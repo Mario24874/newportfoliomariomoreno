@@ -119,7 +119,23 @@ export const translations = {
       github: 'View GitHub Profile',
       location: 'Location',
       connectWith: 'Connect with me:',
-      additionalInfo: 'Feel free to reach out for collaborations, consultations, or just a friendly chat about AI and technology!'
+      additionalInfo: 'Feel free to reach out for collaborations, consultations, or just a friendly chat about AI and technology!',
+      form: {
+        title: 'Send me a message',
+        subtitle: 'I\'d love to hear from you. Send me a message and I\'ll respond as soon as possible.',
+        name: 'Full Name',
+        email: 'Email Address',
+        phone: 'Phone Number (Optional)',
+        message: 'Your Message',
+        send: 'Send Message',
+        sending: 'Sending...',
+        cancel: 'Cancel',
+        successMessage: 'Message sent successfully! I\'ll get back to you soon.',
+        errorMessage: 'Failed to send message. Please try again.',
+        nameRequired: 'Name is required',
+        emailInvalid: 'Valid email is required',
+        messageRequired: 'Message is required'
+      }
     },
     footer: {
       rights: 'All rights reserved',
@@ -246,7 +262,23 @@ export const translations = {
       github: 'Ver Perfil de GitHub',
       location: 'Ubicación',
       connectWith: 'Conéctate conmigo:',
-      additionalInfo: '¡No dudes en contactarme para colaboraciones, consultas o simplemente una charla amistosa sobre IA y tecnología!'
+      additionalInfo: '¡No dudes en contactarme para colaboraciones, consultas o simplemente una charla amistosa sobre IA y tecnología!',
+      form: {
+        title: 'Envíame un mensaje',
+        subtitle: 'Me encantaría saber de ti. Envíame un mensaje y te responderé lo antes posible.',
+        name: 'Nombre Completo',
+        email: 'Correo Electrónico',
+        phone: 'Número de Teléfono (Opcional)',
+        message: 'Tu Mensaje',
+        send: 'Enviar Mensaje',
+        sending: 'Enviando...',
+        cancel: 'Cancelar',
+        successMessage: '¡Mensaje enviado exitosamente! Te responderé pronto.',
+        errorMessage: 'Error al enviar el mensaje. Por favor intenta de nuevo.',
+        nameRequired: 'El nombre es requerido',
+        emailInvalid: 'Se requiere un email válido',
+        messageRequired: 'El mensaje es requerido'
+      }
     },
     footer: {
       rights: 'Todos los derechos reservados',

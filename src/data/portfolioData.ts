@@ -139,8 +139,8 @@ export const PROJECTS: Project[] = [
 
 export const YOUR_NAME = "Mario Moreno";
 export const YOUR_TITLE = "AI Developer & Innovation Engineer";
-export const YOUR_WHATSAPP_NUMBER = "+584120526989"; // Actualiza con tu número real
-export const YOUR_EMAIL = "marioivanmorenopindea@gmail.com"; // Update with real email
+export const YOUR_WHATSAPP_NUMBER = "+584145364657"; // Número actualizado
+export const YOUR_EMAIL = "marioivanmorenopineda@gmail.com"; // Email corregido
 export const YOUR_LINKEDIN_URL = "https://www.linkedin.com/in/mario-moreno-9916043b"; // Update with real LinkedIn
 export const YOUR_GITHUB_URL = "https://github.com/Mario24874"; // Update with real GitHub
 

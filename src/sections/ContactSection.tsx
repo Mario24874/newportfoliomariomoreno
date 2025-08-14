@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button, IconButton, Box } from '@mui/material';
 import { FaEnvelope, FaWhatsapp, FaLinkedin, FaGithub } from 'react-icons/fa';
 import { YOUR_WHATSAPP_NUMBER, YOUR_EMAIL, YOUR_LINKEDIN_URL, YOUR_GITHUB_URL } from '@/data/portfolioData';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
+import ContactForm from '@/components/ui/ContactForm';
 
 const ContactSection: React.FC = () => {
   const { language } = useLanguage();
   const t = translations[language];
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false);
   const whatsappLink = `https://wa.me/${YOUR_WHATSAPP_NUMBER.replace(/\D/g, '')}`; // Ensure only digits and '+' for the number
 
   return (
@@ -32,13 +34,13 @@ const ContactSection: React.FC = () => {
           
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Button
-              href={`mailto:${YOUR_EMAIL}`}
+              onClick={() => setIsContactFormOpen(true)}
               variant="contained"
               color="primary"
               size="large"
               fullWidth
               startIcon={<FaEnvelope />}
-              component={motion.a}
+              component={motion.button}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               sx={{
@@ -116,6 +118,12 @@ const ContactSection: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Contact Form Modal */}
+      <ContactForm 
+        open={isContactFormOpen} 
+        onClose={() => setIsContactFormOpen(false)} 
+      />
     </section>
   );
 };

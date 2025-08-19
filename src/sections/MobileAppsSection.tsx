@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaApple, FaGooglePlay, FaDownload, FaStar, FaMobile } from 'react-icons/fa';
+import { FaApple, FaGooglePlay, FaDownload, FaStar, FaMobile, FaGlobe } from 'react-icons/fa';
 import { SiFlutter, SiReact } from 'react-icons/si';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,9 +25,11 @@ const MobileAppsSection: React.FC = () => {
         'https://picsum.photos/seed/app1-2/300/600',
         'https://picsum.photos/seed/app1-3/300/600'
       ],
-      androidUrl: '/downloads/UrbanDriveApp.apk',
+      androidUrl: '#', // Will be replaced with PWA URL
       iosUrl: '#',
-      status: 'available'
+      status: 'available',
+      isPWA: true,
+      pwaUrl: '#' // Placeholder - will be updated after deployment
     },
     {
       id: 'italianto-app',
@@ -173,17 +175,45 @@ const MobileAppsSection: React.FC = () => {
                   </ul>
                 </div>
 
-                {/* Download Buttons */}
+                {/* Download/Access Buttons */}
                 <div className="space-y-3">
                   {app.status === 'available' ? (
-                    <a
-                      href={app.androidUrl}
-                      download={app.id === 'btu-calculator'}
-                      className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <FaDownload className="w-5 h-5" />
-                      <span>{t.mobileApps.downloadAppHere}</span>
-                    </a>
+                    <>
+                      {/* PWA Button for Urban Drive */}
+                      {app.isPWA ? (
+                        <a
+                          href={app.pwaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                        >
+                          <FaGlobe className="w-5 h-5" />
+                          <span>
+                            {language === 'es' ? 'Abrir Aplicación Web' : 'Open Web App'}
+                          </span>
+                        </a>
+                      ) : (
+                        /* APK Download for other apps */
+                        <a
+                          href={app.androidUrl}
+                          download={app.id === 'btu-calculator'}
+                          className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                        >
+                          <FaDownload className="w-5 h-5" />
+                          <span>{t.mobileApps.downloadAppHere}</span>
+                        </a>
+                      )}
+                      
+                      {/* Additional info for PWA */}
+                      {app.isPWA && (
+                        <p className="text-xs text-gray-500 text-center">
+                          {language === 'es' 
+                            ? 'Aplicación web progresiva - No requiere descarga'
+                            : 'Progressive Web App - No download required'
+                          }
+                        </p>
+                      )}
+                    </>
                   ) : (
                     <div className="w-full bg-gray-100 text-gray-500 py-3 px-4 rounded-lg font-medium text-center">
                       {t.mobileApps.comingSoon}

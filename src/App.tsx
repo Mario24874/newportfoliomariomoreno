@@ -10,10 +10,17 @@ import MobileAppsSection from '@/sections/MobileAppsSection';
 import ContactSection from '@/sections/ContactSection';
 import WhatsAppWidget from '@/components/ui/WhatsAppWidget';
 import { YOUR_WHATSAPP_NUMBER } from '@/data/portfolioData';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const App: React.FC = () => {
+  const { isDarkMode } = useTheme();
+  
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 font-sans antialiased">
+    <div className={`min-h-screen font-sans antialiased transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-gray-900 text-gray-100' 
+        : 'bg-white text-gray-900'
+    }`}>
       <HeaderMUI />
       <main>
         <HeroSection />

@@ -34,11 +34,16 @@ export const translations = {
     },
     skills: {
       title: 'Skills & Technologies',
-      aiMl: 'AI & Machine Learning',
-      webDev: 'Web Development',
-      mobile: 'Mobile Development',
-      cloud: 'Cloud & DevOps',
-      description: 'My technical expertise spans multiple domains, enabling me to build comprehensive solutions from concept to deployment.'
+      description: 'My technical expertise spans multiple domains, enabling me to build comprehensive solutions from concept to deployment.',
+      categories: {
+        programmingLanguages: 'Programming Languages',
+        frameworks: 'APIs & Frameworks',
+        devOps: 'Development & Operations',
+        aiAutomation: 'Automation & AI',
+        business: 'Business & Marketing',
+        soft: 'Soft & Organizational Skills',
+        languages: 'Language Proficiency'
+      }
     },
     projects: {
       title: 'Featured Projects',
@@ -46,7 +51,33 @@ export const translations = {
       liveDemo: 'Live Demo',
       description: 'Explore my latest AI-powered projects and innovative solutions',
       technologies: 'Technologies',
-      screenshot: 'Screenshot of'
+      screenshot: 'Screenshot of',
+      list: {
+        italianto: {
+          title: 'Italianto',
+          description: 'We developed a complete platform for learning Italian language and culture, with tutorials, exercises, online classes and AI tutors.'
+        },
+        antyquim: {
+          title: 'Antyquim',
+          description: 'Built a scalable e-commerce website with features like product listings, shopping cart, user authentication, and payment gateway integration. Focused on SEO optimization and responsive design.'
+        },
+        urbanDrive: {
+          title: 'UrbanDrive',
+          description: 'Created a cross-platform mobile application for enterprise task management using React Native. Features include real-time collaboration, notifications, and offline capabilities.'
+        },
+        eduManager: {
+          title: 'EduManager',
+          description: 'Designed and implemented a web-based dashboard for visualizing and analyzing large datasets, leveraging cloud services for processing and storage. Used D3.js for complex visualizations.'
+        },
+        blogIT: {
+          title: 'BlogIT',
+          description: 'Modern blog platform with AI-powered content generation and automatic SEO optimization.'
+        },
+        nextCodeSolutions: {
+          title: 'Next Code Solutions',
+          description: 'Professional development agency website showcasing modern web technologies and client solutions.'
+        }
+      }
     },
     demos: {
       title: 'AI Demos',
@@ -177,11 +208,16 @@ export const translations = {
     },
     skills: {
       title: 'Habilidades y Tecnologías',
-      aiMl: 'IA y Machine Learning',
-      webDev: 'Desarrollo Web',
-      mobile: 'Desarrollo Móvil',
-      cloud: 'Cloud y DevOps',
-      description: 'Mi experiencia técnica abarca múltiples dominios, lo que me permite construir soluciones integrales desde el concepto hasta la implementación.'
+      description: 'Mi experiencia técnica abarca múltiples dominios, lo que me permite construir soluciones integrales desde el concepto hasta la implementación.',
+      categories: {
+        programmingLanguages: 'Lenguajes de Programación',
+        frameworks: 'APIs y Frameworks',
+        devOps: 'Desarrollo y Operaciones',
+        aiAutomation: 'Automatización e IA',
+        business: 'Negocios y Marketing',
+        soft: 'Habilidades Blandas y Organizacionales',
+        languages: 'Competencia en Idiomas'
+      }
     },
     projects: {
       title: 'Proyectos Destacados',
@@ -189,7 +225,33 @@ export const translations = {
       liveDemo: 'Demo en Vivo',
       description: 'Explora mis últimos proyectos potenciados por IA y soluciones innovadoras',
       technologies: 'Tecnologías',
-      screenshot: 'Captura de pantalla de'
+      screenshot: 'Captura de pantalla de',
+      list: {
+        italianto: {
+          title: 'Italianto',
+          description: 'Desarrollamos una plataforma completa para aprender idioma y cultura italiana, con tutoriales, ejercicios, clases en línea y tutores de IA.'
+        },
+        antyquim: {
+          title: 'Antyquim',
+          description: 'Construimos un sitio web de comercio electrónico escalable con características como listados de productos, carrito de compras, autenticación de usuarios e integración de pasarela de pagos. Enfocado en optimización SEO y diseño responsivo.'
+        },
+        urbanDrive: {
+          title: 'UrbanDrive',
+          description: 'Creamos una aplicación móvil multiplataforma para gestión de tareas empresariales usando React Native. Las características incluyen colaboración en tiempo real, notificaciones y capacidades offline.'
+        },
+        eduManager: {
+          title: 'EduManager',
+          description: 'Diseñé e implementé un panel web para visualizar y analizar grandes conjuntos de datos, aprovechando servicios en la nube para procesamiento y almacenamiento. Usé D3.js para visualizaciones complejas.'
+        },
+        blogIT: {
+          title: 'BlogIT',
+          description: 'Plataforma de blog moderna con generación de contenido impulsada por IA y optimización SEO automática.'
+        },
+        nextCodeSolutions: {
+          title: 'Next Code Solutions',
+          description: 'Sitio web de agencia de desarrollo profesional que muestra tecnologías web modernas y soluciones para clientes.'
+        }
+      }
     },
     demos: {
       title: 'Demos de IA',

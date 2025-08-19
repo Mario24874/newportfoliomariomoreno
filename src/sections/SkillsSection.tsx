@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { SKILL_CATEGORIES, LANGUAGE_SKILLS } from '@/data/portfolioData';
+import { getSkillCategories, getLanguageSkills } from '@/data/portfolioData';
 import { SkillCategory, SkillItem } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { translations } from '@/data/translations';
 
 const SkillPill: React.FC<{ skill: SkillItem }> = ({ skill }) => (
@@ -15,16 +16,26 @@ const SkillPill: React.FC<{ skill: SkillItem }> = ({ skill }) => (
   </motion.span>
 );
 
-const CategoryCard: React.FC<{ category: SkillCategory }> = ({ category }) => (
+const CategoryCard: React.FC<{ category: SkillCategory; isDarkMode: boolean }> = ({ category, isDarkMode }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ duration: 0.6 }}
-    className="bg-gray-800/50 backdrop-blur-sm border border-white/10 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-blue-500/30 h-full"
+    className={`backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-blue-500/30 h-full ${
+      isDarkMode 
+        ? 'bg-gray-800/50 border border-white/10' 
+        : 'bg-white border border-gray-200'
+    }`}
   >
     <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-blue-400 mb-3 sm:mb-4">{category.title}</h3>
-    {category.description && <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed">{category.description}</p>}
+    {category.description && (
+      <p className={`mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed transition-colors duration-300 ${
+        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+      }`}>
+        {category.description}
+      </p>
+    )}
     <div className="flex flex-wrap gap-2 sm:gap-3">
       {category.skills.map((skill) => (
         <SkillPill key={skill.name} skill={skill} />
@@ -35,31 +46,38 @@ const CategoryCard: React.FC<{ category: SkillCategory }> = ({ category }) => (
 
 const SkillsSection: React.FC = () => {
   const { language } = useLanguage();
+  const { isDarkMode } = useTheme();
   const t = translations[language];
+  const skillCategories = getSkillCategories(t);
+  const languageSkills = getLanguageSkills(t);
   
   return (
-    <section id="skills" className="py-12 sm:py-16 lg:py-24 bg-gray-900">
+    <section id="skills" className={`py-12 sm:py-16 lg:py-24 transition-colors duration-300 ${
+      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    }`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-blue-400 mb-4 sm:mb-6">
             {t.skills.title}
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
+          <p className={`text-base sm:text-lg lg:text-xl max-w-3xl mx-auto leading-relaxed px-4 transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>
             {t.skills.description}
           </p>
         </div>
         
         {/* Skills Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-          {SKILL_CATEGORIES.map((category) => (
-            <CategoryCard key={category.title} category={category} />
+          {skillCategories.map((category) => (
+            <CategoryCard key={category.title} category={category} isDarkMode={isDarkMode} />
           ))}
         </div>
 
         {/* Language Skills - Full Width */}
         <div className="max-w-4xl mx-auto">
-          <CategoryCard category={LANGUAGE_SKILLS} />
+          <CategoryCard category={languageSkills} isDarkMode={isDarkMode} />
         </div>
       </div>
     </section>

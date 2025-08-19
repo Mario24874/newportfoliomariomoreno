@@ -13,6 +13,57 @@ export const NAV_ITEMS: NavItem[] = [
 // You can add, remove, or modify skill categories and individual skills
 // Simply edit the arrays below to match your expertise
 
+export const getSkillCategories = (t: any) => [
+  {
+    title: t.skills.categories.programmingLanguages,
+    skills: [
+      { name: 'HTML' }, { name: 'CSS' }, { name: 'JavaScript' }, { name: 'TypeScript' },
+      { name: 'Java' }, { name: 'Python' }, { name: 'C' }, { name: 'C++' },
+      { name: 'C#' }, { name: 'PHP' }, { name: 'SQL' },
+    ],
+  },
+  {
+    title: t.skills.categories.frameworks,
+    skills: [
+      { name: 'React.JS' }, { name: 'Angular.JS' }, { name: 'Vue.JS' }, 
+      { name: 'Node.js (Express.JS)' }, { name: 'Spring Boot (Java)' }, { name: 'Django REST (Python)' }, 
+      { name: 'Flask (Python)' }, { name: 'Web2py (Python)' }, { name: 'Symfony (PHP)' }, { name: 'Laravel (PHP)' },
+      { name: 'ASP.NET Core' }, { name: 'ADO.NET' }, { name: 'Ruby on Rails' }, { name: 'Sinatra (Ruby)'},
+      { name: 'Slim (PHP)' }, { name: 'Nancy (.NET)'}, { name: 'Play Framework (Java)'}
+    ],
+  },
+  {
+    title: t.skills.categories.devOps,
+    skills: [
+      { name: 'Software Management & IDEs' }, { name: 'Web Development' }, { name: 'Multiplatform Mobile Apps' },
+      { name: 'Version Control (Git)' }, { name: 'Container Management (Docker)' },
+      { name: 'Orchestration (Kubernetes)' }, { name: 'Server Management' }, { name: 'Database Management' },
+      { name: 'Cloud Services (AWS, Azure, GCP)' },
+    ],
+  },
+  {
+    title: t.skills.categories.aiAutomation,
+    skills: [
+      { name: 'n8n' }, { name: 'Flowise' }, { name: 'Make (Integromat)' }, { name: 'Conversational Agents' },
+      { name: 'Chatbots' }, { name: 'Virtual Assistants' }, { name: 'AI Integration' }
+    ],
+  },
+  {
+    title: t.skills.categories.business,
+    skills: [
+      { name: 'SEO (Search Engine Optimization)' }, { name: 'ERP (Enterprise Resource Planning)' },
+      { name: 'Social Media Management' },
+    ],
+  },
+  {
+    title: t.skills.categories.soft,
+    skills: [
+      { name: 'Problem Solving' }, { name: 'Teamwork & Collaboration' }, { name: 'Human Resources Management' },
+      { name: 'Occupational Risk Prevention' }, { name: 'Agile Methodologies (Scrum, Kanban)' },
+    ],
+  },
+];
+
 export const SKILL_CATEGORIES: SkillCategory[] = [
   {
     title: 'Programming Languages',
@@ -64,6 +115,15 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
   },
 ];
 
+export const getLanguageSkills = (t: any) => ({
+  title: t.skills.categories.languages,
+  skills: [
+    { name: 'Spanish (Native)' },
+    { name: 'English (Intermediate)' },
+    { name: 'Italian (Intermediate)' },
+  ],
+});
+
 export const LANGUAGE_SKILLS: SkillCategory = {
   title: 'Language Proficiency',
   skills: [
@@ -78,15 +138,69 @@ export const LANGUAGE_SKILLS: SkillCategory = {
 // To remove a project, delete the entire object from the array
 // To change project order, simply reorder the objects in the array
 
+export const getProjects = (t: any) => [
+  {
+    id: 'italianto',
+    title: t.projects.list.italianto.title,
+    description: t.projects.list.italianto.description,
+    technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
+    imageUrl: '/images/logo_Italianto.png',
+    liveUrl: '#',
+    repoUrl: '#',
+  },
+  {
+    id: 'antyquim',
+    title: t.projects.list.antyquim.title,
+    description: t.projects.list.antyquim.description,
+    technologies: ['Vue.js', 'Symfony (PHP)', 'MySQL', 'Stripe API', 'Tailwind CSS'],
+    imageUrl: '/images/LogoAntyquimRSF.png',
+    liveUrl: '#',
+  },
+  {
+    id: 'urbanDrive',
+    title: t.projects.list.urbanDrive.title,
+    description: t.projects.list.urbanDrive.description,
+    technologies: ['React', 'Firebase', 'TypeScript', 'Jest'],
+    imageUrl: '/images/UrbanDrive.png',
+    repoUrl: '#',
+  },
+  {
+    id: 'eduManager',
+    title: t.projects.list.eduManager.title,
+    description: t.projects.list.eduManager.description,
+    technologies: ['Angular', 'Spring Boot (Java)', 'AWS (S3, Redshift)', 'D3.js', 'REST APIs'],
+    imageUrl: '/images/LogoEduManager.jpeg',
+    liveUrl: '#',
+  },
+  {
+    id: 'blogIT',
+    title: t.projects.list.blogIT.title,
+    description: t.projects.list.blogIT.description,
+    technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
+    imageUrl: '/images/BlogIT.jpeg',
+    liveUrl: '#',
+    repoUrl: '#',
+  },
+  {
+    id: 'nextCodeSolutions',
+    title: t.projects.list.nextCodeSolutions.title,
+    description: t.projects.list.nextCodeSolutions.description,
+    technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
+    imageUrl: '/images/NextCodeSolutions.jpeg',
+    liveUrl: '#',
+    repoUrl: '#',
+  },
+];
+
 export const PROJECTS: Project[] = [
   {
-    id: 'proj1', // ✏️ Unique identifier
-    title: 'Italianto', // ✏️ Project title
-    description: 'We developed a complete platform for learning Italian language and culture, with tutorials, exercises, online classes and AI tutors.', // ✏️ Project description
-    technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'], // ✏️ Technologies used
-    imageUrl: '/images/logo_Italianto.png', // ✏️ Replace with your project image URL
-    liveUrl: '#', // ✏️ Replace with live demo URL or remove if not available
-    repoUrl: '#', // ✏️ Replace with repository URL or remove if not available
+    id: 'proj1',
+    title: 'Italianto',
+    description: 'We developed a complete platform for learning Italian language and culture, with tutorials, exercises, online classes and AI tutors.',
+    technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
+    imageUrl: '/images/logo_Italianto.png',
+    liveUrl: '#',
+    repoUrl: '#',
   },
   {
     id: 'proj2',
@@ -95,7 +209,6 @@ export const PROJECTS: Project[] = [
     technologies: ['Vue.js', 'Symfony (PHP)', 'MySQL', 'Stripe API', 'Tailwind CSS'],
     imageUrl: '/images/LogoAntyquimRSF.png',
     liveUrl: '#',
-    // repoUrl: '#', // ℹ️ You can comment out or remove liveUrl/repoUrl if not needed
   },
   {
     id: 'proj3',
@@ -113,24 +226,23 @@ export const PROJECTS: Project[] = [
     imageUrl: '/images/LogoEduManager.jpeg',
     liveUrl: '#',
   },
-  // ➕ TO ADD A NEW PROJECT, copy the template below:  
   {
-    id: 'proj5', 
+    id: 'proj5',
     title: 'BlogIT',
-    description: 'Your project description here...',
+    description: 'Modern blog platform with AI-powered content generation and automatic SEO optimization.',
     technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
     imageUrl: '/images/BlogIT.jpeg',
-    liveUrl: 'https://your-live-demo.com', // Optional
-    repoUrl: 'https://github.com/your-repo', // Optional
+    liveUrl: '#',
+    repoUrl: '#',
   },
   {
     id: 'proj6',
     title: 'Next Code Solutions',
-    description: 'Your project description here...',
+    description: 'Professional development agency website showcasing modern web technologies and client solutions.',
     technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
     imageUrl: '/images/NextCodeSolutions.jpeg',
-    liveUrl: 'https://your-live-demo.com', // Optional
-    repoUrl: 'https://github.com/your-repo', // Optional
+    liveUrl: '#',
+    repoUrl: '#',
   },
 ];
 

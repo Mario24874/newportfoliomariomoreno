@@ -31,7 +31,7 @@ const ElevenLabsWidget: React.FC<ElevenLabsWidgetProps> = ({ agentId }) => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] pointer-events-auto">
+    <div className="fixed bottom-4 right-4 z-[9998] pointer-events-auto">
       <elevenlabs-convai agent-id={agentId}></elevenlabs-convai>
     </div>
   );

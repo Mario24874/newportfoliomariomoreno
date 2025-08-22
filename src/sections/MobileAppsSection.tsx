@@ -25,11 +25,11 @@ const MobileAppsSection: React.FC = () => {
         'https://picsum.photos/seed/app1-2/300/600',
         'https://picsum.photos/seed/app1-3/300/600'
       ],
-      androidUrl: '#', // Will be replaced with PWA URL
-      iosUrl: '#',
+      androidUrl: 'https://urban-drive-master.netlify.app',
+      iosUrl: 'https://urban-drive-master.netlify.app',
       status: 'available',
       isPWA: true,
-      pwaUrl: '#' // Placeholder - will be updated after deployment
+      pwaUrl: 'https://urban-drive-master.netlify.app'
     },
     {
       id: 'italianto-app',

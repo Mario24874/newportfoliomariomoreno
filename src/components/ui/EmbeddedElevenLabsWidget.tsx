@@ -7,16 +7,38 @@ interface EmbeddedElevenLabsWidgetProps {
 
 const EmbeddedElevenLabsWidget: React.FC<EmbeddedElevenLabsWidgetProps> = ({ agentId }) => {
   useEffect(() => {
-    // Dynamically load the ElevenLabs ConvAI script
-    const script = document.createElement('script');
-    script.src = 'https://elevenlabs.io/convai-widget/index.js';
-    script.async = true;
+    let script: HTMLScriptElement | null = null;
     
-    // Check if script is already loaded
-    const existingScript = document.querySelector('script[src="https://elevenlabs.io/convai-widget/index.js"]');
-    if (!existingScript) {
-      document.head.appendChild(script);
-    }
+    // Dynamically load the ElevenLabs ConvAI script
+    const loadScript = () => {
+      const existingScript = document.querySelector('script[src="https://elevenlabs.io/convai-widget/index.js"]');
+      if (!existingScript) {
+        script = document.createElement('script');
+        script.src = 'https://elevenlabs.io/convai-widget/index.js';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        
+        script.onload = () => {
+          console.log('ElevenLabs widget script loaded successfully');
+        };
+        
+        script.onerror = (error) => {
+          console.error('Failed to load ElevenLabs widget script:', error);
+        };
+        
+        document.head.appendChild(script);
+      }
+    };
+
+    // Add delay for production environments
+    const timer = setTimeout(loadScript, 100);
+    
+    return () => {
+      clearTimeout(timer);
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
   }, []);
 
   return (

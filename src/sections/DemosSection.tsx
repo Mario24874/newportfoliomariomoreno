@@ -13,6 +13,9 @@ const DemosSection: React.FC = () => {
   const { isDarkMode } = useTheme();
   const t = translations[language];
   const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
+  
+  // Debug log for agent ID
+  console.log('DemosSection: ElevenLabs Agent ID:', agentId, typeof agentId);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentDemo, setCurrentDemo] = useState<'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant'>('telegram-store');
 

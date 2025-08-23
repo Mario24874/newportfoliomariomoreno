@@ -11,37 +11,47 @@ const EmbeddedElevenLabsWidget: React.FC<EmbeddedElevenLabsWidgetProps> = ({ age
 
   useEffect(() => {
     let checkCount = 0;
-    const maxChecks = 5;
+    const maxChecks = 8;
+    
+    console.log('EmbeddedElevenLabsWidget: Starting with agentId:', agentId);
     
     // Check if the script is already loaded (from index.html)
     const checkScript = () => {
       const script = document.querySelector('script[src="https://elevenlabs.io/convai-widget/index.js"]');
       const widgetExists = window.customElements && window.customElements.get('elevenlabs-convai');
       
+      console.log(`Check ${checkCount + 1}: Script found: ${!!script}, Widget registered: ${!!widgetExists}`);
+      
       if (script && widgetExists) {
         console.log('ElevenLabs widget script is loaded and registered');
         setScriptLoaded(true);
-        // Force re-render of the custom element
-        const widget = document.querySelector('elevenlabs-convai');
-        if (widget) {
-          widget.setAttribute('agent-id', agentId);
+      } else if (script && !widgetExists) {
+        // Script loaded but widget not registered yet, wait more
+        console.log('Script loaded, waiting for widget registration...');
+        checkCount++;
+        if (checkCount < maxChecks) {
+          setTimeout(checkScript, 1500);
+        } else {
+          console.warn('ElevenLabs widget failed to register after multiple attempts');
+          setShowFallback(true);
         }
       } else {
         checkCount++;
         if (checkCount < maxChecks) {
+          console.log('Script not loaded yet, retrying...');
           setTimeout(checkScript, 1000);
         } else {
-          console.warn('ElevenLabs widget failed to load after multiple attempts');
+          console.warn('ElevenLabs widget script failed to load');
           setShowFallback(true);
         }
       }
     };
 
     // Check immediately and retry if needed
-    checkScript();
+    const initialTimer = setTimeout(checkScript, 500);
     
     return () => {
-      // Cleanup if needed
+      clearTimeout(initialTimer);
     };
   }, [agentId]);
 
@@ -83,12 +93,12 @@ const EmbeddedElevenLabsWidget: React.FC<EmbeddedElevenLabsWidgetProps> = ({ age
                 Voice Assistant Demo Available
               </p>
               <a 
-                href={`https://elevenlabs.io/convai-demo/${agentId}`}
+                href={`https://elevenlabs.io/app/conversational-ai/${agentId}/widget`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors text-sm"
               >
-                Open Demo <FaExternalLinkAlt className="w-3 h-3" />
+                Open Voice Demo <FaExternalLinkAlt className="w-3 h-3" />
               </a>
             </div>
             <p className="text-xs text-gray-500">

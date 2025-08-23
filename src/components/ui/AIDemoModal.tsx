@@ -5,11 +5,12 @@ import { SiTelegram } from 'react-icons/si';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
 import VirtualStoreDemo from './VirtualStoreDemo';
+import TelegramVoiceAssistantDemo from './TelegramVoiceAssistantDemo';
 
 interface AIDemoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow';
+  demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant';
 }
 
 const AIDemoModal: React.FC<AIDemoModalProps> = ({ isOpen, onClose, demoType }) => {
@@ -183,6 +184,10 @@ const AIDemoModal: React.FC<AIDemoModalProps> = ({ isOpen, onClose, demoType }) 
     </div>
   );
 
+  const renderTelegramVoiceAssistantDemo = () => (
+    <TelegramVoiceAssistantDemo />
+  );
+
   const renderContent = () => {
     switch (demoType) {
       case 'telegram-store':
@@ -191,6 +196,8 @@ const AIDemoModal: React.FC<AIDemoModalProps> = ({ isOpen, onClose, demoType }) 
         return renderVoiceAssistantDemo();
       case 'automation-flow':
         return renderAutomationFlowDemo();
+      case 'telegram-voice-assistant':
+        return renderTelegramVoiceAssistantDemo();
       default:
         return null;
     }

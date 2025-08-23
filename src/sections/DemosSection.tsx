@@ -14,9 +14,9 @@ const DemosSection: React.FC = () => {
   const t = translations[language];
   const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentDemo, setCurrentDemo] = useState<'telegram-store' | 'voice-assistant' | 'automation-flow'>('telegram-store');
+  const [currentDemo, setCurrentDemo] = useState<'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant'>('telegram-store');
 
-  const openModal = (demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow') => {
+  const openModal = (demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant') => {
     setCurrentDemo(demoType);
     setModalOpen(true);
   };
@@ -67,11 +67,11 @@ const DemosSection: React.FC = () => {
       )
     },
     {
-      id: 'ai-chatbot',
-      title: language === 'es' ? 'Asistente de Código GPT-4' : 'GPT-4 Code Assistant',
+      id: 'telegram-voice-assistant',
+      title: language === 'es' ? 'Asistente de Voz IA con Telegram' : 'AI Voice Assistant with Telegram',
       description: language === 'es' 
-        ? 'Asistente de IA avanzado especializado en generación de código, depuración y consulta técnica.'
-        : 'Advanced AI assistant specialized in code generation, debugging, and technical consultation.',
+        ? 'Asistente personal con OpenAI que procesa mensajes de voz, accede a Gmail y Google Calendar.'
+        : 'Personal assistant with OpenAI that processes voice messages, accesses Gmail and Google Calendar.',
       icon: SiOpenai,
       gradient: 'from-green-500 to-teal-500',
       component: (
@@ -79,11 +79,18 @@ const DemosSection: React.FC = () => {
           <div className="mb-4">
             <SiOpenai className="w-12 h-12 text-green-500 mx-auto mb-2" />
             <p className="text-gray-600 text-sm">
-              {language === 'es' ? 'Próximamente disponible' : 'Coming Soon'}
+              {language === 'es' 
+                ? 'Asistente con transcripción de voz y acceso a servicios'
+                : 'Assistant with voice transcription and service access'
+              }
             </p>
           </div>
-          <button className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-lg font-medium opacity-50 cursor-not-allowed">
-            {language === 'es' ? 'Próximamente' : 'Coming Soon'}
+          <button 
+            onClick={() => openModal('telegram-voice-assistant')}
+            className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all flex items-center mx-auto"
+          >
+            <FaPlay className="mr-2" />
+            {language === 'es' ? 'Probar Demo' : 'Try Demo'}
           </button>
         </div>
       )

@@ -6,7 +6,7 @@ En el Dashboard de Netlify, ve a **Site Settings > Environment variables** y agr
 
 ```
 VITE_ELEVENLABS_AGENT_ID=Aik3gpbr6ipxdLFAKBTu
-VITE_N8N_WEBHOOK_URL=https://n8n-magnetraffic-n8n.jdaoel.easypanel.host/webhook/bot-portfolio
+VITE_N8N_WEBHOOK_URL=https://mariomoreno.app.n8n.cloud/webhook/bot-portfolio
 ```
 
 **⚠️ IMPORTANTE:** 

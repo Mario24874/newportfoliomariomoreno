@@ -171,6 +171,28 @@ export const translations = {
     footer: {
       rights: 'All rights reserved',
       builtWith: 'Built with React, TypeScript & AI'
+    },
+    chatbot: {
+      title: 'AI Assistant',
+      subtitle: 'Powered by AI automation',
+      placeholder: 'Type your message...',
+      send: 'Send',
+      welcomeMessage: '👋 Hello! I\'m Dev, Mario\'s AI Assistant. I\'m here to help you with any questions about his portfolio, services, or AI development projects.',
+      typing: 'Dev is typing...',
+      offline: 'Chat is temporarily offline. You can contact me directly via WhatsApp or email.',
+      errorMessage: 'Sorry, there was a connection problem. Please try again.',
+      connectionError: 'Connection error. Please check your internet.',
+      quickReplies: {
+        services: 'What services do you offer?',
+        projects: 'Show me your projects',
+        contact: 'How can I contact you?',
+        skills: 'What are your skills?'
+      },
+      status: {
+        online: 'Online',
+        offline: 'Offline',
+        connecting: 'Connecting...'
+      }
     }
   },
   es: {
@@ -345,6 +367,28 @@ export const translations = {
     footer: {
       rights: 'Todos los derechos reservados',
       builtWith: 'Construido con React, TypeScript e IA'
+    },
+    chatbot: {
+      title: 'Asistente IA',
+      subtitle: 'Potenciado por automatización IA',
+      placeholder: 'Escribe tu mensaje...',
+      send: 'Enviar',
+      welcomeMessage: '👋 ¡Hola! Soy Dev, el Asistente IA de Mario. Estoy aquí para ayudarte con cualquier pregunta sobre su portfolio, servicios o proyectos de desarrollo de IA.',
+      typing: 'Dev está escribiendo...',
+      offline: 'El chat está temporalmente fuera de línea. Puedes contactarme directamente por WhatsApp o email.',
+      errorMessage: 'Lo siento, hubo un problema de conexión. Por favor intenta de nuevo.',
+      connectionError: 'Error de conexión. Por favor verifica tu internet.',
+      quickReplies: {
+        services: '¿Qué servicios ofreces?',
+        projects: 'Muéstrame tus proyectos',
+        contact: '¿Cómo puedo contactarte?',
+        skills: '¿Cuáles son tus habilidades?'
+      },
+      status: {
+        online: 'En línea',
+        offline: 'Desconectado',
+        connecting: 'Conectando...'
+      }
     }
   }
 };

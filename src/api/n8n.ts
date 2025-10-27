@@ -194,19 +194,29 @@ export function getN8nWebhookUrl(): string | undefined {
 
 /**
  * Send chat message to n8n and get AI response
+ * Uses the bot-portfolio webhook endpoint with correct payload structure
+ * @param message - The user's message
+ * @param conversationId - Unique identifier for the conversation (for memory persistence)
  */
-export async function sendChatMessage(message: string, conversationId: string = 'portfolio-chat'): Promise<{ success: boolean; response?: string }> {
+export async function sendChatMessage(message: string, conversationId: string = 'portfolio-chat'): Promise<{ success: boolean; response?: string; error?: string }> {
   try {
-    const payload: WebhookPayload = {
-      type: 'chat_message',
+    if (!N8N_WEBHOOK_URL) {
+      console.warn('N8N webhook URL is not configured');
+      return {
+        success: false,
+        error: 'Webhook not configured'
+      };
+    }
+
+    // Structure expected by the bot-portfolio webhook with conversationId for memory
+    const payload = {
       data: {
-        message,
-        conversationId,
-        platform: 'portfolio'
-      },
-      timestamp: Date.now(),
-      source: 'portfolio'
+        message: message,
+        conversationId: conversationId
+      }
     };
+
+    console.log('Sending to n8n:', { url: N8N_WEBHOOK_URL, conversationId, messagePreview: message.substring(0, 50) });
 
     const response = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
@@ -218,16 +228,25 @@ export async function sendChatMessage(message: string, conversationId: string = 
 
     if (response.ok) {
       const data = await response.json();
+      console.log('n8n response received:', data);
       return {
         success: true,
-        response: data.message || data.response || 'Mensaje recibido correctamente.'
+        response: data.message || data.output || data.text || 'Mensaje recibido correctamente.'
       };
     } else {
-      return { success: false };
+      const errorText = await response.text();
+      console.error('Webhook response error:', response.status, errorText);
+      return {
+        success: false,
+        error: `HTTP ${response.status}`
+      };
     }
   } catch (error) {
     console.error('Error sending chat message:', error);
-    return { success: false };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Network error'
+    };
   }
 }
 

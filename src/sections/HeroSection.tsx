@@ -95,7 +95,7 @@ const HeroSection: React.FC = () => {
     };
 
     return (
-        <section id="about" className="min-h-screen flex items-center justify-center text-center px-4 sm:px-6 lg:px-8 -mt-16 sm:-mt-20 relative overflow-hidden">
+        <section id="hero-section" className="min-h-screen flex items-center justify-center text-center px-4 sm:px-6 lg:px-8 -mt-16 sm:-mt-20 relative overflow-hidden">
             {/* Background Image with Fade Effect */}
             <div className="absolute inset-0 z-0">
                 {/* Main background image */}

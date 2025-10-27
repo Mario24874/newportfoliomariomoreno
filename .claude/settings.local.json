@@ -18,7 +18,8 @@
       "Bash(mv:*)",
       "WebSearch",
       "Bash(git rm:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

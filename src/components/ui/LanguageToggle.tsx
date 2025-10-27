@@ -5,7 +5,7 @@ const LanguageToggle: React.FC = () => {
   const { language, changeLanguage } = useLanguage();
 
   return (
-    <div className="flex items-center space-x-2">
+    <div id="language-toggle" className="flex items-center space-x-2">
       <button
         onClick={() => changeLanguage('en')}
         className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${

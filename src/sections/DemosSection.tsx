@@ -7,15 +7,13 @@ import AIDemoModal from '@/components/ui/AIDemoModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { translations } from '@/data/translations';
+import { ELEVENLABS_AGENT_ID } from '@/config/elevenlabs';
 
 const DemosSection: React.FC = () => {
   const { language } = useLanguage();
   const { isDarkMode } = useTheme();
   const t = translations[language];
-  const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
-  
-  // Debug log for agent ID
-  console.log('DemosSection: ElevenLabs Agent ID:', agentId, typeof agentId);
+  const agentId = ELEVENLABS_AGENT_ID;
   const [modalOpen, setModalOpen] = useState(false);
   const [currentDemo, setCurrentDemo] = useState<'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant'>('telegram-store');
 
@@ -130,7 +128,7 @@ const DemosSection: React.FC = () => {
   ];
 
   return (
-    <section id="demos" className={`py-20 transition-colors duration-300 ${
+    <section id="demos-section" className={`py-20 transition-colors duration-300 ${
       isDarkMode 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-50 via-gray-50 to-blue-50'

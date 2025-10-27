@@ -100,7 +100,7 @@ const WhatsAppWidget: React.FC<WhatsAppWidgetProps> = ({
   return (
     <>
       {/* AI Chat Floating Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div id="whatsapp-widget" className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"

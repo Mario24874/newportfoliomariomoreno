@@ -23,6 +23,7 @@ import { NAV_ITEMS } from '@/data/portfolioData';
 import { NavItem } from '@/types';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import TourButton from '@/components/ui/TourButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
 
@@ -121,6 +122,7 @@ const HeaderMUI: React.FC = () => {
                 </Button>
               ))}
               <Box sx={{ ml: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <TourButton />
                 <ThemeToggle />
                 <LanguageToggle />
               </Box>
@@ -203,6 +205,7 @@ const HeaderMUI: React.FC = () => {
         <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
         
         <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
+          <TourButton />
           <ThemeToggle />
           <LanguageToggle />
         </Box>

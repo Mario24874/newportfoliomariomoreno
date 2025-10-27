@@ -30,7 +30,7 @@ const ProjectsSection: React.FC = () => {
   const projects = getProjects(t);
   
   return (
-    <section id="projects" className={`py-20 sm:py-24 transition-colors duration-300 ${
+    <section id="projects-section" className={`py-20 sm:py-24 transition-colors duration-300 ${
       isDarkMode ? 'bg-gray-900/70' : 'bg-gray-100'
     }`}>
       <div className="container mx-auto px-6 lg:px-8">

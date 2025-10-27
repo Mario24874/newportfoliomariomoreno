@@ -13,7 +13,7 @@ const EmbeddedElevenLabsWidget: React.FC<EmbeddedElevenLabsWidgetProps> = ({ age
     let checkCount = 0;
     const maxChecks = 8;
     
-    console.log('EmbeddedElevenLabsWidget: Starting with agentId:', agentId);
+    console.log('EmbeddedElevenLabsWidget: Using agentId:', agentId);
     
     // Check if the script is already loaded (from index.html)
     const checkScript = () => {

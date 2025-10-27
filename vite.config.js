@@ -12,6 +12,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    // Clean environment variables to remove any quotes
+    'import.meta.env.VITE_ELEVENLABS_AGENT_ID': JSON.stringify(
+      process.env.VITE_ELEVENLABS_AGENT_ID?.replace(/^["']|["']$/g, '') || ''
+    ),
+  },
   server: {
     port: 3000,
     host: true,

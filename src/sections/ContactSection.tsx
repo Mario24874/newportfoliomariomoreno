@@ -14,7 +14,7 @@ const ContactSection: React.FC = () => {
   const whatsappLink = `https://wa.me/${YOUR_WHATSAPP_NUMBER.replace(/\D/g, '')}`; // Ensure only digits and '+' for the number
 
   return (
-    <section id="contact" className="py-16 sm:py-24 bg-gray-900">
+    <section id="contact-section" className="py-16 sm:py-24 bg-gray-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-blue-400">{t.contact.title}</h2>

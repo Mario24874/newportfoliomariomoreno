@@ -14,6 +14,7 @@ const ThemeToggle: React.FC = () => {
   return (
     <Tooltip title={isDarkMode ? (t.theme?.lightMode || 'Light Mode') : (t.theme?.darkMode || 'Dark Mode')}>
       <IconButton
+        id="theme-toggle"
         onClick={toggleTheme}
         component={motion.button}
         whileHover={{ scale: 1.1 }}

@@ -212,19 +212,17 @@ const VirtualStoreDemo: React.FC<VirtualStoreDemoProps> = ({ onPriceUpdate }) =>
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation - Circular carousel */}
       <button
         onClick={prevSlide}
-        disabled={currentSlide === 0}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-blue-600/80 hover:bg-blue-600 disabled:bg-gray-600/50 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-all duration-300"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-blue-600/80 hover:bg-blue-600 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg"
       >
         <FaChevronLeft className="text-white" />
       </button>
 
       <button
         onClick={nextSlide}
-        disabled={currentSlide === productsState.length - 1}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-blue-600/80 hover:bg-blue-600 disabled:bg-gray-600/50 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-all duration-300"
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-blue-600/80 hover:bg-blue-600 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg"
       >
         <FaChevronRight className="text-white" />
       </button>

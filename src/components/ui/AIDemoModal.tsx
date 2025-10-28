@@ -6,11 +6,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
 import VirtualStoreDemo from './VirtualStoreDemo';
 import TelegramVoiceAssistantDemo from './TelegramVoiceAssistantDemo';
+import AIVirtualWarehouse from './AIVirtualWarehouse';
 
 interface AIDemoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant';
+  demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant' | 'ai-warehouse';
 }
 
 const AIDemoModal: React.FC<AIDemoModalProps> = ({ isOpen, onClose, demoType }) => {
@@ -188,6 +189,42 @@ const AIDemoModal: React.FC<AIDemoModalProps> = ({ isOpen, onClose, demoType }) 
     <TelegramVoiceAssistantDemo />
   );
 
+  const renderAIWarehouseDemo = () => (
+    <div className="p-6">
+      <div className="text-center mb-6">
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+          <FaStore className="w-8 h-8 text-white" />
+        </div>
+        <h3 className="text-2xl font-bold text-gray-800 mb-2">
+          {language === 'es' ? 'Demo: AI Virtual Warehouse' : 'Demo: AI Virtual Warehouse'}
+        </h3>
+        <p className="text-gray-600 mb-6">
+          {language === 'es'
+            ? 'Almacén virtual con cambio automático de presentaciones y precios mediante comandos de Telegram'
+            : 'Virtual warehouse with automatic presentation and price changes via Telegram commands'
+          }
+        </p>
+      </div>
+
+      {/* AI Virtual Warehouse Demo */}
+      <AIVirtualWarehouse />
+
+      {/* Instructions */}
+      <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+        <h4 className="font-semibold text-green-800 mb-2 flex items-center">
+          <SiTelegram className="mr-2" />
+          {language === 'es' ? 'Cómo usar la demo:' : 'How to use the demo:'}
+        </h4>
+        <ul className="text-sm text-green-700 space-y-1">
+          <li>• {language === 'es' ? 'Navega entre los 3 sabores de soda (Limón, Naranja, Manzana)' : 'Navigate between 3 soda flavors (Lemon, Orange, Apple)'}</li>
+          <li>• {language === 'es' ? 'Selecciona la presentación: Unidad ($1), 6-Pack ($5.50) o Caja de 24 ($20)' : 'Select presentation: Unit ($1), 6-Pack ($5.50) or 24-Pack Box ($20)'}</li>
+          <li>• {language === 'es' ? 'Envía comandos como "Cambiar a 6-pack" o usa los botones rápidos' : 'Send commands like "Change to 6-pack" or use quick buttons'}</li>
+          <li>• {language === 'es' ? 'El precio se actualiza automáticamente según la presentación' : 'Price updates automatically based on presentation'}</li>
+        </ul>
+      </div>
+    </div>
+  );
+
   const renderContent = () => {
     switch (demoType) {
       case 'telegram-store':
@@ -198,6 +235,8 @@ const AIDemoModal: React.FC<AIDemoModalProps> = ({ isOpen, onClose, demoType }) 
         return renderAutomationFlowDemo();
       case 'telegram-voice-assistant':
         return renderTelegramVoiceAssistantDemo();
+      case 'ai-warehouse':
+        return renderAIWarehouseDemo();
       default:
         return null;
     }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaMicrophone, FaRobot, FaBrain, FaCode, FaStore, FaPlay } from 'react-icons/fa';
+import { FaMicrophone, FaRobot, FaBrain, FaCode, FaStore, FaPlay, FaWarehouse } from 'react-icons/fa';
 import { SiOpenai, SiTelegram } from 'react-icons/si';
 import { motion } from 'framer-motion';
 import EmbeddedElevenLabsWidget from '@/components/ui/EmbeddedElevenLabsWidget';
@@ -15,9 +15,9 @@ const DemosSection: React.FC = () => {
   const t = translations[language];
   const agentId = ELEVENLABS_AGENT_ID;
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentDemo, setCurrentDemo] = useState<'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant'>('telegram-store');
+  const [currentDemo, setCurrentDemo] = useState<'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant' | 'ai-warehouse'>('telegram-store');
 
-  const openModal = (demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant') => {
+  const openModal = (demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant' | 'ai-warehouse') => {
     setCurrentDemo(demoType);
     setModalOpen(true);
   };
@@ -41,7 +41,7 @@ const DemosSection: React.FC = () => {
     {
       id: 'telegram-store',
       title: language === 'es' ? 'Agente de Tienda Telegram' : 'Telegram Store Agent',
-      description: language === 'es' 
+      description: language === 'es'
         ? 'Demo interactiva de una tienda virtual con IA que responde a comandos de Telegram para cambiar precios automáticamente.'
         : 'Interactive demo of a virtual store with AI that responds to Telegram commands to automatically change prices.',
       icon: SiTelegram,
@@ -51,15 +51,44 @@ const DemosSection: React.FC = () => {
           <div className="mb-4">
             <FaStore className="w-12 h-12 text-blue-500 mx-auto mb-2" />
             <p className="text-gray-600 text-sm">
-              {language === 'es' 
+              {language === 'es'
                 ? 'Simula cambios de precio mediante mensajería'
                 : 'Simulate price changes via messaging'
               }
             </p>
           </div>
-          <button 
+          <button
             onClick={() => openModal('telegram-store')}
             className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all flex items-center mx-auto"
+          >
+            <FaPlay className="mr-2" />
+            {language === 'es' ? 'Probar Demo' : 'Try Demo'}
+          </button>
+        </div>
+      )
+    },
+    {
+      id: 'ai-warehouse',
+      title: language === 'es' ? 'AI Virtual Warehouse' : 'AI Virtual Warehouse',
+      description: language === 'es'
+        ? 'Almacén virtual inteligente con cambio automático de presentaciones (Unidad, 6-Pack, Caja) y precios mediante comandos de Telegram.'
+        : 'Smart virtual warehouse with automatic presentation changes (Unit, 6-Pack, Box) and prices via Telegram commands.',
+      icon: FaWarehouse,
+      gradient: 'from-green-500 to-emerald-500',
+      component: (
+        <div className="text-center p-6">
+          <div className="mb-4">
+            <FaWarehouse className="w-12 h-12 text-green-500 mx-auto mb-2" />
+            <p className="text-gray-600 text-sm">
+              {language === 'es'
+                ? 'Gestión automatizada de inventario y presentaciones'
+                : 'Automated inventory and presentation management'
+              }
+            </p>
+          </div>
+          <button
+            onClick={() => openModal('ai-warehouse')}
+            className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all flex items-center mx-auto"
           >
             <FaPlay className="mr-2" />
             {language === 'es' ? 'Probar Demo' : 'Try Demo'}

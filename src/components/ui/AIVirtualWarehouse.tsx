@@ -226,26 +226,30 @@ const AIVirtualWarehouse: React.FC = () => {
               <div className="container mx-auto h-full flex items-center justify-between px-12">
                 {/* Product Image with Mask Effect */}
                 <motion.div
-                  initial={{ x: -200, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="relative w-80 h-full flex items-center"
+                  initial={{ x: -200, opacity: 0, rotateY: -45 }}
+                  animate={{ x: 0, opacity: 1, rotateY: 0 }}
+                  exit={{ x: -200, opacity: 0, rotateY: 45 }}
+                  transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 80 }}
+                  className="relative w-80 h-full flex items-center justify-center"
                 >
                   <div
-                    className="w-72 h-[450px] relative"
+                    className="w-80 h-[480px] relative"
                     style={{
                       backgroundImage: `url(${currentProduct.image}), url(/images/soda.png)`,
-                      backgroundPosition: '0 0, 0 0',
-                      backgroundSize: '100% auto, 100% auto',
+                      backgroundPosition: 'center center, center center',
+                      backgroundSize: 'auto 100%, auto 100%',
                       backgroundRepeat: 'no-repeat, no-repeat',
                       backgroundBlendMode: 'multiply',
                       WebkitMaskImage: 'url(/images/soda.png)',
-                      WebkitMaskSize: '100% auto',
+                      WebkitMaskSize: 'auto 100%',
+                      WebkitMaskPosition: 'center center',
                       WebkitMaskRepeat: 'no-repeat',
                       maskImage: 'url(/images/soda.png)',
-                      maskSize: '100% auto',
+                      maskSize: 'auto 100%',
+                      maskPosition: 'center center',
                       maskRepeat: 'no-repeat',
-                      filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.3))'
+                      filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.4))',
+                      transform: 'rotate(-8deg)'
                     }}
                   />
                 </motion.div>

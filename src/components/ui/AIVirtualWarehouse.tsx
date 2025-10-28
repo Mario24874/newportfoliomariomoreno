@@ -1,85 +1,76 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaChevronLeft, FaChevronRight, FaTelegram, FaPaperPlane, FaSpinner, FaRobot, FaBoxOpen, FaTag } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaTelegram, FaPaperPlane, FaSpinner, FaCheck, FaBoxOpen } from 'react-icons/fa';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SodaProduct {
   id: number;
   name: string;
   nameEs: string;
-  flavor: string;
-  flavorEs: string;
+  brand: string;
+  brandEs: string;
   image: string;
   bgColor: string;
   category: string;
   categoryEs: string;
+  description: string;
+  descriptionEs: string;
 }
 
 interface Presentation {
   type: 'unit' | '6pack' | '24pack';
   label: string;
   labelEs: string;
-  basePrice: number;
-  icon: string;
-}
-
-interface ChatMessage {
-  id: number;
-  text: string;
-  isBot: boolean;
-  timestamp: Date;
+  price: number;
+  units: number;
 }
 
 const AIVirtualWarehouse: React.FC = () => {
   const { language } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentPresentation, setCurrentPresentation] = useState<Presentation['type']>('unit');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
-      id: 1,
-      text: language === 'es'
-        ? '👋 ¡Bienvenido al Almacén Virtual AI! Puedo ayudarte a cambiar presentaciones y precios.'
-        : '👋 Welcome to AI Virtual Warehouse! I can help you change presentations and prices.',
-      isBot: true,
-      timestamp: new Date()
-    }
-  ]);
+  const [showResult, setShowResult] = useState(false);
 
   const products: SodaProduct[] = [
     {
       id: 1,
-      name: 'Lemon Soda',
-      nameEs: 'Soda de Limón',
-      flavor: 'Lemon',
-      flavorEs: 'Limón',
-      image: '/slider_soda-main/images/item1.png',
-      bgColor: '#428372',
-      category: 'Fruit Soda',
-      categoryEs: 'Soda de Frutas'
+      name: 'Sprite Soda',
+      nameEs: 'Sprite Soda',
+      brand: 'SPRITE',
+      brandEs: 'SPRITE',
+      image: '/images/item1.png',
+      bgColor: '#00D856',
+      category: 'Lemon-Lime Soda',
+      categoryEs: 'Refresco de Limón-Lima',
+      description: 'Refreshing lemon-lime flavored soda with crisp, clean taste.',
+      descriptionEs: 'Refrescante refresco con sabor a limón-lima con un sabor fresco y limpio.'
     },
     {
       id: 2,
-      name: 'Orange Soda',
-      nameEs: 'Soda de Naranja',
-      flavor: 'Orange',
-      flavorEs: 'Naranja',
-      image: '/slider_soda-main/images/item2.png',
-      bgColor: '#EEAA19',
-      category: 'Fruit Soda',
-      categoryEs: 'Soda de Frutas'
+      name: 'Fanta Soda',
+      nameEs: 'Fanta Soda',
+      brand: 'FANTA',
+      brandEs: 'FANTA',
+      image: '/images/item2.png',
+      bgColor: '#FF8C00',
+      category: 'Orange Soda',
+      categoryEs: 'Refresco de Naranja',
+      description: 'Delicious orange flavored soda bursting with fruity flavor.',
+      descriptionEs: 'Delicioso refresco con sabor a naranja lleno de sabor frutal.'
     },
     {
       id: 3,
-      name: 'Apple Soda',
-      nameEs: 'Soda de Manzana',
-      flavor: 'Apple',
-      flavorEs: 'Manzana',
-      image: '/slider_soda-main/images/item3.png',
-      bgColor: '#e86c3f',
-      category: 'Fruit Soda',
-      categoryEs: 'Soda de Frutas'
+      name: 'Coca-Cola Original',
+      nameEs: 'Coca-Cola Original',
+      brand: 'COCA-COLA',
+      brandEs: 'COCA-COLA',
+      image: '/images/item3.png',
+      bgColor: '#E71D36',
+      category: 'Classic Cola',
+      categoryEs: 'Cola Clásica',
+      description: 'The original and iconic cola taste that started it all.',
+      descriptionEs: 'El sabor de cola original e icónico que comenzó todo.'
     }
   ];
 
@@ -88,105 +79,90 @@ const AIVirtualWarehouse: React.FC = () => {
       type: 'unit',
       label: 'Single Unit',
       labelEs: 'Unidad',
-      basePrice: 1,
-      icon: '🥤'
+      price: 1.00,
+      units: 1
     },
     {
       type: '6pack',
       label: '6-Pack',
       labelEs: 'Paquete de 6',
-      basePrice: 5.50,
-      icon: '📦'
+      price: 5.50,
+      units: 6
     },
     {
       type: '24pack',
       label: '24-Pack Box',
       labelEs: 'Caja de 24',
-      basePrice: 20,
-      icon: '📦'
+      price: 20.00,
+      units: 24
     }
   ];
 
-  const currentProduct = products[currentSlide];
-  const currentPresentationData = presentations.find(p => p.type === currentPresentation)!;
-  const currentPrice = currentPresentationData.basePrice;
+  const [productsState, setProductsState] = useState(
+    products.map(product => ({
+      ...product,
+      presentation: presentations[0]
+    }))
+  );
+
+  const currentProduct = productsState[currentSlide];
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % products.length);
+    setCurrentSlide((prev) => (prev + 1) % productsState.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + products.length) % products.length);
-  };
-
-  const addChatMessage = (text: string, isBot: boolean) => {
-    const newMessage: ChatMessage = {
-      id: Date.now(),
-      text,
-      isBot,
-      timestamp: new Date()
-    };
-    setChatMessages(prev => [...prev, newMessage]);
+    setCurrentSlide((prev) => (prev - 1 + productsState.length) % productsState.length);
   };
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
 
-    const userMessage = message.trim();
-    addChatMessage(userMessage, false);
-    setMessage('');
     setIsLoading(true);
+    setShowResult(false);
 
     // Simulate AI processing
     setTimeout(() => {
-      const messageLower = userMessage.toLowerCase();
-      let botResponse = '';
+      const currentProductData = productsState[currentSlide];
+      let newPresentation = currentProductData.presentation;
       let presentationChanged = false;
 
+      const messageLower = message.toLowerCase();
+
       // Check for presentation change commands
-      if (messageLower.includes('unit') || messageLower.includes('unidad') || messageLower.includes('single')) {
-        setCurrentPresentation('unit');
-        botResponse = language === 'es'
-          ? `✅ Presentación cambiada a Unidad. Precio actualizado: $${presentations[0].basePrice}`
-          : `✅ Presentation changed to Single Unit. Price updated: $${presentations[0].basePrice}`;
+      const unitKeywords = ['unit', 'unidad', 'single', 'individual', '1'];
+      const sixPackKeywords = ['6', 'six', 'seis', '6-pack', '6pack', 'paquete'];
+      const twentyFourKeywords = ['24', 'twenty', 'veinticuatro', '24-pack', '24pack', 'caja', 'box'];
+
+      if (unitKeywords.some(keyword => messageLower.includes(keyword))) {
+        newPresentation = presentations[0];
         presentationChanged = true;
-      } else if (messageLower.includes('6') || messageLower.includes('six') || messageLower.includes('seis')) {
-        setCurrentPresentation('6pack');
-        botResponse = language === 'es'
-          ? `✅ Presentación cambiada a 6-Pack. Precio actualizado: $${presentations[1].basePrice}`
-          : `✅ Presentation changed to 6-Pack. Price updated: $${presentations[1].basePrice}`;
+      } else if (sixPackKeywords.some(keyword => messageLower.includes(keyword))) {
+        newPresentation = presentations[1];
         presentationChanged = true;
-      } else if (messageLower.includes('24') || messageLower.includes('box') || messageLower.includes('caja')) {
-        setCurrentPresentation('24pack');
-        botResponse = language === 'es'
-          ? `✅ Presentación cambiada a Caja de 24. Precio actualizado: $${presentations[2].basePrice}`
-          : `✅ Presentation changed to 24-Pack Box. Price updated: $${presentations[2].basePrice}`;
+      } else if (twentyFourKeywords.some(keyword => messageLower.includes(keyword))) {
+        newPresentation = presentations[2];
         presentationChanged = true;
-      } else {
-        botResponse = language === 'es'
-          ? '❌ Comando no reconocido. Prueba: "cambiar a unidad", "cambiar a 6-pack" o "cambiar a caja de 24"'
-          : '❌ Command not recognized. Try: "change to unit", "change to 6-pack" or "change to 24-pack box"';
       }
 
-      addChatMessage(botResponse, true);
-      setIsLoading(false);
-    }, 1000);
-  };
+      if (presentationChanged) {
+        setProductsState(prev => {
+          const newProducts = prev.map(product =>
+            product.id === currentProductData.id
+              ? { ...product, presentation: newPresentation }
+              : product
+          );
+          return newProducts;
+        });
+      }
 
-  const quickCommands = [
-    {
-      text: language === 'es' ? 'Cambiar a Unidad' : 'Change to Unit',
-      command: language === 'es' ? 'Cambiar a unidad' : 'Change to unit'
-    },
-    {
-      text: language === 'es' ? 'Cambiar a 6-Pack' : 'Change to 6-Pack',
-      command: language === 'es' ? 'Cambiar a 6-pack' : 'Change to 6-pack'
-    },
-    {
-      text: language === 'es' ? 'Cambiar a Caja 24' : 'Change to Box 24',
-      command: language === 'es' ? 'Cambiar a caja de 24' : 'Change to 24-pack box'
-    }
-  ];
+      setIsLoading(false);
+      setShowResult(presentationChanged);
+      setMessage('');
+
+      setTimeout(() => setShowResult(false), 3000);
+    }, 1500);
+  };
 
   return (
     <div className="ai-virtual-warehouse relative w-full h-[700px] rounded-xl overflow-hidden shadow-2xl">
@@ -200,22 +176,22 @@ const AIVirtualWarehouse: React.FC = () => {
           <motion.div
             key={currentSlide}
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 0.15, scale: 1 }}
+            animate={{ opacity: 0.1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="text-[12rem] font-black text-white uppercase leading-none select-none"
+            className="text-[10rem] font-black text-white uppercase leading-none select-none"
             style={{
               textShadow: '0 0 40px rgba(0,0,0,0.3)',
               WebkitTextStroke: '2px rgba(255,255,255,0.1)'
             }}
           >
-            {language === 'es' ? currentProduct.flavorEs : currentProduct.flavor}
+            {language === 'es' ? currentProduct.brandEs : currentProduct.brand}
           </motion.div>
         </div>
 
         {/* Logo/Brand */}
         <div className="absolute top-6 left-6 z-10">
           <div className="text-2xl font-bold text-white drop-shadow-lg">
-            <FaRobot className="inline-block mr-2" />
+            <FaBoxOpen className="inline-block mr-2" />
             <span className="text-white/90">AI</span> WAREHOUSE
           </div>
         </div>
@@ -258,15 +234,15 @@ const AIVirtualWarehouse: React.FC = () => {
                   <div
                     className="w-72 h-[450px] relative"
                     style={{
-                      backgroundImage: `${currentProduct.image}, url(/slider_soda-main/images/soda.png)`,
+                      backgroundImage: `url(${currentProduct.image}), url(/images/soda.png)`,
                       backgroundPosition: '0 0, 0 0',
                       backgroundSize: '100% auto, 100% auto',
                       backgroundRepeat: 'no-repeat, no-repeat',
                       backgroundBlendMode: 'multiply',
-                      WebkitMaskImage: 'url(/slider_soda-main/images/soda.png)',
+                      WebkitMaskImage: 'url(/images/soda.png)',
                       WebkitMaskSize: '100% auto',
                       WebkitMaskRepeat: 'no-repeat',
-                      maskImage: 'url(/slider_soda-main/images/soda.png)',
+                      maskImage: 'url(/images/soda.png)',
                       maskSize: '100% auto',
                       maskRepeat: 'no-repeat',
                       filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.3))'
@@ -299,58 +275,34 @@ const AIVirtualWarehouse: React.FC = () => {
                     {language === 'es' ? currentProduct.nameEs : currentProduct.name}
                   </motion.h1>
 
-                  {/* Presentation Selector */}
+                  {/* Presentation Display */}
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7 }}
-                    className="mb-6"
-                  >
-                    <div className="flex items-center space-x-2 mb-3">
-                      <FaBoxOpen className="text-white/80" />
-                      <span className="text-sm font-medium opacity-90">
-                        {language === 'es' ? 'PRESENTACIÓN' : 'PRESENTATION'}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {presentations.map((pres) => (
-                        <button
-                          key={pres.type}
-                          onClick={() => setCurrentPresentation(pres.type)}
-                          className={`p-3 rounded-lg backdrop-blur-md transition-all duration-300 ${
-                            currentPresentation === pres.type
-                              ? 'bg-white text-gray-900 shadow-lg scale-105'
-                              : 'bg-white/20 hover:bg-white/30'
-                          }`}
-                        >
-                          <div className="text-2xl mb-1">{pres.icon}</div>
-                          <div className="text-xs font-semibold">
-                            {language === 'es' ? pres.labelEs : pres.label}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  {/* Price Display */}
-                  <motion.div
-                    key={`price-${currentPresentation}`}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    key={`presentation-${currentProduct.id}-${currentProduct.presentation.type}`}
+                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ duration: 0.5, type: 'spring', stiffness: 200 }}
-                    className="mb-6"
+                    className="mb-6 bg-white/20 backdrop-blur-md rounded-lg p-4"
                   >
-                    <div className="flex items-center space-x-2 mb-2">
-                      <FaTag className="text-white/80" />
-                      <span className="text-sm font-medium opacity-90">
-                        {language === 'es' ? 'PRECIO' : 'PRICE'}
-                      </span>
-                    </div>
-                    <div className="text-6xl font-black text-white drop-shadow-lg">
-                      ${currentPrice.toFixed(2)}
-                    </div>
-                    <div className="text-sm opacity-80 mt-1">
-                      {language === 'es' ? currentPresentationData.labelEs : currentPresentationData.label}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-medium opacity-80 mb-1">
+                          {language === 'es' ? 'PRESENTACIÓN' : 'PRESENTATION'}
+                        </div>
+                        <div className="text-2xl font-bold">
+                          {language === 'es' ? currentProduct.presentation.labelEs : currentProduct.presentation.label}
+                        </div>
+                        <div className="text-sm opacity-80">
+                          {currentProduct.presentation.units} {language === 'es' ? 'unidades' : 'units'}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs font-medium opacity-80 mb-1">
+                          {language === 'es' ? 'PRECIO' : 'PRICE'}
+                        </div>
+                        <div className="text-4xl font-black">
+                          ${currentProduct.presentation.price.toFixed(2)}
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
 
@@ -358,12 +310,10 @@ const AIVirtualWarehouse: React.FC = () => {
                   <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9 }}
-                    className="text-white/90 leading-relaxed"
+                    transition={{ delay: 0.8 }}
+                    className="text-white/90 leading-relaxed text-sm"
                   >
-                    {language === 'es'
-                      ? 'Refresco de frutas premium con sabor natural. Perfecto para cualquier ocasión.'
-                      : 'Premium fruit soda with natural flavor. Perfect for any occasion.'}
+                    {language === 'es' ? currentProduct.descriptionEs : currentProduct.description}
                   </motion.p>
                 </motion.div>
               </div>
@@ -373,7 +323,7 @@ const AIVirtualWarehouse: React.FC = () => {
 
         {/* Product Indicators */}
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3 z-10">
-          {products.map((_, index) => (
+          {productsState.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
@@ -387,85 +337,89 @@ const AIVirtualWarehouse: React.FC = () => {
         </div>
       </div>
 
-      {/* Telegram Chat Simulation */}
+      {/* Telegram Control Panel */}
       <div className="h-[200px] bg-gradient-to-b from-gray-900 to-black">
-        {/* Chat Header */}
-        <div className="bg-blue-600 px-4 py-2 flex items-center space-x-2">
-          <FaTelegram className="text-white text-xl" />
-          <div className="flex-1">
-            <div className="text-white font-semibold text-sm">
-              {language === 'es' ? 'Asistente de Almacén' : 'Warehouse Assistant'}
-            </div>
-            <div className="text-blue-100 text-xs">
-              {isLoading ? (language === 'es' ? 'Escribiendo...' : 'Typing...') : 'Online'}
-            </div>
+        {/* Quick Command Buttons */}
+        <div className="px-4 pt-3 pb-2 flex flex-wrap gap-2 bg-gray-800/50">
+          <button
+            onClick={() => setMessage(language === 'es' ? 'Cambiar a unidad' : 'Change to unit')}
+            className="bg-gray-700 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded-full transition-colors"
+            disabled={isLoading}
+          >
+            {language === 'es' ? 'Cambiar a Unidad' : 'Change to Unit'}
+          </button>
+          <button
+            onClick={() => setMessage(language === 'es' ? 'Cambiar a 6-pack' : 'Change to 6-pack')}
+            className="bg-gray-700 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded-full transition-colors"
+            disabled={isLoading}
+          >
+            {language === 'es' ? 'Cambiar a 6-Pack' : 'Change to 6-Pack'}
+          </button>
+          <button
+            onClick={() => setMessage(language === 'es' ? 'Cambiar a caja de 24' : 'Change to 24-pack box')}
+            className="bg-gray-700 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded-full transition-colors"
+            disabled={isLoading}
+          >
+            {language === 'es' ? 'Cambiar a Caja 24' : 'Change to Box 24'}
+          </button>
+        </div>
+
+        <div className="px-4 py-3 flex items-center space-x-3">
+          <FaTelegram className="text-blue-400 text-xl flex-shrink-0" />
+          <div className="flex-1 flex space-x-2">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder={language === 'es'
+                ? 'Escribe un comando para cambiar presentación...'
+                : 'Write a command to change presentation...'
+              }
+              className="flex-1 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+              disabled={isLoading}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={isLoading || !message.trim()}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+            >
+              {isLoading ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}
+            </button>
           </div>
         </div>
 
-        {/* Chat Messages */}
-        <div className="h-24 overflow-y-auto px-4 py-2 space-y-2 bg-gray-800">
-          {chatMessages.slice(-3).map((msg) => (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}
-            >
-              <div
-                className={`max-w-[80%] px-3 py-2 rounded-lg text-xs ${
-                  msg.isBot
-                    ? 'bg-gray-700 text-white'
-                    : 'bg-blue-600 text-white'
-                }`}
-              >
-                {msg.text}
-              </div>
-            </motion.div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-700 text-white px-3 py-2 rounded-lg">
-                <FaSpinner className="animate-spin" />
-              </div>
-            </div>
-          )}
-        </div>
+        {isLoading && (
+          <div className="px-4 text-blue-400 text-sm flex items-center space-x-2">
+            <FaSpinner className="animate-spin" />
+            <span>
+              {language === 'es' ? 'Procesando comando...' : 'Processing command...'}
+            </span>
+          </div>
+        )}
 
-        {/* Quick Commands */}
-        <div className="px-4 py-1 flex gap-2 bg-gray-800/50">
-          {quickCommands.map((cmd, idx) => (
-            <button
-              key={idx}
-              onClick={() => setMessage(cmd.command)}
-              className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded-full transition-colors"
-              disabled={isLoading}
-            >
-              {cmd.text}
-            </button>
-          ))}
-        </div>
-
-        {/* Input */}
-        <div className="px-4 py-2 bg-gray-900 flex items-center space-x-2">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder={language === 'es'
-              ? 'Escribe un comando...'
-              : 'Type a command...'
-            }
-            className="flex-1 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
-            disabled={isLoading}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={isLoading || !message.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white p-2 rounded-lg transition-colors"
+        {showResult && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="px-4 bg-green-600/20 border-t border-green-500/50 py-2 text-green-400 text-sm flex items-center space-x-2"
           >
-            {isLoading ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}
-          </button>
+            <FaCheck />
+            <span>
+              {language === 'es'
+                ? `Presentación actualizada a ${currentProduct.presentation.labelEs} - $${currentProduct.presentation.price.toFixed(2)}`
+                : `Presentation updated to ${currentProduct.presentation.label} - $${currentProduct.presentation.price.toFixed(2)}`
+              }
+            </span>
+          </motion.div>
+        )}
+
+        {/* Instructions */}
+        <div className="px-4 py-2 text-gray-400 text-xs text-center">
+          {language === 'es'
+            ? '💡 Prueba: "Cambiar a 6-pack", "Unidad", "Caja de 24"'
+            : '💡 Try: "Change to 6-pack", "Unit", "Box of 24"'
+          }
         </div>
       </div>
     </div>

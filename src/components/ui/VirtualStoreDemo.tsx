@@ -194,10 +194,10 @@ const VirtualStoreDemo: React.FC<VirtualStoreDemoProps> = ({ onPriceUpdate }) =>
   const currentProduct = productsState[currentSlide];
 
   return (
-    <div className="virtual-store-demo relative w-full h-[600px] bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-xl overflow-hidden">
+    <div className="virtual-store-demo relative w-full h-[700px] bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-xl overflow-hidden shadow-2xl">
       {/* Background */}
       <div className="absolute inset-0">
-        <img 
+        <img
           src="https://res.cloudinary.com/muhammederdem/image/upload/v1536405234/starwars/death_star.jpg"
           alt="Background"
           className="w-full h-full object-cover opacity-20"
@@ -404,9 +404,9 @@ const VirtualStoreDemo: React.FC<VirtualStoreDemoProps> = ({ onPriceUpdate }) =>
       </div>
 
       {/* Telegram Control Panel */}
-      <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm p-4">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-b from-gray-900 to-black backdrop-blur-sm">
         {/* Quick Command Buttons */}
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="px-4 pt-3 pb-2 flex flex-wrap gap-2 bg-gray-800/50">
           <button
             onClick={() => setMessage(language === 'es' ? 'Descuento 20%' : '20% discount')}
             className="bg-gray-700 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded-full transition-colors"
@@ -429,19 +429,19 @@ const VirtualStoreDemo: React.FC<VirtualStoreDemoProps> = ({ onPriceUpdate }) =>
             {language === 'es' ? 'Subir 10%' : 'Increase 10%'}
           </button>
         </div>
-        
-        <div className="flex items-center space-x-3">
-          <FaTelegram className="text-blue-400 text-xl" />
+
+        <div className="px-4 py-3 flex items-center space-x-3">
+          <FaTelegram className="text-blue-400 text-xl flex-shrink-0" />
           <div className="flex-1 flex space-x-2">
             <input
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder={language === 'es' 
+              placeholder={language === 'es'
                 ? 'Escribe un comando para cambiar el precio...'
                 : 'Write a command to change the price...'
               }
-              className="flex-1 px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+              className="flex-1 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
               disabled={isLoading}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             />
@@ -454,31 +454,39 @@ const VirtualStoreDemo: React.FC<VirtualStoreDemoProps> = ({ onPriceUpdate }) =>
             </button>
           </div>
         </div>
-        
+
         {isLoading && (
-          <div className="mt-2 text-blue-400 text-sm flex items-center space-x-2">
+          <div className="px-4 text-blue-400 text-sm flex items-center space-x-2">
             <FaSpinner className="animate-spin" />
             <span>
               {language === 'es' ? 'Procesando comando...' : 'Processing command...'}
             </span>
           </div>
         )}
-        
+
         {showResult && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-2 bg-green-600/20 border border-green-500/50 rounded-lg p-2 text-green-400 text-sm flex items-center space-x-2"
+            className="px-4 bg-green-600/20 border-t border-green-500/50 py-2 text-green-400 text-sm flex items-center space-x-2"
           >
             <FaCheck />
             <span>
-              {language === 'es' 
+              {language === 'es'
                 ? `Precio actualizado a $${currentProduct.price.toLocaleString()}`
                 : `Price updated to $${currentProduct.price.toLocaleString()}`
               }
             </span>
           </motion.div>
         )}
+
+        {/* Instructions */}
+        <div className="px-4 py-2 text-gray-400 text-xs text-center">
+          {language === 'es'
+            ? '💡 Prueba: "Descuento 25%", "Precio $2000", "Subir 15%"'
+            : '💡 Try: "25% discount", "Price $2000", "Increase 15%"'
+          }
+        </div>
       </div>
 
       {/* Product Indicators */}

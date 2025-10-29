@@ -66,7 +66,8 @@ const MobileAppsSection: React.FC = () => {
       category: t.mobileApps.apps.btuCalculator.category,
       technologies: [SiReact, SiTypescript],
       features: t.mobileApps.apps.btuCalculator.features,
-      status: 'coming-soon'
+      expoAndroidUrl: 'https://expo.dev/accounts/mario24874/projects/calculadora-btu/builds/ff5bd940-a3fb-40cd-958d-dd51c03da4c9',
+      status: 'available'
     }
   ];
 

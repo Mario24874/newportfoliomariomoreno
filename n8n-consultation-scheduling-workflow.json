@@ -87,7 +87,7 @@
         "conditions": {
           "number": [
             {
-              "value1": "={{ $json.length }}",
+              "value1": "={{ $input.all().length }}",
               "operation": "equal",
               "value2": 0
             }

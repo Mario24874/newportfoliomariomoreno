@@ -258,7 +258,7 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900 placeholder-gray-400"
           placeholder={language === 'es' ? 'Tu nombre' : 'Your name'}
           required
         />
@@ -275,7 +275,7 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900 placeholder-gray-400"
           placeholder={language === 'es' ? 'tu@email.com' : 'your@email.com'}
           required
         />
@@ -292,7 +292,7 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
           name="phone"
           value={formData.phone}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900 placeholder-gray-400"
           placeholder="+58 412 1234567"
         />
       </div>
@@ -307,7 +307,7 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
           name="consultationType"
           value={formData.consultationType}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900"
         >
           {Object.entries(consultationTypes).map(([value, label]) => (
             <option key={value} value={value}>{label}</option>
@@ -326,7 +326,7 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
           value={formData.message}
           onChange={handleChange}
           rows={3}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none bg-white text-gray-900 placeholder-gray-400"
           placeholder={language === 'es'
             ? 'Cuéntame sobre tu proyecto o necesidades...'
             : 'Tell me about your project or needs...'
@@ -351,7 +351,7 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
           onChange={handleChange}
           min={getMinDate()}
           max={getMaxDate()}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900"
           required
         />
         <p className="text-xs text-gray-500 mt-1">
@@ -376,7 +376,7 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
           min="09:00"
           max="18:00"
           step="1800"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900"
           required
         />
         <p className="text-xs text-gray-500 mt-1">

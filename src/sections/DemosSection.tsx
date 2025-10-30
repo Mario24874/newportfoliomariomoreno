@@ -4,6 +4,7 @@ import { SiOpenai, SiTelegram } from 'react-icons/si';
 import { motion } from 'framer-motion';
 import EmbeddedElevenLabsWidget from '@/components/ui/EmbeddedElevenLabsWidget';
 import AIDemoModal from '@/components/ui/AIDemoModal';
+import ScheduleConsultationModal from '@/components/ui/ScheduleConsultationModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { translations } from '@/data/translations';
@@ -15,6 +16,7 @@ const DemosSection: React.FC = () => {
   const t = translations[language];
   const agentId = ELEVENLABS_AGENT_ID;
   const [modalOpen, setModalOpen] = useState(false);
+  const [consultationModalOpen, setConsultationModalOpen] = useState(false);
   const [currentDemo, setCurrentDemo] = useState<'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant' | 'ai-warehouse'>('telegram-store');
 
   const openModal = (demoType: 'telegram-store' | 'voice-assistant' | 'automation-flow' | 'telegram-voice-assistant' | 'ai-warehouse') => {
@@ -250,18 +252,27 @@ const DemosSection: React.FC = () => {
                 : 'I specialize in creating tailored AI solutions for businesses. Let\'s discuss how AI can transform your operations.'
               }
             </p>
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+            <button
+              onClick={() => setConsultationModalOpen(true)}
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
               {language === 'es' ? 'Programar una Consulta' : 'Schedule a Consultation'}
             </button>
           </div>
         </motion.div>
       </div>
 
-      {/* Modal */}
-      <AIDemoModal 
+      {/* Demo Modal */}
+      <AIDemoModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         demoType={currentDemo}
+      />
+
+      {/* Consultation Scheduling Modal */}
+      <ScheduleConsultationModal
+        isOpen={consultationModalOpen}
+        onClose={() => setConsultationModalOpen(false)}
       />
     </section>
   );

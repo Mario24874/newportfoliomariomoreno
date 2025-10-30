@@ -1,0 +1,391 @@
+{
+  "name": "Portfolio Consultation Scheduling - Optimized",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "agendas-consultas-mario-moreno",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook - Receive Consultation Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "consultation-webhook-2025"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract data from webhook payload\nconst query = $input.item.json.QUERY || '';\nconst data = $input.item.json.data || {};\n\n// Parse consultation data\nconst consultationData = {\n  name: data.name || '',\n  email: data.email || '',\n  phone: data.phone || '',\n  consultationType: data.consultationType || 'other',\n  preferredDate: data.preferredDate || '',\n  duration: parseInt(data.duration) || 30,\n  message: data.message || '',\n  timezone: data.timezone || 'America/Caracas'\n};\n\n// Validate required fields\nif (!consultationData.name || !consultationData.email || !consultationData.preferredDate) {\n  return {\n    json: {\n      success: false,\n      error: 'Missing required fields: name, email, or preferredDate',\n      message: 'Por favor completa todos los campos requeridos.'\n    }\n  };\n}\n\n// Validate email format\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!emailRegex.test(consultationData.email)) {\n  return {\n    json: {\n      success: false,\n      error: 'Invalid email format',\n      message: 'El formato del email no es válido.'\n    }\n  };\n}\n\n// Parse date and calculate end time\nconst startDate = new Date(consultationData.preferredDate);\nconst endDate = new Date(startDate.getTime() + consultationData.duration * 60000);\n\n// Validate date is in the future\nif (startDate < new Date()) {\n  return {\n    json: {\n      success: false,\n      error: 'Date must be in the future',\n      message: 'La fecha de consulta debe ser futura.'\n    }\n  };\n}\n\n// Validate business hours (9 AM - 6 PM)\nconst hours = startDate.getHours();\nif (hours < 9 || hours >= 18) {\n  return {\n    json: {\n      success: false,\n      error: 'Outside business hours',\n      message: 'Las consultas solo están disponibles entre 9 AM y 6 PM.'\n    }\n  };\n}\n\n// Validate not weekend\nconst dayOfWeek = startDate.getDay();\nif (dayOfWeek === 0 || dayOfWeek === 6) {\n  return {\n    json: {\n      success: false,\n      error: 'Weekends not available',\n      message: 'Las consultas no están disponibles los fines de semana.'\n    }\n  };\n}\n\n// Prepare consultation type label\nconst consultationTypeLabels = {\n  'ai-development': 'Desarrollo de IA',\n  'web-development': 'Desarrollo Web',\n  'automation': 'Automatización',\n  'other': 'Otro'\n};\n\nconst typeLabel = consultationTypeLabels[consultationData.consultationType] || consultationData.consultationType;\n\n// Prepare calendar event data\nconst eventSummary = `Consulta: ${typeLabel} - ${consultationData.name}`;\nconst eventDescription = `Tipo de Consulta: ${typeLabel}\nCliente: ${consultationData.name}\nEmail: ${consultationData.email}\nTeléfono: ${consultationData.phone || 'No proporcionado'}\nDuración: ${consultationData.duration} minutos\n\nMensaje del cliente:\n${consultationData.message || 'Sin mensaje adicional'}\n\n---\nAgendado automáticamente desde el portfolio\nFecha de solicitud: ${new Date().toISOString()}`;\n\nreturn {\n  json: {\n    ...consultationData,\n    typeLabel: typeLabel,\n    summary: eventSummary,\n    description: eventDescription,\n    startDateTime: startDate.toISOString(),\n    endDateTime: endDate.toISOString(),\n    attendeeEmail: consultationData.email,\n    attendeeName: consultationData.name,\n    originalQuery: query,\n    validated: true\n  }\n};"
+      },
+      "id": "function-validate",
+      "name": "Process & Validate Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.success }}",
+              "operation": "notEqual",
+              "value2": "false"
+            }
+          ]
+        }
+      },
+      "id": "if-validation",
+      "name": "Validation Passed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "Primary Calendar"
+        },
+        "returnAll": false,
+        "limit": 10,
+        "options": {
+          "timeMin": "={{ $json.startDateTime }}",
+          "timeMax": "={{ $json.endDateTime }}"
+        }
+      },
+      "id": "calendar-check",
+      "name": "Check Calendar Availability",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        900,
+        200
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.length }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "if-available",
+      "name": "Time Slot Available?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "Primary Calendar"
+        },
+        "start": "={{ $('Process & Validate Data').item.json.startDateTime }}",
+        "end": "={{ $('Process & Validate Data').item.json.endDateTime }}",
+        "summary": "={{ $('Process & Validate Data').item.json.summary }}",
+        "description": "={{ $('Process & Validate Data').item.json.description }}",
+        "additionalFields": {
+          "sendUpdates": "all",
+          "conferenceData": {
+            "createRequest": {
+              "requestId": "={{ $('Process & Validate Data').item.json.email }}-{{ $now.toUnixInteger() }}",
+              "conferenceSolutionKey": {
+                "type": "hangoutsMeet"
+              }
+            }
+          },
+          "attendees": [
+            {
+              "email": "={{ $('Process & Validate Data').item.json.attendeeEmail }}",
+              "displayName": "={{ $('Process & Validate Data').item.json.attendeeName }}"
+            }
+          ]
+        }
+      },
+      "id": "calendar-create",
+      "name": "Create Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        1340,
+        100
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Process & Validate Data').item.json.attendeeEmail }}",
+        "subject": "✅ Consulta Confirmada - Mario Moreno AI Developer",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; padding: 20px; }\n    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }\n    .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }\n    .details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }\n    .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }\n    .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>🎉 ¡Consulta Confirmada!</h1>\n      <p>Tu sesión ha sido agendada exitosamente</p>\n    </div>\n\n    <div class=\"content\">\n      <p>Hola <strong>{{ $('Process & Validate Data').item.json.attendeeName }}</strong>,</p>\n\n      <p>Tu consulta de <strong>{{ $('Process & Validate Data').item.json.typeLabel }}</strong> ha sido confirmada.</p>\n\n      <div class=\"details\">\n        <h3>📅 Detalles de la Consulta:</h3>\n        <p><strong>Fecha:</strong> {{ $('Process & Validate Data').item.json.startDateTime.toDateTime().toFormat('dd/MM/yyyy') }}</p>\n        <p><strong>Hora:</strong> {{ $('Process & Validate Data').item.json.startDateTime.toDateTime().toFormat('HH:mm') }} (Hora Venezuela)</p>\n        <p><strong>Duración:</strong> {{ $('Process & Validate Data').item.json.duration }} minutos</p>\n        <p><strong>Tipo:</strong> {{ $('Process & Validate Data').item.json.typeLabel }}</p>\n      </div>\n\n      <p><strong>📹 Enlace de Reunión:</strong></p>\n      <a href=\"{{ $json.hangoutLink }}\" class=\"button\">🔗 Unirse a Google Meet</a>\n\n      <h3>📝 Qué esperar:</h3>\n      <ul>\n        <li>Revisaremos tus necesidades y objetivos</li>\n        <li>Discutiremos soluciones de IA personalizadas</li>\n        <li>Responderé todas tus preguntas</li>\n        <li>Definiremos próximos pasos si decides avanzar</li>\n      </ul>\n\n      <h3>🔔 Recordatorios:</h3>\n      <p>Recibirás recordatorios automáticos de Google Calendar.</p>\n\n      <p><strong>¿Necesitas reagendar?</strong><br>\n      Responde a este email o contáctame por WhatsApp: +584120526989</p>\n\n      <p>¡Espero con interés nuestra conversación!</p>\n\n      <p>Saludos,<br>\n      <strong>Mario Moreno</strong><br>\n      AI Developer & Innovation Engineer</p>\n    </div>\n\n    <div class=\"footer\">\n      <p>📧 marioivanmorenopineda@gmail.com | 💼 <a href=\"https://linkedin.com/in/mario-moreno-9916043b\">LinkedIn</a></p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "gmail-confirmation",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Success response\nconst calendarEvent = $('Create Calendar Event').item.json;\nconst consultationData = $('Process & Validate Data').item.json;\n\nreturn {\n  json: {\n    success: true,\n    message: 'Consulta agendada exitosamente. Revisa tu email para confirmar.',\n    eventId: calendarEvent.id,\n    meetingLink: calendarEvent.hangoutLink || '',\n    startTime: consultationData.startDateTime,\n    endTime: consultationData.endDateTime,\n    summary: consultationData.summary\n  }\n};"
+      },
+      "id": "response-success",
+      "name": "Format Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1780,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Conflict response\nconst consultationData = $('Process & Validate Data').item.json;\n\nreturn {\n  json: {\n    success: false,\n    error: 'Time slot not available',\n    message: 'El horario seleccionado no está disponible. Por favor elige otro horario o te contactaremos para coordinar.',\n    requestedTime: consultationData.startDateTime\n  }\n};"
+      },
+      "id": "response-conflict",
+      "name": "Format Conflict Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validation error response\nconst errorData = $input.item.json;\n\nreturn {\n  json: {\n    success: false,\n    error: errorData.error || 'Validation failed',\n    message: errorData.message || 'Error al validar los datos. Intenta de nuevo.'\n  }\n};"
+      },
+      "id": "response-validation-error",
+      "name": "Format Validation Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "webhook-response",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "marioivanmorenopineda@gmail.com",
+        "subject": "⚠️ Error en Sistema de Agendamiento",
+        "emailType": "text",
+        "message": "Se produjo un error en el flujo de agendamiento.\n\nDetalles:\n{{ $json.error }}\n\nTimestamp: {{ $now }}\n\nPor favor revisa el workflow en n8n.",
+        "options": {}
+      },
+      "id": "gmail-error-notification",
+      "name": "Send Error Notification",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1340,
+        500
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Receive Consultation Request": {
+      "main": [
+        [
+          {
+            "node": "Process & Validate Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process & Validate Data": {
+      "main": [
+        [
+          {
+            "node": "Validation Passed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation Passed?": {
+      "main": [
+        [
+          {
+            "node": "Check Calendar Availability",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Validation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Calendar Availability": {
+      "main": [
+        [
+          {
+            "node": "Time Slot Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Time Slot Available?": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Conflict Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Format Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Success Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Conflict Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Validation Error": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-30T00:00:00.000Z",
+  "versionId": "consultation-scheduling-v1"
+}

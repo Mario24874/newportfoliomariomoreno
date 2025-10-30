@@ -26,3 +26,29 @@ export interface NavItem {
   href: string;
   key: string;
 }
+
+// Consultation scheduling types
+export interface ConsultationRequest {
+  name: string;
+  email: string;
+  phone?: string;
+  consultationType: 'ai-development' | 'web-development' | 'automation' | 'other';
+  preferredDate: string; // ISO format date-time
+  duration: '30' | '60'; // minutes
+  message?: string;
+  timezone?: string;
+}
+
+export interface ConsultationResponse {
+  success: boolean;
+  message: string;
+  eventId?: string;
+  meetingLink?: string;
+  error?: string;
+}
+
+export interface AvailableSlot {
+  date: string;
+  time: string;
+  available: boolean;
+}

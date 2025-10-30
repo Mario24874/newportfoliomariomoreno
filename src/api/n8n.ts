@@ -280,3 +280,122 @@ export async function sendWhatsAppMessage(phoneNumber: string, message: string):
     return false;
   }
 }
+
+// Consultation scheduling webhook URL
+const CONSULTATION_WEBHOOK_URL = import.meta.env.VITE_N8N_CONSULTATION_WEBHOOK_URL ||
+  'https://mariomoreno.app.n8n.cloud/webhook/agendas-consultas-mario-moreno';
+
+/**
+ * Schedule a consultation via n8n workflow
+ * Sends data to the Google Calendar integration workflow
+ */
+export async function scheduleConsultation(consultationData: {
+  name: string;
+  email: string;
+  phone?: string;
+  consultationType: string;
+  preferredDate: string;
+  duration: string;
+  message?: string;
+  timezone?: string;
+}): Promise<{ success: boolean; response?: any; error?: string }> {
+  try {
+    console.log('Scheduling consultation:', {
+      url: CONSULTATION_WEBHOOK_URL,
+      name: consultationData.name,
+      date: consultationData.preferredDate
+    });
+
+    // Construct the query message for the AI Agent
+    const query = `Agendar consulta para ${consultationData.name} (${consultationData.email}) - Tipo: ${consultationData.consultationType} - Fecha preferida: ${consultationData.preferredDate} - Duración: ${consultationData.duration} minutos${consultationData.phone ? ` - Teléfono: ${consultationData.phone}` : ''}${consultationData.message ? ` - Mensaje: ${consultationData.message}` : ''}`;
+
+    const payload = {
+      QUERY: query,
+      data: {
+        name: consultationData.name,
+        email: consultationData.email,
+        phone: consultationData.phone || '',
+        consultationType: consultationData.consultationType,
+        preferredDate: consultationData.preferredDate,
+        duration: consultationData.duration,
+        message: consultationData.message || '',
+        timezone: consultationData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      }
+    };
+
+    const response = await fetch(CONSULTATION_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Consultation scheduled successfully:', data);
+      return {
+        success: true,
+        response: data
+      };
+    } else {
+      const errorText = await response.text();
+      console.error('Consultation scheduling failed:', response.status, errorText);
+      return {
+        success: false,
+        error: `HTTP ${response.status}: ${errorText}`
+      };
+    }
+  } catch (error) {
+    console.error('Error scheduling consultation:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Network error'
+    };
+  }
+}
+
+/**
+ * Get available time slots (placeholder - implement based on Google Calendar integration)
+ */
+export async function getAvailableSlots(date: string): Promise<{ success: boolean; slots?: string[]; error?: string }> {
+  // This is a placeholder. In production, this would query n8n to get available slots from Google Calendar
+  // For now, return mock business hours
+  try {
+    const selectedDate = new Date(date);
+    const dayOfWeek = selectedDate.getDay();
+
+    // Skip weekends
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      return {
+        success: true,
+        slots: []
+      };
+    }
+
+    // Return business hours slots: 9 AM - 6 PM (Venezuela Time)
+    const slots = [
+      '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+      '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+      '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
+    ];
+
+    return {
+      success: true,
+      slots
+    };
+  } catch (error) {
+    console.error('Error getting available slots:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+/**
+ * Utility function to check if consultation webhook is configured
+ */
+export function isConsultationWebhookConfigured(): boolean {
+  return !!CONSULTATION_WEBHOOK_URL;
+}

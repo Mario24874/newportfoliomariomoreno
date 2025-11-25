@@ -283,7 +283,7 @@ export async function sendWhatsAppMessage(phoneNumber: string, message: string):
 
 // Consultation scheduling webhook URL
 const CONSULTATION_WEBHOOK_URL = import.meta.env.VITE_N8N_CONSULTATION_WEBHOOK_URL ||
-  'https://mariomoreno.app.n8n.cloud/webhook/agendas-consultas-mario-moreno';
+  'https://n8n-n8n.geu10q.easypanel.host/webhook/agendas-consultas-mario-moreno';
 
 /**
  * Schedule a consultation via n8n workflow

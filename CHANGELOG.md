@@ -127,6 +127,56 @@
 
 ## 🚀 REGISTRO DE CAMBIOS
 
+### [2025-01-25 18:00] - CORRECCIÓN CSP PARA ELEVENLABS WIDGET
+**Desarrollador/Agente:** Claude Code
+**Categoría:** Fix
+
+#### Descripción
+Corrección del Content Security Policy (CSP) para permitir que el widget de voz de ElevenLabs funcione correctamente. El CSP estaba bloqueando scripts dinámicos necesarios para el procesamiento de audio.
+
+#### Problema Identificado
+El widget de ElevenLabs estaba mostrando errores en consola:
+```
+Loading the script 'blob:...' violates the following Content Security Policy directive
+Loading the script 'data:application/javascript;base64...' violates CSP directive
+```
+
+Estos scripts son necesarios para:
+- **blob:** URLs → Web Workers de procesamiento de audio
+- **data:** URLs → AudioWorklet processors (codecs de audio)
+
+#### Solución Aplicada
+Agregado `blob:` y `data:` a la directiva `script-src` del CSP:
+
+**Antes:**
+```
+script-src 'self' 'unsafe-inline' 'unsafe-eval' https://elevenlabs.io ...
+```
+
+**Después:**
+```
+script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://elevenlabs.io ...
+```
+
+#### Archivos Modificados
+- `netlify.toml` (línea 22) - Actualizado CSP principal
+- `netlify/_headers` (línea 2) - Actualizado CSP headers
+
+#### Testing Requerido
+Después del deploy:
+- [ ] Abrir el widget de voz de ElevenLabs
+- [ ] Verificar que no haya errores de CSP en consola
+- [ ] Probar grabación de voz
+- [ ] Verificar que el audio se procese correctamente
+
+#### Notas de Seguridad
+⚠️ **Implicaciones de Seguridad:**
+- `blob:` permite web workers (necesario para audio processing)
+- `data:` permite scripts inline base64 (necesario para AudioWorklet)
+- Estos permisos están limitados al contexto del sitio y son seguros cuando se usan con scripts de confianza como ElevenLabs
+
+---
+
 ### [2025-01-25 17:30] - ACTUALIZACIÓN DE WEBHOOKS N8N
 **Desarrollador/Agente:** Claude Code
 **Categoría:** Configuration Update

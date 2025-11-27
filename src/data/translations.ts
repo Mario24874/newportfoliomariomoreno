@@ -170,7 +170,83 @@ export const translations = {
     },
     footer: {
       rights: 'All rights reserved',
-      builtWith: 'Built with React, TypeScript & AI'
+      builtWith: 'Built with React, TypeScript & AI',
+      privacyPolicy: 'Privacy Policy'
+    },
+    privacy: {
+      title: 'Privacy Policy',
+      lastUpdated: 'Last Updated',
+      close: 'Close',
+      introduction: {
+        title: 'Introduction',
+        content: 'This Privacy Policy describes how Mario Moreno ("we", "us", or "our") collects, uses, and protects your personal information when you visit our portfolio website. We are committed to protecting your privacy and complying with applicable data protection laws, including GDPR and Meta\'s privacy requirements.'
+      },
+      dataCollection: {
+        title: 'Information We Collect',
+        intro: 'We may collect the following types of information:',
+        items: [
+          'Personal information you provide (name, email, phone number) through contact forms',
+          'Information about your device and browser',
+          'Usage data and analytics (pages visited, time spent, interactions)',
+          'Voice recordings when using our AI voice assistant (processed by ElevenLabs)',
+          'Messages sent through our chatbot or contact forms',
+          'Cookies and similar tracking technologies'
+        ]
+      },
+      dataUsage: {
+        title: 'How We Use Your Information',
+        items: [
+          'To respond to your inquiries and consultation requests',
+          'To schedule and manage appointments through Google Calendar',
+          'To send confirmation emails and communications',
+          'To improve our services and user experience',
+          'To analyze website usage and performance',
+          'To comply with legal obligations',
+          'To prevent fraud and ensure security'
+        ]
+      },
+      thirdParty: {
+        title: 'Third-Party Services',
+        intro: 'We use the following third-party services that may collect and process your data:',
+        services: [
+          'ElevenLabs - AI voice assistant (voice processing and conversation)',
+          'n8n - Workflow automation and data processing',
+          'Google Calendar - Appointment scheduling',
+          'Gmail - Email communications',
+          'Google Meet - Video conferencing',
+          'Netlify - Website hosting',
+          'Meta Platforms - Social media integration (Facebook, Instagram)',
+          'WhatsApp - Direct messaging'
+        ]
+      },
+      cookies: {
+        title: 'Cookies and Tracking',
+        content: 'We use cookies and similar technologies to enhance your experience. These include essential cookies for website functionality, analytics cookies to understand usage patterns, and preference cookies to remember your settings (such as language preference and theme). You can control cookies through your browser settings, but disabling them may affect website functionality.'
+      },
+      security: {
+        title: 'Data Security',
+        content: 'We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.'
+      },
+      userRights: {
+        title: 'Your Rights',
+        items: [
+          'Access: You can request access to your personal data',
+          'Rectification: You can request correction of inaccurate data',
+          'Erasure: You can request deletion of your data ("right to be forgotten")',
+          'Portability: You can request a copy of your data in a portable format',
+          'Objection: You can object to processing of your data',
+          'Withdraw Consent: You can withdraw consent at any time',
+          'File a Complaint: You can file a complaint with a supervisory authority'
+        ]
+      },
+      changes: {
+        title: 'Changes to This Policy',
+        content: 'We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page with an updated "Last Updated" date. Your continued use of our services after changes constitutes acceptance of the updated policy.'
+      },
+      contact: {
+        title: 'Contact Us',
+        content: 'If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us:'
+      }
     },
     chatbot: {
       title: 'AI Assistant',
@@ -366,7 +442,83 @@ export const translations = {
     },
     footer: {
       rights: 'Todos los derechos reservados',
-      builtWith: 'Construido con React, TypeScript e IA'
+      builtWith: 'Construido con React, TypeScript e IA',
+      privacyPolicy: 'Política de Privacidad'
+    },
+    privacy: {
+      title: 'Política de Privacidad',
+      lastUpdated: 'Última Actualización',
+      close: 'Cerrar',
+      introduction: {
+        title: 'Introducción',
+        content: 'Esta Política de Privacidad describe cómo Mario Moreno ("nosotros", "nuestro") recopila, usa y protege su información personal cuando visita nuestro sitio web de portafolio. Estamos comprometidos a proteger su privacidad y cumplir con las leyes aplicables de protección de datos, incluyendo GDPR y los requisitos de privacidad de Meta.'
+      },
+      dataCollection: {
+        title: 'Información que Recopilamos',
+        intro: 'Podemos recopilar los siguientes tipos de información:',
+        items: [
+          'Información personal que proporciona (nombre, email, teléfono) a través de formularios de contacto',
+          'Información sobre su dispositivo y navegador',
+          'Datos de uso y analítica (páginas visitadas, tiempo de permanencia, interacciones)',
+          'Grabaciones de voz cuando usa nuestro asistente de voz IA (procesado por ElevenLabs)',
+          'Mensajes enviados a través de nuestro chatbot o formularios de contacto',
+          'Cookies y tecnologías de rastreo similares'
+        ]
+      },
+      dataUsage: {
+        title: 'Cómo Usamos su Información',
+        items: [
+          'Para responder a sus consultas y solicitudes de consultoría',
+          'Para programar y gestionar citas a través de Google Calendar',
+          'Para enviar emails de confirmación y comunicaciones',
+          'Para mejorar nuestros servicios y experiencia de usuario',
+          'Para analizar el uso y rendimiento del sitio web',
+          'Para cumplir con obligaciones legales',
+          'Para prevenir fraudes y garantizar la seguridad'
+        ]
+      },
+      thirdParty: {
+        title: 'Servicios de Terceros',
+        intro: 'Utilizamos los siguientes servicios de terceros que pueden recopilar y procesar sus datos:',
+        services: [
+          'ElevenLabs - Asistente de voz IA (procesamiento de voz y conversación)',
+          'n8n - Automatización de flujos de trabajo y procesamiento de datos',
+          'Google Calendar - Programación de citas',
+          'Gmail - Comunicaciones por email',
+          'Google Meet - Videoconferencias',
+          'Netlify - Alojamiento web',
+          'Meta Platforms - Integración con redes sociales (Facebook, Instagram)',
+          'WhatsApp - Mensajería directa'
+        ]
+      },
+      cookies: {
+        title: 'Cookies y Rastreo',
+        content: 'Utilizamos cookies y tecnologías similares para mejorar su experiencia. Estas incluyen cookies esenciales para la funcionalidad del sitio web, cookies de analítica para entender patrones de uso, y cookies de preferencias para recordar su configuración (como preferencia de idioma y tema). Puede controlar las cookies a través de la configuración de su navegador, pero deshabilitarlas puede afectar la funcionalidad del sitio.'
+      },
+      security: {
+        title: 'Seguridad de Datos',
+        content: 'Implementamos medidas de seguridad técnicas y organizativas apropiadas para proteger su información personal contra acceso no autorizado, alteración, divulgación o destrucción. Sin embargo, ningún método de transmisión por internet es 100% seguro, y no podemos garantizar seguridad absoluta.'
+      },
+      userRights: {
+        title: 'Sus Derechos',
+        items: [
+          'Acceso: Puede solicitar acceso a sus datos personales',
+          'Rectificación: Puede solicitar corrección de datos inexactos',
+          'Eliminación: Puede solicitar eliminación de sus datos ("derecho al olvido")',
+          'Portabilidad: Puede solicitar una copia de sus datos en formato portable',
+          'Objeción: Puede objetar el procesamiento de sus datos',
+          'Retirar Consentimiento: Puede retirar el consentimiento en cualquier momento',
+          'Presentar Queja: Puede presentar una queja ante una autoridad supervisora'
+        ]
+      },
+      changes: {
+        title: 'Cambios a esta Política',
+        content: 'Podemos actualizar esta Política de Privacidad de vez en cuando. Le notificaremos cualquier cambio publicando la nueva política en esta página con una fecha actualizada de "Última Actualización". Su uso continuado de nuestros servicios después de los cambios constituye aceptación de la política actualizada.'
+      },
+      contact: {
+        title: 'Contáctenos',
+        content: 'Si tiene preguntas sobre esta Política de Privacidad o desea ejercer sus derechos, por favor contáctenos:'
+      }
     },
     chatbot: {
       title: 'Asistente IA',

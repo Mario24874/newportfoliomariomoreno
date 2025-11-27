@@ -127,6 +127,119 @@
 
 ## 🚀 REGISTRO DE CAMBIOS
 
+### [2025-01-25 19:00] - POLÍTICA DE PRIVACIDAD PARA CUMPLIMIENTO META
+**Desarrollador/Agente:** Claude Code
+**Categoría:** Feature
+
+#### Descripción
+Implementación completa de Política de Privacidad profesional que cumple con GDPR y requisitos de Meta (Facebook/Instagram). Incluye modal interactivo, traducciones completas ES/EN, y enlace accesible en el footer.
+
+#### Funcionalidades Implementadas
+**Componente PrivacyPolicy:**
+- Modal full-screen responsive con scroll interno
+- Diseño profesional con animaciones Framer Motion
+- Cierre con botón, backdrop click, o tecla ESC
+- Prevención de scroll del body cuando está abierto
+- Soporte completo para modo oscuro/claro
+- Fecha de actualización dinámica
+
+**Contenido Legal Incluido:**
+- ✅ Introducción y compromiso con privacidad
+- ✅ Información recopilada (formularios, analytics, voz, cookies)
+- ✅ Cómo usamos la información
+- ✅ Servicios de terceros (ElevenLabs, n8n, Google, Meta, WhatsApp)
+- ✅ Política de cookies
+- ✅ Seguridad de datos
+- ✅ Derechos del usuario (GDPR compliant)
+- ✅ Procedimiento de cambios a la política
+- ✅ Información de contacto completa
+
+**Cumplimiento Regulatorio:**
+- ✅ GDPR (General Data Protection Regulation)
+- ✅ Meta Business Tools Privacy Requirements
+- ✅ Derecho al olvido
+- ✅ Portabilidad de datos
+- ✅ Transparencia en recolección y uso
+
+#### Archivos Creados
+- `src/components/ui/PrivacyPolicy.tsx` - Componente modal completo (195 líneas)
+
+#### Archivos Modificados
+- `src/data/translations.ts` - Agregadas traducciones completas ES/EN para política de privacidad (~150 líneas)
+- `src/App.tsx` - Agregado estado y renderizado del modal de privacidad
+- `src/components/layout/Footer.tsx` - Agregado enlace "Política de Privacidad" con hover effect
+
+#### Características Técnicas
+**UI/UX:**
+- Modal responsive con max-width 4xl
+- Scroll interno con altura máxima 70vh
+- Headers sticky (top y bottom)
+- Animaciones de entrada/salida suaves
+- Botón de cierre siempre visible
+- Información de contacto destacada en card
+
+**Accesibilidad:**
+- Cierre con tecla ESC
+- ARIA labels apropiados
+- Contraste adecuado en modo claro y oscuro
+- Navegación por teclado funcional
+
+**Traducciones:**
+- Inglés: Formal, profesional, legal compliance
+- Español: Traducción precisa manteniendo tono legal
+
+#### Servicios de Terceros Declarados
+1. **ElevenLabs** - Procesamiento de voz IA
+2. **n8n** - Automatización de workflows
+3. **Google Calendar** - Agendamiento de citas
+4. **Gmail** - Comunicaciones email
+5. **Google Meet** - Videoconferencias
+6. **Netlify** - Hosting web
+7. **Meta Platforms** - Integración redes sociales
+8. **WhatsApp** - Mensajería directa
+
+#### Testing Realizado
+- ✅ Build compilado sin errores
+- ✅ Modal abre y cierra correctamente
+- ✅ Traducciones funcionan en ES/EN
+- ✅ Scroll funciona correctamente
+- ✅ Cierre con ESC funcional
+- ✅ Diseño responsive verificado
+- ✅ Modo oscuro/claro funcionan
+
+#### Próximos Pasos Recomendados
+**Para Netlify/Producción:**
+1. Hacer deploy de los cambios
+2. Verificar que el enlace funcione en producción
+3. Copiar la URL completa de la política: `https://newportfoliomariomoreno.netlify.app/#privacy` (cuando se abra el modal)
+
+**Para Meta Business Suite:**
+1. Ir a Facebook Business Settings
+2. Agregar URL de privacidad: Pega la URL de tu sitio en el campo requerido
+3. Instagram Business: Configuración → Privacidad → URL de política
+
+**Para Compliance:**
+- [ ] Revisar contenido legal con abogado si es necesario
+- [ ] Configurar proceso de manejo de solicitudes GDPR
+- [ ] Documentar procedimiento de eliminación de datos
+- [ ] Configurar email para solicitudes de privacidad
+
+#### Notas Importantes
+⚠️ **Requisitos de Meta:**
+Meta requiere que tengas una política de privacidad publicada y accesible para:
+- Usar Meta Business Tools
+- Publicar anuncios en Facebook/Instagram
+- Recopilar datos de usuarios a través de formularios
+- Usar píxel de Facebook
+
+✅ **Ahora Cumples con:**
+- Política de privacidad pública y accesible
+- Información sobre recolección de datos
+- Derechos de los usuarios claramente especificados
+- Información de contacto para ejercer derechos
+
+---
+
 ### [2025-01-25 18:00] - CORRECCIÓN CSP PARA ELEVENLABS WIDGET
 **Desarrollador/Agente:** Claude Code
 **Categoría:** Fix

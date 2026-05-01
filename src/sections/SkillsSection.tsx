@@ -52,7 +52,7 @@ const SkillsSection: React.FC = () => {
   const languageSkills = getLanguageSkills(t);
   
   return (
-    <section id="skills-section" className={`py-12 sm:py-16 lg:py-24 transition-colors duration-300 ${
+    <section id="skills" className={`py-12 sm:py-16 lg:py-24 transition-colors duration-300 ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
     }`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

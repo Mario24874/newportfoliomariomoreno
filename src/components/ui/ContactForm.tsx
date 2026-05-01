@@ -29,6 +29,7 @@ interface FormData {
   email: string;
   phone: string;
   message: string;
+  website: string;
 }
 
 const ContactForm: React.FC<ContactFormProps> = ({ open, onClose }) => {
@@ -41,6 +42,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ open, onClose }) => {
     email: '',
     phone: '',
     message: '',
+    website: '',
   });
   
   const [status, setStatus] = useState<{
@@ -76,7 +78,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ open, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    if (formData.website) return;
     if (!validateForm()) return;
     
     setIsLoading(true);
@@ -105,7 +107,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ open, onClose }) => {
       
       // Limpiar formulario después de 2 segundos
       setTimeout(() => {
-        setFormData({ name: '', email: '', phone: '', message: '' });
+        setFormData({ name: '', email: '', phone: '', message: '', website: '' });
         onClose();
       }, 2000);
       
@@ -121,7 +123,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ open, onClose }) => {
   };
 
   const handleClose = () => {
-    setFormData({ name: '', email: '', phone: '', message: '' });
+    setFormData({ name: '', email: '', phone: '', message: '', website: '' });
     setStatus({ type: null, message: '' });
     onClose();
   };
@@ -158,6 +160,16 @@ const ContactForm: React.FC<ContactFormProps> = ({ open, onClose }) => {
       </DialogTitle>
 
       <form ref={formRef} onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="website"
+          value={formData.website}
+          onChange={handleChange}
+          tabIndex={-1}
+          autoComplete="off"
+          style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
+          aria-hidden="true"
+        />
         <DialogContent sx={{ pt: 1 }}>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             {t.contact?.form?.subtitle || 'I\'d love to hear from you. Send me a message and I\'ll respond as soon as possible.'}

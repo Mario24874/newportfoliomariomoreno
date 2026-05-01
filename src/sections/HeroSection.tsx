@@ -23,7 +23,12 @@ const HeroSection: React.FC = () => {
     const [charIndex, setCharIndex] = useState(0);
     const [isWaiting, setIsWaiting] = useState(false);
 
-    const heroTexts = [`${t.hero.greeting} ${YOUR_NAME}`];
+    const heroTexts = [
+        `${t.hero.greeting} ${YOUR_NAME}`,
+        language === 'es' ? 'Full Stack Developer' : 'Full Stack Developer',
+        language === 'es' ? 'Experto en IA & Automatización' : 'AI & Automation Expert',
+        language === 'es' ? 'Ingeniero IoT & Domótica' : 'IoT & Smart Systems Engineer',
+    ];
 
     useEffect(() => {
         const typeSpeed = 120;

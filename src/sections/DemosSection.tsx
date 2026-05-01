@@ -4,6 +4,7 @@ import { SiOpenai, SiTelegram } from 'react-icons/si';
 import { motion } from 'framer-motion';
 import EmbeddedElevenLabsWidget from '@/components/ui/EmbeddedElevenLabsWidget';
 import AIDemoModal from '@/components/ui/AIDemoModal';
+import N8nAutomationDemo from '@/components/ui/N8nAutomationDemo';
 import ScheduleConsultationModal from '@/components/ui/ScheduleConsultationModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -130,36 +131,17 @@ const DemosSection: React.FC = () => {
     {
       id: 'automation-bot',
       title: language === 'es' ? 'Agente de Automatización n8n' : 'n8n Automation Agent',
-      description: language === 'es' 
+      description: language === 'es'
         ? 'Automatización inteligente de flujos de trabajo impulsada por n8n e integraciones de IA personalizadas.'
         : 'Intelligent workflow automation powered by n8n and custom AI integrations.',
       icon: FaRobot,
       gradient: 'from-orange-500 to-red-500',
-      component: (
-        <div className="text-center p-6">
-          <div className="mb-4">
-            <FaRobot className="w-12 h-12 text-orange-500 mx-auto mb-2" />
-            <p className="text-gray-600 text-sm">
-              {language === 'es' 
-                ? 'Visualización de flujo de automatización'
-                : 'Automation flow visualization'
-              }
-            </p>
-          </div>
-          <button 
-            onClick={() => openModal('automation-flow')}
-            className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all flex items-center mx-auto"
-          >
-            <FaPlay className="mr-2" />
-            {language === 'es' ? 'Ver Flujo' : 'View Flow'}
-          </button>
-        </div>
-      )
+      component: <N8nAutomationDemo />
     }
   ];
 
   return (
-    <section id="demos-section" className={`py-20 transition-colors duration-300 ${
+    <section id="demos" className={`py-20 transition-colors duration-300 ${
       isDarkMode 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-50 via-gray-50 to-blue-50'
@@ -196,7 +178,7 @@ const DemosSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className={`rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2 ${
-                isDarkMode ? 'bg-white' : 'bg-white'
+                isDarkMode ? 'bg-gray-800' : 'bg-white'
               }`}
             >
               {/* Header */}

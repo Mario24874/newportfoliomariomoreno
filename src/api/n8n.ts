@@ -216,8 +216,6 @@ export async function sendChatMessage(message: string, conversationId: string = 
       }
     };
 
-    console.log('Sending to n8n:', { url: N8N_WEBHOOK_URL, conversationId, messagePreview: message.substring(0, 50) });
-
     const response = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: {
@@ -228,7 +226,6 @@ export async function sendChatMessage(message: string, conversationId: string = 
 
     if (response.ok) {
       const data = await response.json();
-      console.log('n8n response received:', data);
       return {
         success: true,
         response: data.message || data.output || data.text || 'Mensaje recibido correctamente.'
@@ -282,8 +279,7 @@ export async function sendWhatsAppMessage(phoneNumber: string, message: string):
 }
 
 // Consultation scheduling webhook URL
-const CONSULTATION_WEBHOOK_URL = import.meta.env.VITE_N8N_CONSULTATION_WEBHOOK_URL ||
-  'https://n8n-n8n.geu10q.easypanel.host/webhook/agendas-consultas-mario-moreno';
+const CONSULTATION_WEBHOOK_URL = import.meta.env.VITE_N8N_CONSULTATION_WEBHOOK_URL;
 
 /**
  * Schedule a consultation via n8n workflow
@@ -300,12 +296,6 @@ export async function scheduleConsultation(consultationData: {
   timezone?: string;
 }): Promise<{ success: boolean; response?: any; error?: string }> {
   try {
-    console.log('Scheduling consultation:', {
-      url: CONSULTATION_WEBHOOK_URL,
-      name: consultationData.name,
-      date: consultationData.preferredDate
-    });
-
     // Construct the query message for the AI Agent
     const query = `Agendar consulta para ${consultationData.name} (${consultationData.email}) - Tipo: ${consultationData.consultationType} - Fecha preferida: ${consultationData.preferredDate} - Duración: ${consultationData.duration} minutos${consultationData.phone ? ` - Teléfono: ${consultationData.phone}` : ''}${consultationData.message ? ` - Mensaje: ${consultationData.message}` : ''}`;
 
@@ -333,7 +323,6 @@ export async function scheduleConsultation(consultationData: {
 
     if (response.ok) {
       const data = await response.json();
-      console.log('Consultation scheduled successfully:', data);
       return {
         success: true,
         response: data

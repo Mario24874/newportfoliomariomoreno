@@ -171,7 +171,8 @@ export const translations = {
     footer: {
       rights: 'All rights reserved',
       builtWith: 'Built with React, TypeScript & AI',
-      privacyPolicy: 'Privacy Policy'
+      privacyPolicy: 'Privacy Policy',
+      termsConditions: 'Terms & Conditions'
     },
     privacy: {
       title: 'Privacy Policy',
@@ -179,7 +180,7 @@ export const translations = {
       close: 'Close',
       introduction: {
         title: 'Introduction',
-        content: 'This Privacy Policy describes how Mario Moreno ("we", "us", or "our") collects, uses, and protects your personal information when you visit our portfolio website. We are committed to protecting your privacy and complying with applicable data protection laws, including GDPR and Meta\'s privacy requirements.'
+        content: 'This Privacy Policy describes how Mario Moreno ("we", "us", or "our") collects, uses, and protects your personal information when you visit our portfolio website. We are committed to protecting your privacy and complying with applicable data protection laws.'
       },
       dataCollection: {
         title: 'Information We Collect',
@@ -188,8 +189,8 @@ export const translations = {
           'Personal information you provide (name, email, phone number) through contact forms',
           'Information about your device and browser',
           'Usage data and analytics (pages visited, time spent, interactions)',
-          'Voice recordings when using our AI voice assistant (processed by ElevenLabs)',
-          'Messages sent through our chatbot or contact forms',
+          'Voice recordings when using our AI voice assistant (processed by third-party AI providers)',
+          'Messages sent through our AI chatbot or contact forms',
           'Cookies and similar tracking technologies'
         ]
       },
@@ -197,7 +198,7 @@ export const translations = {
         title: 'How We Use Your Information',
         items: [
           'To respond to your inquiries and consultation requests',
-          'To schedule and manage appointments through Google Calendar',
+          'To schedule and manage appointments',
           'To send confirmation emails and communications',
           'To improve our services and user experience',
           'To analyze website usage and performance',
@@ -207,16 +208,15 @@ export const translations = {
       },
       thirdParty: {
         title: 'Third-Party Services',
-        intro: 'We use the following third-party services that may collect and process your data:',
+        intro: 'We use third-party services that may collect and process your data, including:',
         services: [
-          'ElevenLabs - AI voice assistant (voice processing and conversation)',
-          'n8n - Workflow automation and data processing',
-          'Google Calendar - Appointment scheduling',
-          'Gmail - Email communications',
-          'Google Meet - Video conferencing',
-          'Netlify - Website hosting',
-          'Meta Platforms - Social media integration (Facebook, Instagram)',
-          'WhatsApp - Direct messaging'
+          'AI voice and conversation processing providers',
+          'Workflow automation and data processing services',
+          'Appointment scheduling and calendar services',
+          'Email communication services',
+          'Video conferencing services',
+          'Website hosting and infrastructure providers',
+          'Social media and messaging platforms'
         ]
       },
       cookies: {
@@ -246,6 +246,55 @@ export const translations = {
       contact: {
         title: 'Contact Us',
         content: 'If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us:'
+      }
+    },
+    terms: {
+      title: 'Terms & Conditions',
+      lastUpdated: 'Last Updated',
+      close: 'Close',
+      acceptance: {
+        title: 'Acceptance of Terms',
+        content: 'By accessing and using this website, you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use this site.'
+      },
+      services: {
+        title: 'Services',
+        content: 'This website serves as a professional portfolio for Mario Moreno, a Full Stack Systems Engineer. The services described herein are offered for informational and commercial purposes. Service agreements are formalized separately through individual contracts.'
+      },
+      aiDisclaimer: {
+        title: 'AI Tools — Disclaimer and Limitation of Liability',
+        intro: 'This website incorporates artificial intelligence tools, including a conversational chatbot and a voice assistant. By using these features, you acknowledge and agree to the following:',
+        items: [
+          'AI-generated responses are automated and may be inaccurate, incomplete, or outdated. They do not constitute professional, legal, financial, or technical advice.',
+          'Mario Moreno is not liable for any decisions made based on AI-generated content.',
+          'AI conversations may be processed and stored by third-party AI providers. Do not share sensitive personal, financial, or confidential information through these tools.',
+          'The AI assistant is provided "as is" without warranties of any kind, express or implied.',
+          'We reserve the right to modify, suspend, or discontinue AI features at any time without notice.',
+          'By interacting with AI tools on this site, you assume full responsibility for how you use the information provided.'
+        ]
+      },
+      consultations: {
+        title: 'Consultation Scheduling',
+        content: 'Appointment requests made through this website are subject to availability and confirmation by Mario Moreno. Scheduling a consultation does not constitute a binding contract for services. Confirmed appointments should be cancelled at least 24 hours in advance.'
+      },
+      intellectualProperty: {
+        title: 'Intellectual Property',
+        content: 'All content on this website, including text, graphics, logos, and code, is the property of Mario Moreno and is protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without prior written permission.'
+      },
+      limitation: {
+        title: 'Limitation of Liability',
+        content: 'To the maximum extent permitted by law, Mario Moreno shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of this website or its AI-powered features, even if advised of the possibility of such damages.'
+      },
+      governing: {
+        title: 'Governing Law',
+        content: 'These Terms are governed by the laws of the Bolivarian Republic of Venezuela, without regard to its conflict of law provisions. Any disputes shall be resolved through good-faith negotiation, or if necessary, through the competent courts.'
+      },
+      changes: {
+        title: 'Changes to These Terms',
+        content: 'We reserve the right to update these Terms at any time. Changes take effect immediately upon posting. Continued use of the website after changes constitutes acceptance of the updated Terms.'
+      },
+      contact: {
+        title: 'Contact',
+        content: 'For questions about these Terms and Conditions, please contact us:'
       }
     },
     chatbot: {
@@ -443,7 +492,8 @@ export const translations = {
     footer: {
       rights: 'Todos los derechos reservados',
       builtWith: 'Construido con React, TypeScript e IA',
-      privacyPolicy: 'Política de Privacidad'
+      privacyPolicy: 'Política de Privacidad',
+      termsConditions: 'Términos y Condiciones'
     },
     privacy: {
       title: 'Política de Privacidad',
@@ -451,7 +501,7 @@ export const translations = {
       close: 'Cerrar',
       introduction: {
         title: 'Introducción',
-        content: 'Esta Política de Privacidad describe cómo Mario Moreno ("nosotros", "nuestro") recopila, usa y protege su información personal cuando visita nuestro sitio web de portafolio. Estamos comprometidos a proteger su privacidad y cumplir con las leyes aplicables de protección de datos, incluyendo GDPR y los requisitos de privacidad de Meta.'
+        content: 'Esta Política de Privacidad describe cómo Mario Moreno ("nosotros", "nuestro") recopila, usa y protege su información personal cuando visita nuestro sitio web de portafolio. Estamos comprometidos a proteger su privacidad y cumplir con las leyes aplicables de protección de datos.'
       },
       dataCollection: {
         title: 'Información que Recopilamos',
@@ -460,8 +510,8 @@ export const translations = {
           'Información personal que proporciona (nombre, email, teléfono) a través de formularios de contacto',
           'Información sobre su dispositivo y navegador',
           'Datos de uso y analítica (páginas visitadas, tiempo de permanencia, interacciones)',
-          'Grabaciones de voz cuando usa nuestro asistente de voz IA (procesado por ElevenLabs)',
-          'Mensajes enviados a través de nuestro chatbot o formularios de contacto',
+          'Grabaciones de voz cuando usa nuestro asistente de voz IA (procesado por proveedores externos de IA)',
+          'Mensajes enviados a través de nuestro chatbot IA o formularios de contacto',
           'Cookies y tecnologías de rastreo similares'
         ]
       },
@@ -469,7 +519,7 @@ export const translations = {
         title: 'Cómo Usamos su Información',
         items: [
           'Para responder a sus consultas y solicitudes de consultoría',
-          'Para programar y gestionar citas a través de Google Calendar',
+          'Para programar y gestionar citas',
           'Para enviar emails de confirmación y comunicaciones',
           'Para mejorar nuestros servicios y experiencia de usuario',
           'Para analizar el uso y rendimiento del sitio web',
@@ -479,16 +529,15 @@ export const translations = {
       },
       thirdParty: {
         title: 'Servicios de Terceros',
-        intro: 'Utilizamos los siguientes servicios de terceros que pueden recopilar y procesar sus datos:',
+        intro: 'Utilizamos servicios de terceros que pueden recopilar y procesar sus datos, incluyendo:',
         services: [
-          'ElevenLabs - Asistente de voz IA (procesamiento de voz y conversación)',
-          'n8n - Automatización de flujos de trabajo y procesamiento de datos',
-          'Google Calendar - Programación de citas',
-          'Gmail - Comunicaciones por email',
-          'Google Meet - Videoconferencias',
-          'Netlify - Alojamiento web',
-          'Meta Platforms - Integración con redes sociales (Facebook, Instagram)',
-          'WhatsApp - Mensajería directa'
+          'Proveedores de procesamiento de voz y conversación con IA',
+          'Servicios de automatización de flujos de trabajo y procesamiento de datos',
+          'Servicios de programación de citas y calendario',
+          'Servicios de comunicación por email',
+          'Servicios de videoconferencia',
+          'Proveedores de alojamiento web e infraestructura',
+          'Plataformas de redes sociales y mensajería'
         ]
       },
       cookies: {
@@ -518,6 +567,55 @@ export const translations = {
       contact: {
         title: 'Contáctenos',
         content: 'Si tiene preguntas sobre esta Política de Privacidad o desea ejercer sus derechos, por favor contáctenos:'
+      }
+    },
+    terms: {
+      title: 'Términos y Condiciones',
+      lastUpdated: 'Última Actualización',
+      close: 'Cerrar',
+      acceptance: {
+        title: 'Aceptación de los Términos',
+        content: 'Al acceder y utilizar este sitio web, usted acepta y se compromete a cumplir estos Términos y Condiciones. Si no está de acuerdo, por favor no utilice este sitio.'
+      },
+      services: {
+        title: 'Servicios',
+        content: 'Este sitio web es el portafolio profesional de Mario Moreno, Ingeniero de Sistemas Full Stack. Los servicios descritos se ofrecen con fines informativos y comerciales. Los acuerdos de servicio se formalizan por separado mediante contratos individuales.'
+      },
+      aiDisclaimer: {
+        title: 'Herramientas de IA — Aviso Legal y Limitación de Responsabilidad',
+        intro: 'Este sitio incorpora herramientas de inteligencia artificial, incluyendo un chatbot conversacional y un asistente de voz. Al usar estas funciones, usted reconoce y acepta lo siguiente:',
+        items: [
+          'Las respuestas generadas por IA son automatizadas y pueden ser inexactas, incompletas u obsoletas. No constituyen asesoramiento profesional, legal, financiero ni técnico.',
+          'Mario Moreno no es responsable de decisiones tomadas con base en contenido generado por IA.',
+          'Las conversaciones con IA pueden ser procesadas y almacenadas por proveedores externos. No comparta información personal sensible, financiera o confidencial a través de estas herramientas.',
+          'El asistente de IA se proporciona "tal cual", sin garantías de ningún tipo, expresas o implícitas.',
+          'Nos reservamos el derecho de modificar, suspender o descontinuar las funciones de IA en cualquier momento sin previo aviso.',
+          'Al interactuar con las herramientas de IA de este sitio, usted asume plena responsabilidad por el uso que haga de la información proporcionada.'
+        ]
+      },
+      consultations: {
+        title: 'Programación de Consultas',
+        content: 'Las solicitudes de citas realizadas a través de este sitio están sujetas a disponibilidad y confirmación por parte de Mario Moreno. Agendar una consulta no constituye un contrato vinculante de servicios. Las citas confirmadas deben cancelarse con al menos 24 horas de anticipación.'
+      },
+      intellectualProperty: {
+        title: 'Propiedad Intelectual',
+        content: 'Todo el contenido de este sitio web, incluyendo textos, gráficos, logotipos y código, es propiedad de Mario Moreno y está protegido por las leyes de propiedad intelectual aplicables. No se permite reproducir, distribuir ni crear obras derivadas sin permiso previo por escrito.'
+      },
+      limitation: {
+        title: 'Limitación de Responsabilidad',
+        content: 'En la máxima medida permitida por la ley, Mario Moreno no será responsable por daños indirectos, incidentales, especiales, consecuentes o punitivos derivados del uso de este sitio web o sus funciones impulsadas por IA, incluso si se hubiera advertido sobre la posibilidad de dichos daños.'
+      },
+      governing: {
+        title: 'Ley Aplicable',
+        content: 'Estos Términos se rigen por las leyes de la República Bolivariana de Venezuela. Cualquier disputa se resolverá mediante negociación de buena fe o, si fuera necesario, a través de los tribunales competentes.'
+      },
+      changes: {
+        title: 'Cambios a estos Términos',
+        content: 'Nos reservamos el derecho de actualizar estos Términos en cualquier momento. Los cambios entran en vigor inmediatamente tras su publicación. El uso continuado del sitio después de los cambios constituye aceptación de los Términos actualizados.'
+      },
+      contact: {
+        title: 'Contacto',
+        content: 'Para preguntas sobre estos Términos y Condiciones, por favor contáctenos:'
       }
     },
     chatbot: {

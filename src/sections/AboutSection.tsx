@@ -16,9 +16,9 @@ const AboutSection: React.FC = () => {
         <div className="max-w-3xl mx-auto bg-gray-900 p-6 sm:p-8 rounded-xl shadow-2xl">
           <div className="flex flex-col md:flex-row items-center md:space-x-8">
             <div className="md:w-1/3 mb-6 md:mb-0">
-              <img 
-                src={`https://picsum.photos/seed/${YOUR_NAME.replace(/\s+/g, '')}/300/300`} 
-                alt={YOUR_NAME} 
+              <img
+                src="/images/mario-moreno.jpeg"
+                alt={YOUR_NAME}
                 className="rounded-full shadow-lg mx-auto w-48 h-48 sm:w-56 sm:h-56 object-cover border-4 border-blue-500"
               />
             </div>

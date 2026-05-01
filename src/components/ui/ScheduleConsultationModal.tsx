@@ -30,6 +30,7 @@ interface FormData {
   preferredTime: string;
   duration: '30' | '60';
   message: string;
+  website: string;
 }
 
 const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ isOpen, onClose }) => {
@@ -44,7 +45,8 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
     preferredDate: '',
     preferredTime: '',
     duration: '30',
-    message: ''
+    message: '',
+    website: ''
   });
 
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
@@ -65,7 +67,8 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
           preferredDate: '',
           preferredTime: '',
           duration: '30',
-          message: ''
+          message: '',
+          website: ''
         });
         setIsSubmitted(false);
         setError('');
@@ -164,7 +167,7 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    if (formData.website) return;
     if (!validateStep2()) return;
 
     setIsLoading(true);
@@ -247,6 +250,16 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
 
   const renderStep1 = () => (
     <div className="space-y-4">
+      <input
+        type="text"
+        name="website"
+        value={formData.website}
+        onChange={handleChange}
+        tabIndex={-1}
+        autoComplete="off"
+        style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
+        aria-hidden="true"
+      />
       {/* Name */}
       <div>
         <label className="flex items-center text-sm font-medium text-gray-700 mb-2">

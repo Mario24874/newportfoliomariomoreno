@@ -72,7 +72,7 @@ const MobileAppsSection: React.FC = () => {
   ];
 
   return (
-    <section id="mobile-apps-section" className={`py-20 transition-colors duration-300 ${
+    <section id="mobile-apps" className={`py-20 transition-colors duration-300 ${
       isDarkMode
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900'
         : 'bg-gradient-to-br from-gray-50 to-white'

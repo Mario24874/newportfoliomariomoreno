@@ -199,7 +199,7 @@ export const PROJECTS: Project[] = [
     description: 'We developed a complete platform for learning Italian language and culture, with tutorials, exercises, online classes and AI tutors.',
     technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
     imageUrl: '/images/logo_Italianto.png',
-    liveUrl: '#',
+    liveUrl: 'https://italianto.com/',
     repoUrl: '#',
   },
   {
@@ -216,6 +216,7 @@ export const PROJECTS: Project[] = [
     description: 'Created a cross-platform mobile application for enterprise task management using React Native. Features include real-time collaboration, notifications, and offline capabilities.',
     technologies: ['React', 'Firebase', 'TypeScript', 'Jest'],
     imageUrl: '/images/UrbanDrive.png',
+    liveUrl: 'https://urbandrive-1082b.web.app/',
     repoUrl: '#',
   },
   {
@@ -232,7 +233,7 @@ export const PROJECTS: Project[] = [
     description: 'Modern blog platform with AI-powered content generation and automatic SEO optimization.',
     technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
     imageUrl: '/images/BlogIT.jpeg',
-    liveUrl: '#',
+    liveUrl: 'https://blog-itech.netlify.app/',
     repoUrl: '#',
   },
   {
@@ -241,7 +242,7 @@ export const PROJECTS: Project[] = [
     description: 'Professional development agency website showcasing modern web technologies and client solutions.',
     technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
     imageUrl: '/images/NextCodeSolutions.jpeg',
-    liveUrl: '#',
+    liveUrl: 'https://nextcodesolutions.netlify.app/',
     repoUrl: '#',
   },
 ];
@@ -252,11 +253,11 @@ export const PROJECTS: Project[] = [
 export const YOUR_NAME = "Mario Moreno";
 export const YOUR_TITLE = "AI Developer & Innovation Engineer";
 export const YOUR_WHATSAPP_NUMBER = "+584145364657"; // Número actualizado
-export const YOUR_EMAIL = "info@mariomoreno.work";
+export const YOUR_EMAIL = "marioivanmorenopineda@gmail.com"; // Email corregido
 export const YOUR_LINKEDIN_URL = "https://www.linkedin.com/in/mario-moreno-9916043b"; // Update with real LinkedIn
 export const YOUR_GITHUB_URL = "https://github.com/Mario24874"; // Update with real GitHub
 
 // Additional profile information
 export const YOUR_DESCRIPTION = "Specialist in creating modern web applications, automation, and AI solutions that generate real impact.";
 export const YOUR_LOCATION = "Remote / Global";
-export const YOUR_PHONE = "+1234567890"; // Update with real phone
+export const YOUR_PHONE = "+5804126504208";

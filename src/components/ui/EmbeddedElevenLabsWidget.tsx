@@ -1,142 +1,124 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { FaMicrophone, FaVolumeUp, FaExternalLinkAlt, FaCircle } from 'react-icons/fa';
+import React, { useState, useRef, useCallback } from 'react';
+import { FaMicrophone, FaStop, FaCircle } from 'react-icons/fa';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'elevenlabs-convai': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        'agent-id'?: string;
-      };
-    }
-  }
-}
 
 interface EmbeddedElevenLabsWidgetProps {
   agentId: string;
 }
 
+type ConvStatus = 'idle' | 'connecting' | 'connected' | 'error';
+
 const EmbeddedElevenLabsWidget: React.FC<EmbeddedElevenLabsWidgetProps> = ({ agentId }) => {
   const { language } = useLanguage();
   const isEs = language === 'es';
-  const [widgetReady, setWidgetReady] = useState(false);
-  const [activated, setActivated] = useState(false);
-  const widgetRef = useRef<HTMLElement | null>(null);
+  const [status, setStatus] = useState<ConvStatus>('idle');
+  const [agentSpeaking, setAgentSpeaking] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const convRef = useRef<{ endSession: () => Promise<void> } | null>(null);
 
-  useEffect(() => {
-    let attempts = 0;
-    const maxAttempts = 12;
+  const startConversation = useCallback(async () => {
+    setErrorMsg('');
+    setStatus('connecting');
+    try {
+      // Dynamic import to keep bundle clean
+      const { Conversation } = await import('@11labs/client');
+      const conv = await Conversation.startSession({
+        agentId,
+        onConnect: () => setStatus('connected'),
+        onDisconnect: () => { setStatus('idle'); setAgentSpeaking(false); },
+        onError: (err: Error) => {
+          setErrorMsg(err?.message ?? 'Connection error');
+          setStatus('error');
+          setAgentSpeaking(false);
+        },
+        onModeChange: ({ mode }: { mode: string }) => setAgentSpeaking(mode === 'speaking'),
+      });
+      convRef.current = conv;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(msg);
+      setStatus('error');
+    }
+  }, [agentId]);
 
-    const checkReady = () => {
-      const registered = window.customElements?.get('elevenlabs-convai');
-      if (registered) {
-        setWidgetReady(true);
-        return;
-      }
-      attempts++;
-      if (attempts < maxAttempts) {
-        setTimeout(checkReady, 1000);
-      }
-    };
-
-    setTimeout(checkReady, 800);
+  const stopConversation = useCallback(async () => {
+    await convRef.current?.endSession();
+    convRef.current = null;
+    setStatus('idle');
+    setAgentSpeaking(false);
   }, []);
 
-  const handleLaunch = () => {
-    setActivated(true);
-    // Give the widget element time to mount, then trigger click
-    setTimeout(() => {
-      if (widgetRef.current) {
-        const btn = widgetRef.current.shadowRoot?.querySelector('button');
-        btn?.click();
-      }
-    }, 300);
-  };
+  const isConnected = status === 'connected';
+  const isConnecting = status === 'connecting';
 
   return (
     <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 flex flex-col items-center gap-5">
-      {/* Icon + Title */}
-      <div className="text-center">
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-          <FaMicrophone className="w-7 h-7 text-white" />
-        </div>
-        <h3 className="text-lg font-bold text-gray-800">
-          {isEs ? 'Asistente de Voz IA' : 'AI Voice Assistant'}
-        </h3>
-        <p className="text-gray-500 text-sm mt-1">
-          {isEs ? 'Powered by ElevenLabs Conversational AI' : 'Powered by ElevenLabs Conversational AI'}
-        </p>
+      {/* Orb / mic button */}
+      <div className="relative flex items-center justify-center">
+        {/* Pulse ring when connected */}
+        {isConnected && (
+          <span className="absolute inline-flex h-24 w-24 rounded-full bg-purple-400 opacity-30 animate-ping" />
+        )}
+        <button
+          onClick={isConnected ? stopConversation : startConversation}
+          disabled={isConnecting}
+          className={`
+            relative w-20 h-20 rounded-full flex items-center justify-center shadow-lg
+            transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300
+            ${isConnected
+              ? 'bg-gradient-to-br from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600'
+              : isConnecting
+                ? 'bg-gradient-to-br from-purple-400 to-pink-400 cursor-wait'
+                : 'bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+            }
+          `}
+          aria-label={isConnected ? (isEs ? 'Detener' : 'Stop') : (isEs ? 'Iniciar' : 'Start')}
+        >
+          {isConnected ? (
+            <FaStop className="w-7 h-7 text-white" />
+          ) : (
+            <FaMicrophone className={`w-7 h-7 text-white ${isConnecting ? 'animate-pulse' : ''}`} />
+          )}
+        </button>
       </div>
 
-      {/* Status badge */}
-      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-1.5 shadow-sm border border-gray-100">
-        <FaCircle className={`text-xs ${widgetReady ? 'text-green-400' : 'text-yellow-400 animate-pulse'}`} />
-        <span className="text-xs text-gray-600 font-medium">
-          {widgetReady
-            ? (isEs ? 'Widget listo' : 'Widget ready')
-            : (isEs ? 'Cargando widget...' : 'Loading widget...')}
+      {/* Status label */}
+      <div className="flex items-center gap-2">
+        <FaCircle className={`text-[8px] ${
+          isConnected ? (agentSpeaking ? 'text-blue-400 animate-pulse' : 'text-green-400')
+          : isConnecting ? 'text-yellow-400 animate-pulse'
+          : status === 'error' ? 'text-red-400'
+          : 'text-gray-300'
+        }`} />
+        <span className="text-sm font-medium text-gray-600">
+          {isConnected
+            ? agentSpeaking
+              ? (isEs ? 'Asistente hablando…' : 'Assistant speaking…')
+              : (isEs ? 'Escuchando — habla ahora' : 'Listening — speak now')
+            : isConnecting
+              ? (isEs ? 'Conectando…' : 'Connecting…')
+              : status === 'error'
+                ? (isEs ? 'Error de conexión' : 'Connection error')
+                : (isEs ? 'Listo para hablar' : 'Ready to talk')}
         </span>
       </div>
 
-      {/* Hidden ElevenLabs web component — renders as floating button */}
-      {activated && (
-        <elevenlabs-convai
-          ref={(el: HTMLElement | null) => { widgetRef.current = el; }}
-          agent-id={agentId}
-          style={{ position: 'fixed', bottom: '80px', right: '20px', zIndex: 9998 }}
-        />
+      {/* Error message */}
+      {status === 'error' && errorMsg && (
+        <p className="text-xs text-red-500 text-center max-w-xs">{errorMsg}</p>
       )}
 
-      {/* Launch button */}
-      {!activated ? (
-        <button
-          onClick={handleLaunch}
-          disabled={!widgetReady}
-          className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <FaMicrophone className="w-4 h-4" />
-          {isEs ? 'Iniciar Chat de Voz' : 'Start Voice Chat'}
-        </button>
-      ) : (
-        <div className="text-center">
-          <p className="text-sm text-purple-700 font-medium">
-            {isEs
-              ? '¡El asistente está activo! Búscalo en la esquina inferior derecha de la pantalla.'
-              : 'Assistant is active! Find it in the bottom-right corner of the screen.'}
-          </p>
-          <button
-            onClick={() => setActivated(false)}
-            className="mt-2 text-xs text-gray-400 hover:text-gray-600 underline"
-          >
-            {isEs ? 'Cerrar' : 'Close'}
-          </button>
-        </div>
-      )}
-
-      {/* Fallback direct link */}
-      <a
-        href={`https://elevenlabs.io/app/conversational-ai/${agentId}/widget`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1.5 text-xs text-purple-500 hover:text-purple-700 transition-colors"
-      >
-        <FaExternalLinkAlt className="w-3 h-3" />
-        {isEs ? 'Abrir en nueva pestaña' : 'Open in new tab'}
-      </a>
-
-      {/* How to use */}
-      <div className="w-full bg-white/70 rounded-lg p-4">
-        <div className="flex items-center gap-2 text-purple-600 mb-2">
-          <FaVolumeUp className="w-3.5 h-3.5" />
-          <span className="text-xs font-semibold">
-            {isEs ? 'Cómo usar:' : 'How to use:'}
-          </span>
-        </div>
-        <ul className="text-xs text-gray-600 space-y-1">
-          <li>• {isEs ? 'Haz clic en "Iniciar Chat de Voz"' : 'Click "Start Voice Chat"'}</li>
-          <li>• {isEs ? 'Busca el widget en la esquina inferior derecha' : 'Find the widget at the bottom-right corner'}</li>
-          <li>• {isEs ? 'Pregunta sobre proyectos, experiencia o IA' : 'Ask about projects, experience, or AI'}</li>
-        </ul>
+      {/* Instructions */}
+      <div className="w-full bg-white/70 rounded-lg p-4 text-center">
+        <p className="text-xs text-gray-500 leading-relaxed">
+          {isEs
+            ? isConnected
+              ? 'Habla con el micrófono abierto. Haz clic en el botón rojo para finalizar.'
+              : 'Haz clic en el micrófono y permite el acceso. Pregunta sobre proyectos, experiencia o IA.'
+            : isConnected
+              ? 'Speak into your mic. Click the red button to end the session.'
+              : 'Click the mic and allow access. Ask about projects, experience, or AI.'}
+        </p>
       </div>
     </div>
   );

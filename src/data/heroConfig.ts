@@ -2,32 +2,32 @@
 export const getHeroBackgroundConfig = (isDark: boolean = true) => ({
   // Imagen de fondo del portfolio
   imageUrl: '/images/background-portfolio.png',
-  
+
   // Configuración de efectos visuales
   effects: {
-    blur: 2, // px
-    brightness: isDark ? 0.7 : 0.5, // Más oscura en modo claro para mejor contraste
+    blur: 1, // px — reducido de 2 a 1 para mayor nitidez
+    brightness: isDark ? 0.85 : 0.65, // más brillante para mejor visibilidad
     scale: 1.05, // para evitar bordes al aplicar blur
   },
-  
+
   // Configuración de overlay gradients
   overlay: {
-    // Gradiente principal (de arriba a abajo)
-    primary: isDark 
-      ? 'from-gray-900/80 via-gray-900/40 to-gray-900/90'
-      : 'from-gray-50/80 via-gray-100/40 to-gray-50/90',
-    
+    // Gradiente principal (de arriba a abajo) — menos opaco para mostrar más la imagen
+    primary: isDark
+      ? 'from-gray-900/60 via-gray-900/20 to-gray-900/70'
+      : 'from-gray-50/60 via-gray-100/20 to-gray-50/70',
+
     // Configuración de fade en los bordes
     edges: {
       horizontal: { start: 25, end: 75 }, // porcentajes
       vertical: { start: 20, end: 80 },
       backgroundColor: isDark ? '#0f172a' : '#f8fafc',
     },
-    
-    // Configuración del vignette
+
+    // Configuración del vignette — reducido para mostrar más imagen
     vignette: {
-      innerTransparency: 30, // porcentaje
-      outerOpacity: isDark ? 0.6 : 0.4,
+      innerTransparency: 40, // porcentaje — aumentado de 30 a 40 (más área transparente)
+      outerOpacity: isDark ? 0.4 : 0.25, // reducido: dark 0.6→0.4, light 0.4→0.25
       backgroundColor: isDark ? 'rgba(15, 23, 42, ' : 'rgba(248, 250, 252, ',
     }
   }

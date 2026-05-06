@@ -1,6 +1,7 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
 import Lenis from 'lenis';
+import Analytics from '@/components/Analytics';
 import HeaderMUI from '@/components/layout/HeaderMUI';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/sections/HeroSection';
@@ -35,6 +36,7 @@ const App: React.FC = () => {
         ? 'bg-gray-900 text-gray-100'
         : 'bg-white text-gray-900'
     }`}>
+      <Analytics />
       <HeaderMUI />
       <main>
         <HeroSection />

@@ -235,7 +235,7 @@ export function ResearchAgentDemo() {
     setError(null);
     try {
       const res = await fetch(
-        'https://n8n-n8n.qr7yo1.easypanel.host/webhook/research-agent-demo',
+        '/proxy/n8n/webhook/research-agent-demo',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -457,7 +457,7 @@ export function ContentAgentDemo() {
     setError(null);
     try {
       const res = await fetch(
-        'https://n8n-n8n.qr7yo1.easypanel.host/webhook/content-agent-demo',
+        '/proxy/n8n/webhook/content-agent-demo',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -632,7 +632,7 @@ export function SupportAgentDemo() {
       if (customerCompany.trim()) body.customer_company = customerCompany;
 
       const res = await fetch(
-        'https://n8n-n8n.qr7yo1.easypanel.host/webhook/support-agent-demo',
+        '/proxy/n8n/webhook/support-agent-demo',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

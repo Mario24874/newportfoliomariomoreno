@@ -8,9 +8,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 // ---------------------------------------------------------------------------
 // Config — replace with your n8n webhook once created
 // ---------------------------------------------------------------------------
+// Proxy through Caddy to avoid CORS — Caddy forwards to n8n internally
 const WEBHOOK_URL =
   import.meta.env.VITE_GEMINI_VOICE_WEBHOOK_URL ||
-  'https://n8n-n8n.qr7yo1.easypanel.host/webhook/gemini-voice-demo';
+  '/proxy/n8n/webhook/gemini-voice-demo';
 
 // ---------------------------------------------------------------------------
 // Types

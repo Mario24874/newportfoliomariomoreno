@@ -42,8 +42,10 @@ declare module '*.jpeg' {
 interface ImportMetaEnv {
   readonly VITE_ELEVENLABS_AGENT_ID: string;
   readonly VITE_N8N_WEBHOOK_URL: string;
+  readonly VITE_N8N_CONSULTATION_WEBHOOK_URL: string;
   readonly VITE_API_BASE_URL: string;
-  // Add more env variables as needed
+  readonly VITE_GA4_ID: string;
+  readonly VITE_CLARITY_ID: string;
 }
 
 interface ImportMeta {

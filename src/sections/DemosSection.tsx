@@ -7,6 +7,7 @@ import AIDemoModal from '@/components/ui/AIDemoModal';
 import N8nAutomationDemo from '@/components/ui/N8nAutomationDemo';
 import ScheduleConsultationModal from '@/components/ui/ScheduleConsultationModal';
 import { ResearchAgentDemo, ContentAgentDemo, SupportAgentDemo } from '@/components/ui/N8nAgentDemos';
+import GeminiVoiceDemo from '@/components/ui/GeminiVoiceDemo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { translations } from '@/data/translations';
@@ -73,6 +74,16 @@ const DemosSection: React.FC = () => {
   ];
 
   const demos = [
+    {
+      id: 'gemini-voice',
+      title: language === 'es' ? 'Asistente de Voz con Visión IA' : 'AI Voice & Vision Assistant',
+      description: language === 'es'
+        ? 'Habla con Gemini en tiempo real. Activa tu cámara y el agente también puede ver y describir lo que hay frente a ella.'
+        : 'Talk to Gemini in real time. Enable your camera and the agent can also see and describe what is in front of it.',
+      icon: FaRobot,
+      gradient: 'from-blue-600 to-violet-600',
+      component: <GeminiVoiceDemo />,
+    },
     {
       id: 'voice-assistant',
       title: t.demos.elevenlabs.title,

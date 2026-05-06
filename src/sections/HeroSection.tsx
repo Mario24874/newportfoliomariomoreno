@@ -105,7 +105,7 @@ const HeroSection: React.FC = () => {
             <div className="absolute inset-0 z-0">
                 {/* Main background image */}
                 <div 
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat transform"
+                    className="absolute inset-0 bg-cover bg-top bg-no-repeat transform"
                     style={{
                         backgroundImage: `url(${backgroundConfig.imageUrl})`,
                         filter: `blur(${backgroundConfig.effects.blur}px) brightness(${backgroundConfig.effects.brightness})`,

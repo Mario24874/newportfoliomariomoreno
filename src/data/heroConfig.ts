@@ -1,7 +1,7 @@
 // Configuración de la imagen de fondo del Hero
 export const getHeroBackgroundConfig = (isDark: boolean = true) => ({
   // Imagen de fondo del portfolio
-  imageUrl: '/images/background-portfolio.png',
+  imageUrl: '/images/background-portfolio-new.jpg',
 
   // Configuración de efectos visuales
   effects: {

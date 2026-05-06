@@ -15,6 +15,7 @@ import {
   FaExclamationTriangle,
 } from 'react-icons/fa';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -49,16 +50,116 @@ interface SupportResult {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// i18n
 // ---------------------------------------------------------------------------
 
-const POWERED_BY = (
-  <p className="text-xs text-gray-400 text-center mt-4">
-    Powered by Claude Code + Gemini + n8n
-  </p>
-);
+const T = {
+  es: {
+    // shared
+    copied: 'Copiado!',
+    copy: 'Copiar',
+    processedIn: (s: string) => `Procesado en ${s}s`,
+    errorUnknown: 'Error desconocido al conectar con el agente.',
+    // research
+    researchTopic: 'Tema a investigar',
+    researchPlaceholder: 'Ej: Automatización con IA en PYMES',
+    researchLanguageLabel: 'Idioma',
+    researchDepthLabel: 'Profundidad',
+    researchDeep: 'Profundo',
+    researchBasic: 'Básico',
+    researchBtn: 'Investigar',
+    researchSummary: 'Resumen ejecutivo',
+    researchFindings: 'Hallazgos clave',
+    researchAnalysis: 'Análisis detallado',
+    researchRecommendations: 'Recomendaciones',
+    // content
+    contentTopic: 'Marca / Tema',
+    contentPlaceholder: 'Ej: Software de automatización para restaurantes',
+    contentTone: 'Tono',
+    contentLanguage: 'Idioma',
+    contentPlatforms: 'Plataformas',
+    contentBtn: 'Generar contenido',
+    toneProfessional: 'Profesional',
+    toneCasual: 'Casual',
+    toneEducational: 'Educativo',
+    toneHumorous: 'Humorístico',
+    toneInspirational: 'Inspiracional',
+    toneTechnical: 'Técnico',
+    // support
+    supportMessage: 'Mensaje del cliente *',
+    supportPlaceholder: 'Pega aquí el mensaje del cliente...',
+    supportOptional: 'Datos opcionales',
+    supportName: 'Nombre del cliente',
+    supportProduct: 'Producto / servicio',
+    supportCompany: 'Empresa del cliente',
+    supportBtn: 'Analizar mensaje',
+    supportPriority: 'Prioridad',
+    supportSentiment: 'Sentimiento',
+    supportUrgency: 'Urgencia',
+    supportCategory: 'Categoría',
+    supportDraft: 'Respuesta sugerida',
+    supportActions: 'Acciones sugeridas',
+    priorityCritical: 'Crítica',
+    priorityHigh: 'Alta',
+    priorityMedium: 'Media',
+    priorityLow: 'Baja',
+  },
+  en: {
+    copied: 'Copied!',
+    copy: 'Copy',
+    processedIn: (s: string) => `Processed in ${s}s`,
+    errorUnknown: 'Unknown error connecting to agent.',
+    researchTopic: 'Topic to research',
+    researchPlaceholder: 'e.g. AI automation for small businesses',
+    researchLanguageLabel: 'Language',
+    researchDepthLabel: 'Depth',
+    researchDeep: 'Deep',
+    researchBasic: 'Basic',
+    researchBtn: 'Research',
+    researchSummary: 'Executive summary',
+    researchFindings: 'Key findings',
+    researchAnalysis: 'Detailed analysis',
+    researchRecommendations: 'Recommendations',
+    contentTopic: 'Brand / Topic',
+    contentPlaceholder: 'e.g. Automation software for restaurants',
+    contentTone: 'Tone',
+    contentLanguage: 'Language',
+    contentPlatforms: 'Platforms',
+    contentBtn: 'Generate content',
+    toneProfessional: 'Professional',
+    toneCasual: 'Casual',
+    toneEducational: 'Educational',
+    toneHumorous: 'Humorous',
+    toneInspirational: 'Inspirational',
+    toneTechnical: 'Technical',
+    supportMessage: 'Customer message *',
+    supportPlaceholder: 'Paste the customer message here...',
+    supportOptional: 'Optional data',
+    supportName: 'Customer name',
+    supportProduct: 'Product / service',
+    supportCompany: 'Customer company',
+    supportBtn: 'Analyze message',
+    supportPriority: 'Priority',
+    supportSentiment: 'Sentiment',
+    supportUrgency: 'Urgency',
+    supportCategory: 'Category',
+    supportDraft: 'Suggested response',
+    supportActions: 'Suggested actions',
+    priorityCritical: 'Critical',
+    priorityHigh: 'High',
+    priorityMedium: 'Medium',
+    priorityLow: 'Low',
+  },
+} as const;
 
-function CopyButton({ text }: { text: string }) {
+type Lang = keyof typeof T;
+
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+
+function CopyButton({ text, lang }: { text: string; lang: Lang }) {
+  const t = T[lang];
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     await navigator.clipboard.writeText(text);
@@ -71,7 +172,7 @@ function CopyButton({ text }: { text: string }) {
       className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition-colors"
     >
       <FaCopy className="w-3 h-3" />
-      {copied ? 'Copiado!' : 'Copiar'}
+      {copied ? t.copied : t.copy}
     </button>
   );
 }
@@ -97,15 +198,11 @@ function ErrorBox({ message }: { message: string }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Priority badge helper
-// ---------------------------------------------------------------------------
-const priorityConfig = {
-  critical: { label: 'Crítica', classes: 'bg-red-500/20 text-red-400 border-red-500/30' },
-  high: { label: 'Alta', classes: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
-  medium: { label: 'Media', classes: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-  low: { label: 'Baja', classes: 'bg-green-500/20 text-green-400 border-green-500/30' },
-};
+const POWERED_BY = (
+  <p className="text-xs text-gray-400 text-center mt-4">
+    Powered by Claude Code + Gemini + n8n
+  </p>
+);
 
 // ---------------------------------------------------------------------------
 // Demo 1 — Research Agent
@@ -113,13 +210,17 @@ const priorityConfig = {
 
 export function ResearchAgentDemo() {
   const { isDarkMode } = useTheme();
+  const { language: appLang } = useLanguage();
+  const lang: Lang = appLang === 'en' ? 'en' : 'es';
+  const t = T[lang];
+
   const inputBase = isDarkMode
     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
     : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400';
   const labelClass = isDarkMode ? 'text-gray-300' : 'text-gray-700';
 
   const [topic, setTopic] = useState('');
-  const [language, setLanguage] = useState<'es' | 'en' | 'pt' | 'fr'>('es');
+  const [researchLang, setResearchLang] = useState<'es' | 'en' | 'pt' | 'fr'>(lang === 'en' ? 'en' : 'es');
   const [depth, setDepth] = useState<'basic' | 'deep'>('deep');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ResearchResult | null>(null);
@@ -138,14 +239,14 @@ export function ResearchAgentDemo() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic, language, depth }),
+          body: JSON.stringify({ topic, language: researchLang, depth }),
         }
       );
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data: ResearchResult = await res.json();
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido al conectar con el agente.');
+      setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
       setLoading(false);
     }
@@ -155,21 +256,21 @@ export function ResearchAgentDemo() {
     <div>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className={`block text-sm font-medium mb-1 ${labelClass}`}>Tema a investigar</label>
+          <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.researchTopic}</label>
           <textarea
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Ej: Automatización con IA en PYMES"
+            placeholder={t.researchPlaceholder}
             rows={3}
             className={`w-full px-3 py-2 rounded-lg border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputBase}`}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>Idioma</label>
+            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.researchLanguageLabel}</label>
             <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as typeof language)}
+              value={researchLang}
+              onChange={(e) => setResearchLang(e.target.value as typeof researchLang)}
               className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputBase}`}
             >
               <option value="es">Español</option>
@@ -179,14 +280,14 @@ export function ResearchAgentDemo() {
             </select>
           </div>
           <div>
-            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>Profundidad</label>
+            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.researchDepthLabel}</label>
             <select
               value={depth}
               onChange={(e) => setDepth(e.target.value as typeof depth)}
               className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputBase}`}
             >
-              <option value="deep">Profundo</option>
-              <option value="basic">Básico</option>
+              <option value="deep">{t.researchDeep}</option>
+              <option value="basic">{t.researchBasic}</option>
             </select>
           </div>
         </div>
@@ -196,7 +297,7 @@ export function ResearchAgentDemo() {
           className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2"
         >
           <FaSearch className="w-4 h-4" />
-          Investigar
+          {t.researchBtn}
         </button>
       </form>
 
@@ -219,28 +320,25 @@ export function ResearchAgentDemo() {
             exit={{ opacity: 0 }}
             className="mt-5 space-y-4"
           >
-            {/* Processing time badge */}
             <div className="flex justify-end">
               <span className="text-xs px-2 py-1 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/25">
-                Procesado en {(result.processing_time_ms / 1000).toFixed(1)}s
+                {t.processedIn((result.processing_time_ms / 1000).toFixed(1))}
               </span>
             </div>
 
-            {/* Executive summary */}
             <div className={`p-4 rounded-lg border-l-4 border-blue-500 ${isDarkMode ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
               <p className={`text-sm font-semibold mb-1 ${isDarkMode ? 'text-blue-300' : 'text-blue-700'}`}>
-                Resumen ejecutivo
+                {t.researchSummary}
               </p>
               <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                 {result.report.executive_summary}
               </p>
             </div>
 
-            {/* Key findings */}
             {result.report.key_findings?.length > 0 && (
               <div>
                 <p className={`text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Hallazgos clave
+                  {t.researchFindings}
                 </p>
                 <ul className="space-y-1">
                   {result.report.key_findings.map((f, i) => (
@@ -253,7 +351,6 @@ export function ResearchAgentDemo() {
               </div>
             )}
 
-            {/* Detailed analysis — collapsible */}
             {result.report.detailed_analysis && (
               <div>
                 <button
@@ -261,7 +358,7 @@ export function ResearchAgentDemo() {
                   className={`flex items-center gap-2 text-sm font-semibold w-full text-left ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
                 >
                   {analysisOpen ? <FaChevronUp className="w-3 h-3" /> : <FaChevronDown className="w-3 h-3" />}
-                  Análisis detallado
+                  {t.researchAnalysis}
                 </button>
                 <AnimatePresence>
                   {analysisOpen && (
@@ -280,11 +377,10 @@ export function ResearchAgentDemo() {
               </div>
             )}
 
-            {/* Recommendations */}
             {result.report.recommendations?.length > 0 && (
               <div>
                 <p className={`text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Recomendaciones
+                  {t.researchRecommendations}
                 </p>
                 <ol className="space-y-1 list-none">
                   {result.report.recommendations.map((r, i) => (
@@ -329,6 +425,10 @@ function getPlatformText(content: PlatformsContent, key: PlatformKey): string {
 
 export function ContentAgentDemo() {
   const { isDarkMode } = useTheme();
+  const { language: appLang } = useLanguage();
+  const lang: Lang = appLang === 'en' ? 'en' : 'es';
+  const t = T[lang];
+
   const inputBase = isDarkMode
     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
     : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400';
@@ -337,7 +437,7 @@ export function ContentAgentDemo() {
 
   const [topic, setTopic] = useState('');
   const [tone, setTone] = useState<'professional' | 'casual' | 'educational' | 'humorous' | 'inspirational' | 'technical'>('professional');
-  const [contentLanguage, setContentLanguage] = useState<'es' | 'en'>('es');
+  const [contentLanguage, setContentLanguage] = useState<'es' | 'en'>(lang === 'en' ? 'en' : 'es');
   const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformKey[]>(['instagram', 'youtube', 'linkedin', 'twitter']);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ContentResult | null>(null);
@@ -368,7 +468,7 @@ export function ContentAgentDemo() {
       const data: ContentResult = await res.json();
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido al conectar con el agente.');
+      setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
       setLoading(false);
     }
@@ -378,33 +478,33 @@ export function ContentAgentDemo() {
     <div>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className={`block text-sm font-medium mb-1 ${labelClass}`}>Marca / Tema</label>
+          <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.contentTopic}</label>
           <input
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Ej: Software de automatización para restaurantes"
+            placeholder={t.contentPlaceholder}
             className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 ${inputBase}`}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>Tono</label>
+            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.contentTone}</label>
             <select
               value={tone}
               onChange={(e) => setTone(e.target.value as typeof tone)}
               className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 ${inputBase}`}
             >
-              <option value="professional">Profesional</option>
-              <option value="casual">Casual</option>
-              <option value="educational">Educativo</option>
-              <option value="humorous">Humorístico</option>
-              <option value="inspirational">Inspiracional</option>
-              <option value="technical">Técnico</option>
+              <option value="professional">{t.toneProfessional}</option>
+              <option value="casual">{t.toneCasual}</option>
+              <option value="educational">{t.toneEducational}</option>
+              <option value="humorous">{t.toneHumorous}</option>
+              <option value="inspirational">{t.toneInspirational}</option>
+              <option value="technical">{t.toneTechnical}</option>
             </select>
           </div>
           <div>
-            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>Idioma</label>
+            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.contentLanguage}</label>
             <select
               value={contentLanguage}
               onChange={(e) => setContentLanguage(e.target.value as 'es' | 'en')}
@@ -415,9 +515,8 @@ export function ContentAgentDemo() {
             </select>
           </div>
         </div>
-        {/* Platform checkboxes */}
         <div>
-          <label className={`block text-sm font-medium mb-2 ${labelClass}`}>Plataformas</label>
+          <label className={`block text-sm font-medium mb-2 ${labelClass}`}>{t.contentPlatforms}</label>
           <div className="flex flex-wrap gap-2">
             {PLATFORM_META.map(({ key, label, icon: Icon, color }) => (
               <button
@@ -442,7 +541,7 @@ export function ContentAgentDemo() {
           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2"
         >
           <FaPen className="w-4 h-4" />
-          Generar contenido
+          {t.contentBtn}
         </button>
       </form>
 
@@ -475,7 +574,7 @@ export function ContentAgentDemo() {
                       <Icon className={`w-4 h-4 ${color}`} />
                       <span className={`text-sm font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{label}</span>
                     </div>
-                    <CopyButton text={text} />
+                    <CopyButton text={text} lang={lang} />
                   </div>
                   <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{text}</p>
                 </div>
@@ -495,6 +594,10 @@ export function ContentAgentDemo() {
 
 export function SupportAgentDemo() {
   const { isDarkMode } = useTheme();
+  const { language: appLang } = useLanguage();
+  const lang: Lang = appLang === 'en' ? 'en' : 'es';
+  const t = T[lang];
+
   const inputBase = isDarkMode
     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
     : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400';
@@ -508,6 +611,13 @@ export function SupportAgentDemo() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SupportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const priorityConfig = {
+    critical: { label: t.priorityCritical, classes: 'bg-red-500/20 text-red-400 border-red-500/30' },
+    high:     { label: t.priorityHigh,     classes: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+    medium:   { label: t.priorityMedium,   classes: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+    low:      { label: t.priorityLow,      classes: 'bg-green-500/20 text-green-400 border-green-500/30' },
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -533,7 +643,7 @@ export function SupportAgentDemo() {
       const data: SupportResult = await res.json();
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido al conectar con el agente.');
+      setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
       setLoading(false);
     }
@@ -545,17 +655,16 @@ export function SupportAgentDemo() {
     <div>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className={`block text-sm font-medium mb-1 ${labelClass}`}>Mensaje del cliente *</label>
+          <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.supportMessage}</label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Pega aquí el mensaje del cliente..."
+            placeholder={t.supportPlaceholder}
             rows={4}
             className={`w-full px-3 py-2 rounded-lg border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 ${inputBase}`}
           />
         </div>
 
-        {/* Optional fields — collapsible */}
         <div>
           <button
             type="button"
@@ -563,7 +672,7 @@ export function SupportAgentDemo() {
             className={`flex items-center gap-2 text-sm ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
           >
             {optionalOpen ? <FaChevronUp className="w-3 h-3" /> : <FaChevronDown className="w-3 h-3" />}
-            Datos opcionales
+            {t.supportOptional}
           </button>
           <AnimatePresence>
             {optionalOpen && (
@@ -574,25 +683,16 @@ export function SupportAgentDemo() {
                 className="overflow-hidden"
               >
                 <div className="grid grid-cols-1 gap-2 mt-3">
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Nombre del cliente"
+                  <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder={t.supportName}
                     className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 ${inputBase}`}
                   />
-                  <input
-                    type="text"
-                    value={product}
-                    onChange={(e) => setProduct(e.target.value)}
-                    placeholder="Producto / servicio"
+                  <input type="text" value={product} onChange={(e) => setProduct(e.target.value)}
+                    placeholder={t.supportProduct}
                     className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 ${inputBase}`}
                   />
-                  <input
-                    type="text"
-                    value={customerCompany}
-                    onChange={(e) => setCustomerCompany(e.target.value)}
-                    placeholder="Empresa del cliente"
+                  <input type="text" value={customerCompany} onChange={(e) => setCustomerCompany(e.target.value)}
+                    placeholder={t.supportCompany}
                     className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 ${inputBase}`}
                   />
                 </div>
@@ -607,7 +707,7 @@ export function SupportAgentDemo() {
           className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2"
         >
           <FaHeadset className="w-4 h-4" />
-          Analizar mensaje
+          {t.supportBtn}
         </button>
       </form>
 
@@ -630,22 +730,20 @@ export function SupportAgentDemo() {
             exit={{ opacity: 0 }}
             className="mt-5 space-y-4"
           >
-            {/* Priority badge + ticket id */}
             <div className="flex items-center gap-3 flex-wrap">
               <span className={`text-xs font-bold px-3 py-1 rounded-full border ${pConfig.classes}`}>
-                Prioridad: {pConfig.label}
+                {t.supportPriority}: {pConfig.label}
               </span>
               <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                 #{result.ticket.id}
               </span>
             </div>
 
-            {/* Classification pills */}
             <div className="flex flex-wrap gap-2">
               {[
-                { label: 'Sentimiento', value: result.classification.sentiment },
-                { label: 'Urgencia', value: result.classification.urgency },
-                { label: 'Categoría', value: result.classification.category },
+                { label: t.supportSentiment, value: result.classification.sentiment },
+                { label: t.supportUrgency, value: result.classification.urgency },
+                { label: t.supportCategory, value: result.classification.category },
               ].map(({ label, value }) => (
                 <span
                   key={label}
@@ -656,24 +754,22 @@ export function SupportAgentDemo() {
               ))}
             </div>
 
-            {/* Draft response */}
             <div className={`p-4 rounded-lg border-l-4 border-teal-500 ${isDarkMode ? 'bg-teal-500/10' : 'bg-teal-50'}`}>
               <div className="flex items-center justify-between mb-2">
                 <p className={`text-sm font-semibold ${isDarkMode ? 'text-teal-300' : 'text-teal-700'}`}>
-                  Respuesta sugerida
+                  {t.supportDraft}
                 </p>
-                <CopyButton text={result.response.draft} />
+                <CopyButton text={result.response.draft} lang={lang} />
               </div>
               <p className={`text-sm leading-relaxed whitespace-pre-line ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                 {result.response.draft}
               </p>
             </div>
 
-            {/* Suggested actions checklist */}
             {result.response.suggested_actions?.length > 0 && (
               <div>
                 <p className={`text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Acciones sugeridas
+                  {t.supportActions}
                 </p>
                 <ul className="space-y-1">
                   {result.response.suggested_actions.map((action, i) => (

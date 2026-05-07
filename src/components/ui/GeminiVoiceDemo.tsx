@@ -161,7 +161,7 @@ export function GeminiVoiceDemo() {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 320, height: 240 },
+        video: { width: { ideal: 640 }, height: { ideal: 480 } },
         audio: false,
       });
       streamRef.current = stream;
@@ -186,18 +186,19 @@ export function GeminiVoiceDemo() {
   const captureFrame = (): string | null => {
     if (!streamRef.current || !videoRef.current || !canvasRef.current) return null;
     const video = videoRef.current;
-    if (video.readyState < 2) return null;
-    // Fall back to constraint dims if metadata not yet decoded (videoWidth can be 0
-    // on some browsers even while the video is visibly playing)
-    const w = video.videoWidth || 320;
-    const h = video.videoHeight || 240;
+    // No readyState guard — it was blocking captures even when LIVE is visible.
+    // Use try/catch on drawImage instead; fall back to 640x480 if metadata pending.
+    const w = video.videoWidth || 640;
+    const h = video.videoHeight || 480;
     const canvas = canvasRef.current;
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
-    ctx.drawImage(video, 0, 0, w, h);
-    return canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+    try { ctx.drawImage(video, 0, 0, w, h); } catch { return null; }
+    const b64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+    // < 300 chars = blank/error frame (valid JPEG is always larger)
+    return b64 && b64.length > 300 ? b64 : null;
   };
 
   // ── TTS ─────────────────────────────────────────────────────────────────────
@@ -229,21 +230,19 @@ export function GeminiVoiceDemo() {
       setIsSpeaking(false);
       isSpeakingRef.current = false;
       if (inCallRef.current && !isLoadingRef.current) {
-        if (!recActiveRef.current) {
-          // Session ended while loading/speaking (Edge fires onend after each result
-          // even with continuous=true). Restart now that TTS is done.
-          setTimeout(() => startListeningRef.current(), 400);
-        } else {
-          // Session still alive (Chrome). Delay 1 s before re-enabling so TTS echo
-          // clears from the audio buffer — without this delay Chrome picks up its own
-          // TTS output and creates a monologue loop.
-          setTimeout(() => {
-            if (inCallRef.current && !isLoadingRef.current) {
-              processResultsRef.current = true;
-              setListening(true);
-            }
-          }, 1000);
-        }
+        // 1 s delay: clears TTS echo from audio buffer (prevents Chrome monologue).
+        // recActiveRef checked INSIDE the callback — not at call time — so if the
+        // session dies during this delay we restart rather than enabling
+        // processResultsRef on a dead session (Chrome no-speech timeout / Edge onend).
+        setTimeout(() => {
+          if (!inCallRef.current || isLoadingRef.current) return;
+          if (!recActiveRef.current) {
+            startListeningRef.current();      // session died — restart
+          } else {
+            processResultsRef.current = true; // session alive — re-enable
+            setListening(true);
+          }
+        }, 1000);
       }
     }
 

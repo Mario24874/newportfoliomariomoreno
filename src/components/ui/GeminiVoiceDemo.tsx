@@ -184,17 +184,19 @@ export function GeminiVoiceDemo() {
   };
 
   const captureFrame = (): string | null => {
-    // Use streamRef (always current) — cameraOn state is stale inside useCallback closures
     if (!streamRef.current || !videoRef.current || !canvasRef.current) return null;
     const video = videoRef.current;
-    // readyState < 2 or zero dimensions means stream not decoded yet → black frame
-    if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) return null;
+    if (video.readyState < 2) return null;
+    // Fall back to constraint dims if metadata not yet decoded (videoWidth can be 0
+    // on some browsers even while the video is visibly playing)
+    const w = video.videoWidth || 320;
+    const h = video.videoHeight || 240;
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, w, h);
     return canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
   };
 
@@ -227,9 +229,21 @@ export function GeminiVoiceDemo() {
       setIsSpeaking(false);
       isSpeakingRef.current = false;
       if (inCallRef.current && !isLoadingRef.current) {
-        // Re-enable processing on the still-running session — no stop/restart needed.
-        processResultsRef.current = true;
-        setListening(true);
+        if (!recActiveRef.current) {
+          // Session ended while loading/speaking (Edge fires onend after each result
+          // even with continuous=true). Restart now that TTS is done.
+          setTimeout(() => startListeningRef.current(), 400);
+        } else {
+          // Session still alive (Chrome). Delay 1 s before re-enabling so TTS echo
+          // clears from the audio buffer — without this delay Chrome picks up its own
+          // TTS output and creates a monologue loop.
+          setTimeout(() => {
+            if (inCallRef.current && !isLoadingRef.current) {
+              processResultsRef.current = true;
+              setListening(true);
+            }
+          }, 1000);
+        }
       }
     }
 

@@ -300,26 +300,38 @@ export function GeminiVoiceDemo() {
     const recognition = new SR();
     recognitionRef.current = recognition;
     recognition.lang = lang === 'en' ? 'en-US' : 'es-ES';
-    recognition.continuous = false;
+    // continuous=true: session stays alive until we stop it explicitly.
+    // Edge rejects SpeechRecognition.start() called outside a user-gesture context,
+    // so we never let the session expire and restart — one session per call turn.
+    recognition.continuous = true;
     recognition.interimResults = false;
 
+    let captured = false;
+
     recognition.onresult = (e: SpeechRecognitionEvent) => {
-      const transcript = e.results[0]?.[0]?.transcript ?? '';
-      if (transcript.trim()) sendToGemini(transcript.trim());
+      const last = e.results[e.results.length - 1];
+      const transcript = last?.[0]?.transcript ?? '';
+      if (transcript.trim() && !captured) {
+        captured = true;
+        recActiveRef.current = false;
+        recognition.stop();
+        sendToGemini(transcript.trim());
+      }
     };
 
     recognition.onerror = (e: SpeechRecognitionError) => {
-      recActiveRef.current = false; // sync clear — must happen before onend restart
+      recActiveRef.current = false;
       const silent = ['aborted', 'no-speech', 'network'];
       if (!silent.includes(e.error)) setError(`Speech error: ${e.error}`);
       setListening(false);
     };
 
     recognition.onend = () => {
-      recActiveRef.current = false; // sync clear
+      recActiveRef.current = false;
       setListening(false);
-      // Restart unless sendToGemini is running (it will restart via speak → onDone)
-      if (inCallRef.current && !isLoadingRef.current && !isSpeakingRef.current) {
+      // Only restart if we didn't capture speech (silence timeout / aborted).
+      // If captured=true, sendToGemini is running and will restart via speak→onDone.
+      if (!captured && inCallRef.current && !isLoadingRef.current && !isSpeakingRef.current) {
         setTimeout(() => startListeningRef.current(), 300);
       }
     };
@@ -356,7 +368,9 @@ export function GeminiVoiceDemo() {
       }
     }, 2000);
 
-    setTimeout(() => startListening(), 150);
+    // Call directly — no setTimeout. Edge requires SpeechRecognition.start()
+    // within the user-gesture context of the button click.
+    startListening();
   };
 
   const endCall = () => {

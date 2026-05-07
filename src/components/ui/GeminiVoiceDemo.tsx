@@ -100,9 +100,11 @@ export function GeminiVoiceDemo() {
   const inCallRef = useRef(false);
   const isSpeakingRef = useRef(false);
   const isLoadingRef = useRef(false);
+  const listeningRef = useRef(false);
   // Ref to latest startListening so speak() onend can call it without stale closure
   const startListeningCallbackRef = useRef<() => void>(() => {});
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const watchdogRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [cameraOn, setCameraOn] = useState(false);
   const [inCall, setInCall] = useState(false);
@@ -132,12 +134,14 @@ export function GeminiVoiceDemo() {
       recognitionRef.current?.stop();
       synthRef.current?.cancel();
       if (callTimerRef.current) clearInterval(callTimerRef.current);
+      if (watchdogRef.current) clearInterval(watchdogRef.current);
     };
   }, []);
 
   // Keep refs in sync with state
   useEffect(() => { isLoadingRef.current = loading; }, [loading]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
+  useEffect(() => { listeningRef.current = listening; }, [listening]);
 
   const startCamera = async () => {
     try {
@@ -184,35 +188,28 @@ export function GeminiVoiceDemo() {
     setIsSpeaking(true);
     isSpeakingRef.current = true;
 
-    let pollId: ReturnType<typeof setInterval> | null = null;
-    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+    let done = false;
+    // Generous timeout: avoids polling which fires prematurely in Edge when
+    // speechSynthesis.speaking is briefly false between cancel() and actual playback start
+    const estimatedMs = Math.max(text.length * 80, 3000) + 3000;
+    const fallbackTimer = setTimeout(() => {
+      synthRef.current?.cancel();
+      finishSpeaking();
+    }, estimatedMs);
 
-    const onSpeechDone = () => {
-      if (!isSpeakingRef.current) return; // guard against double-fire
-      if (pollId) clearInterval(pollId);
-      if (fallbackTimer) clearTimeout(fallbackTimer);
+    function finishSpeaking() {
+      if (done) return;
+      done = true;
+      clearTimeout(fallbackTimer);
       setIsSpeaking(false);
       isSpeakingRef.current = false;
       if (inCallRef.current && !isLoadingRef.current) {
-        setTimeout(() => startListeningCallbackRef.current(), 400);
+        setTimeout(() => startListeningCallbackRef.current(), 600);
       }
-    };
+    }
 
-    // Primary: onend event
-    utt.onend = onSpeechDone;
-
-    // Fallback 1: poll speechSynthesis.speaking every 150ms
-    // Needed because Edge/Chrome on Windows often doesn't fire onend reliably
-    pollId = setInterval(() => {
-      if (!synthRef.current?.speaking) onSpeechDone();
-    }, 150);
-
-    // Fallback 2: hard timeout based on estimated speech duration
-    const estimatedMs = Math.max(text.length * 65, 2000) + 2000;
-    fallbackTimer = setTimeout(() => {
-      synthRef.current?.cancel();
-      onSpeechDone();
-    }, estimatedMs);
+    utt.onend = finishSpeaking;
+    utt.onerror = finishSpeaking;
 
     synthRef.current.speak(utt);
   }, [lang]);
@@ -299,6 +296,12 @@ export function GeminiVoiceDemo() {
     setMessages([]);
     setCallDuration(0);
     callTimerRef.current = setInterval(() => setCallDuration((d) => d + 1), 1000);
+    // Watchdog: every 2s, if in call but stuck (not loading/speaking/listening), restart recognition
+    watchdogRef.current = setInterval(() => {
+      if (inCallRef.current && !isLoadingRef.current && !isSpeakingRef.current && !listeningRef.current) {
+        startListeningCallbackRef.current();
+      }
+    }, 2000);
     setTimeout(() => startListening(), 150);
   };
 
@@ -312,9 +315,14 @@ export function GeminiVoiceDemo() {
     setLoading(false);
     isLoadingRef.current = false;
     isSpeakingRef.current = false;
+    listeningRef.current = false;
     if (callTimerRef.current) {
       clearInterval(callTimerRef.current);
       callTimerRef.current = null;
+    }
+    if (watchdogRef.current) {
+      clearInterval(watchdogRef.current);
+      watchdogRef.current = null;
     }
   };
 

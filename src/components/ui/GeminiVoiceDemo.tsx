@@ -59,7 +59,6 @@ const T = {
     powered: 'Powered by Gemini + n8n',
     hint: 'Prueba: "¿Qué ves en mi cámara?" o "Explícame qué es la IA"',
     imageNote: '📷 con imagen',
-    inCall: 'En llamada',
   },
   en: {
     title: 'AI Voice Assistant',
@@ -81,7 +80,6 @@ const T = {
     powered: 'Powered by Gemini + n8n',
     hint: 'Try: "What do you see in my camera?" or "Explain what AI is"',
     imageNote: '📷 with image',
-    inCall: 'In call',
   },
 } as const;
 
@@ -91,21 +89,32 @@ export function GeminiVoiceDemo() {
   const lang = appLang === 'en' ? 'en' : 'es';
   const t = T[lang];
 
+  // DOM refs
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Media / speech refs
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
-  // Refs mirror state so async callbacks always see current values
+
+  // State-mirror refs — readable synchronously inside callbacks/intervals
   const inCallRef = useRef(false);
   const isSpeakingRef = useRef(false);
   const isLoadingRef = useRef(false);
-  const listeningRef = useRef(false);
-  // Ref to latest startListening so speak() onend can call it without stale closure
-  const startListeningCallbackRef = useRef<() => void>(() => {});
+  // Guards against double-start: set synchronously BEFORE recognition.start()
+  // and cleared synchronously inside onerror + onend — never via async state
+  const recActiveRef = useRef(false);
+
+  // Stable ref to latest startListening so speak() onend can call it
+  const startListeningRef = useRef<() => void>(() => {});
+
+  // Timers
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const watchdogRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // UI state
   const [cameraOn, setCameraOn] = useState(false);
   const [inCall, setInCall] = useState(false);
   const [listening, setListening] = useState(false);
@@ -116,8 +125,7 @@ export function GeminiVoiceDemo() {
   const [hasSpeechSupport, setHasSpeechSupport] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  // ── init ────────────────────────────────────────────────────────────────────
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) setHasSpeechSupport(false);
@@ -138,14 +146,17 @@ export function GeminiVoiceDemo() {
     };
   }, []);
 
-  // Keep refs in sync with state
+  // Keep loading / speaking refs in sync with state
   useEffect(() => { isLoadingRef.current = loading; }, [loading]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
-  useEffect(() => { listeningRef.current = listening; }, [listening]);
 
+  // ── camera ──────────────────────────────────────────────────────────────────
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 }, audio: false });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 320, height: 240 },
+        audio: false,
+      });
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -159,14 +170,14 @@ export function GeminiVoiceDemo() {
   };
 
   const stopCamera = () => {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
     setCameraOn(false);
   };
 
   const captureFrame = (): string | null => {
-    // Use streamRef (always current) not cameraOn state (stale in useCallback closures)
+    // Use streamRef (always current) — cameraOn state is stale inside useCallback closures
     if (!streamRef.current || !videoRef.current || !canvasRef.current) return null;
     const canvas = canvasRef.current;
     const video = videoRef.current;
@@ -178,49 +189,51 @@ export function GeminiVoiceDemo() {
     return canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
   };
 
+  // ── TTS ─────────────────────────────────────────────────────────────────────
   const speak = useCallback((text: string) => {
     if (!synthRef.current) return;
     synthRef.current.cancel();
+
     const utt = new SpeechSynthesisUtterance(text);
     utt.lang = lang === 'en' ? 'en-US' : 'es-ES';
     utt.rate = 1.0;
     utt.pitch = 1.0;
+
     setIsSpeaking(true);
     isSpeakingRef.current = true;
 
     let done = false;
-    // Generous timeout: avoids polling which fires prematurely in Edge when
-    // speechSynthesis.speaking is briefly false between cancel() and actual playback start
+    // Generous timeout: avoids relying on onend which doesn't fire reliably in
+    // Edge/Chrome on Windows (especially with Windows TTS voices)
     const estimatedMs = Math.max(text.length * 80, 3000) + 3000;
     const fallbackTimer = setTimeout(() => {
       synthRef.current?.cancel();
-      finishSpeaking();
+      onDone();
     }, estimatedMs);
 
-    function finishSpeaking() {
+    function onDone() {
       if (done) return;
       done = true;
       clearTimeout(fallbackTimer);
       setIsSpeaking(false);
       isSpeakingRef.current = false;
       if (inCallRef.current && !isLoadingRef.current) {
-        setTimeout(() => startListeningCallbackRef.current(), 600);
+        setTimeout(() => startListeningRef.current(), 600);
       }
     }
 
-    utt.onend = finishSpeaking;
-    utt.onerror = finishSpeaking;
-
+    utt.onend = onDone;
+    utt.onerror = onDone;
     synthRef.current.speak(utt);
   }, [lang]);
 
+  // ── sendToGemini ─────────────────────────────────────────────────────────────
   const sendToGemini = useCallback(async (text: string) => {
     setLoading(true);
     isLoadingRef.current = true;
-    const imageBase64 = captureFrame();
-    const hasImage = !!imageBase64;
 
-    setMessages((prev) => [...prev, { role: 'user', text, hasImage }]);
+    const imageBase64 = captureFrame();
+    setMessages((prev) => [...prev, { role: 'user', text, hasImage: !!imageBase64 }]);
 
     try {
       const body: Record<string, unknown> = { text, lang };
@@ -231,19 +244,18 @@ export function GeminiVoiceDemo() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-
       if (!res.ok) throw new Error(`${res.status}`);
+
       const data = await res.json();
       const reply: string = data.response || data.text || data.reply || JSON.stringify(data);
-
       setMessages((prev) => [...prev, { role: 'gemini', text: reply }]);
       speak(reply);
       setError(null);
     } catch {
       setError(t.networkError);
-      // Resume listening even on error
+      // Resume listening even after error
       if (inCallRef.current) {
-        setTimeout(() => startListeningCallbackRef.current(), 1500);
+        setTimeout(() => startListeningRef.current(), 1500);
       }
     } finally {
       setLoading(false);
@@ -251,10 +263,20 @@ export function GeminiVoiceDemo() {
     }
   }, [lang, speak, t.networkError]);
 
+  // ── startListening ───────────────────────────────────────────────────────────
   const startListening = useCallback(() => {
-    if (!hasSpeechSupport || !inCallRef.current || isSpeakingRef.current || isLoadingRef.current) return;
-    // Cancel any lingering TTS to avoid 'network' errors from mic picking up audio
-    synthRef.current?.cancel();
+    // recActiveRef is set synchronously here — prevents double-start from
+    // watchdog + onend firing in the same tick
+    if (
+      !hasSpeechSupport ||
+      !inCallRef.current ||
+      isSpeakingRef.current ||
+      isLoadingRef.current ||
+      recActiveRef.current   // already active — do not start a second instance
+    ) return;
+
+    recActiveRef.current = true;
+    synthRef.current?.cancel(); // kill any lingering TTS before mic opens
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SR();
@@ -267,17 +289,20 @@ export function GeminiVoiceDemo() {
       const transcript = e.results[0]?.[0]?.transcript ?? '';
       if (transcript.trim()) sendToGemini(transcript.trim());
     };
+
     recognition.onerror = (e: SpeechRecognitionError) => {
+      recActiveRef.current = false; // sync clear — must happen before onend restart
       const silent = ['aborted', 'no-speech', 'network'];
       if (!silent.includes(e.error)) setError(`Speech error: ${e.error}`);
       setListening(false);
     };
+
     recognition.onend = () => {
+      recActiveRef.current = false; // sync clear
       setListening(false);
-      // Restart if still in call and not currently processing/speaking
-      // isLoadingRef is true if sendToGemini started → speak() will handle restart via onend
+      // Restart unless sendToGemini is running (it will restart via speak → onDone)
       if (inCallRef.current && !isLoadingRef.current && !isSpeakingRef.current) {
-        setTimeout(() => startListeningCallbackRef.current(), 300);
+        setTimeout(() => startListeningRef.current(), 300);
       }
     };
 
@@ -286,51 +311,53 @@ export function GeminiVoiceDemo() {
     setError(null);
   }, [hasSpeechSupport, lang, sendToGemini]);
 
-  // Keep ref current so speak()/sendToGemini() callbacks always use latest version
-  startListeningCallbackRef.current = startListening;
+  // Always point to latest startListening
+  startListeningRef.current = startListening;
 
+  // ── call management ──────────────────────────────────────────────────────────
   const startCall = () => {
     if (!hasSpeechSupport) return;
     inCallRef.current = true;
     setInCall(true);
     setMessages([]);
     setCallDuration(0);
+
     callTimerRef.current = setInterval(() => setCallDuration((d) => d + 1), 1000);
-    // Watchdog: every 2s, if in call but stuck (not loading/speaking/listening), restart recognition
+
+    // Watchdog: every 2s, if stuck (no active recognition, not loading, not speaking), restart.
+    // Uses recActiveRef (sync) not listening state (async) to avoid false double-starts.
     watchdogRef.current = setInterval(() => {
-      if (inCallRef.current && !isLoadingRef.current && !isSpeakingRef.current && !listeningRef.current) {
-        startListeningCallbackRef.current();
+      if (
+        inCallRef.current &&
+        !isLoadingRef.current &&
+        !isSpeakingRef.current &&
+        !recActiveRef.current
+      ) {
+        startListeningRef.current();
       }
     }, 2000);
+
     setTimeout(() => startListening(), 150);
   };
 
   const endCall = () => {
     inCallRef.current = false;
+    recActiveRef.current = false;
+    isSpeakingRef.current = false;
+    isLoadingRef.current = false;
     setInCall(false);
-    recognitionRef.current?.stop();
-    synthRef.current?.cancel();
     setListening(false);
     setIsSpeaking(false);
     setLoading(false);
-    isLoadingRef.current = false;
-    isSpeakingRef.current = false;
-    listeningRef.current = false;
-    if (callTimerRef.current) {
-      clearInterval(callTimerRef.current);
-      callTimerRef.current = null;
-    }
-    if (watchdogRef.current) {
-      clearInterval(watchdogRef.current);
-      watchdogRef.current = null;
-    }
+    recognitionRef.current?.stop();
+    synthRef.current?.cancel();
+    if (callTimerRef.current) { clearInterval(callTimerRef.current); callTimerRef.current = null; }
+    if (watchdogRef.current) { clearInterval(watchdogRef.current); watchdogRef.current = null; }
   };
 
-  const formatDuration = (secs: number) => {
-    const m = Math.floor(secs / 60).toString().padStart(2, '0');
-    const s = (secs % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
+  // ── helpers ──────────────────────────────────────────────────────────────────
+  const formatDuration = (s: number) =>
+    `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
   const callStatus = loading
     ? t.statusThinking
@@ -346,22 +373,15 @@ export function GeminiVoiceDemo() {
     ? 'text-violet-400'
     : listening
     ? 'text-green-400'
-    : isDarkMode
-    ? 'text-gray-500'
-    : 'text-gray-400';
+    : isDarkMode ? 'text-gray-500' : 'text-gray-400';
 
-  const barColor = loading
-    ? 'bg-yellow-400'
-    : isSpeaking
-    ? 'bg-violet-400'
-    : listening
-    ? 'bg-green-400'
-    : 'bg-gray-400';
+  const barColor = loading ? 'bg-yellow-400' : isSpeaking ? 'bg-violet-400' : listening ? 'bg-green-400' : 'bg-gray-400';
 
   const card = isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/90 border-gray-200';
-  const msgBubbleUser = isDarkMode ? 'bg-blue-600/20 border-blue-500/30 text-gray-100' : 'bg-blue-50 border-blue-200 text-gray-800';
-  const msgBubbleGemini = isDarkMode ? 'bg-gray-700/60 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-200 text-gray-800';
+  const msgUser = isDarkMode ? 'bg-blue-600/20 border-blue-500/30 text-gray-100' : 'bg-blue-50 border-blue-200 text-gray-800';
+  const msgGemini = isDarkMode ? 'bg-gray-700/60 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-200 text-gray-800';
 
+  // ── render ───────────────────────────────────────────────────────────────────
   return (
     <div className={`rounded-2xl border overflow-hidden ${card}`}>
       {/* Header */}
@@ -396,18 +416,13 @@ export function GeminiVoiceDemo() {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden rounded-xl border border-gray-600"
             >
-              <video
-                ref={videoRef}
-                className="w-full max-h-48 object-cover rounded-xl bg-black"
-                muted
-                playsInline
-              />
+              <video ref={videoRef} className="w-full max-h-48 object-cover rounded-xl bg-black" muted playsInline />
             </motion.div>
           )}
         </AnimatePresence>
         <canvas ref={canvasRef} className="hidden" />
 
-        {/* Status bar — only during call */}
+        {/* Status bar */}
         {inCall && (
           <div className={`flex items-center gap-3 rounded-xl px-4 py-2.5 ${isDarkMode ? 'bg-gray-900/60' : 'bg-gray-100'}`}>
             <div className="flex items-end gap-0.5 h-5">
@@ -425,7 +440,7 @@ export function GeminiVoiceDemo() {
           </div>
         )}
 
-        {/* Chat messages */}
+        {/* Messages */}
         <div className={`min-h-32 max-h-64 overflow-y-auto space-y-3 rounded-xl p-3 ${isDarkMode ? 'bg-gray-900/40' : 'bg-gray-50'}`}>
           {messages.length === 0 && (
             <p className={`text-center text-sm py-6 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
@@ -436,7 +451,7 @@ export function GeminiVoiceDemo() {
           )}
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] rounded-xl px-3 py-2 border text-sm ${msg.role === 'user' ? msgBubbleUser : msgBubbleGemini}`}>
+              <div className={`max-w-[85%] rounded-xl px-3 py-2 border text-sm ${msg.role === 'user' ? msgUser : msgGemini}`}>
                 <div className="flex items-center gap-1.5 mb-1">
                   {msg.role === 'gemini' && <FaRobot className="w-3 h-3 text-violet-400" />}
                   <span className="text-xs font-semibold opacity-70">
@@ -444,11 +459,7 @@ export function GeminiVoiceDemo() {
                   </span>
                   {msg.hasImage && <span className="text-xs opacity-50">{t.imageNote}</span>}
                   {msg.role === 'gemini' && (
-                    <button
-                      onClick={() => speak(msg.text)}
-                      className="ml-auto text-violet-400 hover:text-violet-300 transition-colors"
-                      title="Re-read"
-                    >
+                    <button onClick={() => speak(msg.text)} className="ml-auto text-violet-400 hover:text-violet-300 transition-colors" title="Re-read">
                       <FaVolumeUp className="w-3 h-3" />
                     </button>
                   )}
@@ -459,15 +470,10 @@ export function GeminiVoiceDemo() {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className={`rounded-xl px-4 py-3 border ${msgBubbleGemini}`}>
+              <div className={`rounded-xl px-4 py-3 border ${msgGemini}`}>
                 <div className="flex items-center gap-2">
                   {[0, 0.2, 0.4].map((delay, i) => (
-                    <motion.div
-                      key={i}
-                      className="w-2 h-2 rounded-full bg-violet-400"
-                      animate={{ scale: [1, 1.5, 1] }}
-                      transition={{ duration: 0.8, repeat: Infinity, delay }}
-                    />
+                    <motion.div key={i} className="w-2 h-2 rounded-full bg-violet-400" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 0.8, repeat: Infinity, delay }} />
                   ))}
                   <span className="text-xs ml-1 opacity-70">{t.statusThinking}</span>
                 </div>
@@ -478,14 +484,10 @@ export function GeminiVoiceDemo() {
         </div>
 
         {error && (
-          <p className="text-red-400 text-xs text-center bg-red-500/10 rounded-lg py-2 px-3 border border-red-500/20">
-            {error}
-          </p>
+          <p className="text-red-400 text-xs text-center bg-red-500/10 rounded-lg py-2 px-3 border border-red-500/20">{error}</p>
         )}
         {!hasSpeechSupport && (
-          <p className="text-yellow-400 text-xs text-center bg-yellow-500/10 rounded-lg py-2 px-3 border border-yellow-500/20">
-            {t.noSupport}
-          </p>
+          <p className="text-yellow-400 text-xs text-center bg-yellow-500/10 rounded-lg py-2 px-3 border border-yellow-500/20">{t.noSupport}</p>
         )}
 
         {/* Controls */}

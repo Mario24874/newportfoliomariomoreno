@@ -179,10 +179,12 @@ export function GeminiVoiceDemo() {
   const captureFrame = (): string | null => {
     // Use streamRef (always current) — cameraOn state is stale inside useCallback closures
     if (!streamRef.current || !videoRef.current || !canvasRef.current) return null;
-    const canvas = canvasRef.current;
     const video = videoRef.current;
-    canvas.width = video.videoWidth || 320;
-    canvas.height = video.videoHeight || 240;
+    // readyState < 2 or zero dimensions means stream not decoded yet → black frame
+    if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) return null;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);

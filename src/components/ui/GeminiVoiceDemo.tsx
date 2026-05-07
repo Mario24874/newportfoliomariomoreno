@@ -93,6 +93,8 @@ export function GeminiVoiceDemo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Conversation history for multi-turn context sent to Gemini API
+  const historyRef = useRef<{ role: 'user' | 'model'; text: string }[]>([]);
 
   // Media / speech refs
   const streamRef = useRef<MediaStream | null>(null);
@@ -238,7 +240,11 @@ export function GeminiVoiceDemo() {
     setMessages((prev) => [...prev, { role: 'user', text, hasImage: !!imageBase64 }]);
 
     try {
-      const body: Record<string, unknown> = { text, lang };
+      const body: Record<string, unknown> = {
+        text,
+        lang,
+        history: historyRef.current,  // full conversation history for multi-turn context
+      };
       if (imageBase64) body.image = imageBase64;
 
       const res = await fetch(WEBHOOK_URL, {
@@ -250,6 +256,14 @@ export function GeminiVoiceDemo() {
 
       const data = await res.json();
       const reply: string = data.response || data.text || data.reply || JSON.stringify(data);
+
+      // Append both turns to history so next request has full context
+      historyRef.current = [
+        ...historyRef.current,
+        { role: 'user', text },
+        { role: 'model', text: reply },
+      ];
+
       setMessages((prev) => [...prev, { role: 'gemini', text: reply }]);
       speak(reply);
       setError(null);
@@ -280,7 +294,9 @@ export function GeminiVoiceDemo() {
     recActiveRef.current = true;
     synthRef.current?.cancel(); // kill any lingering TTS before mic opens
 
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // Prefer webkitSpeechRecognition: Edge exposes both SpeechRecognition (Azure backend)
+    // and webkitSpeechRecognition (Google backend). Azure backend fails with es-ES in Edge.
+    const SR = window.webkitSpeechRecognition || window.SpeechRecognition;
     const recognition = new SR();
     recognitionRef.current = recognition;
     recognition.lang = lang === 'en' ? 'en-US' : 'es-ES';
@@ -323,6 +339,7 @@ export function GeminiVoiceDemo() {
     setInCall(true);
     setMessages([]);
     setCallDuration(0);
+    historyRef.current = [];
 
     callTimerRef.current = setInterval(() => setCallDuration((d) => d + 1), 1000);
 

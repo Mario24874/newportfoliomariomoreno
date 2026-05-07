@@ -1,21 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash, FaRobot, FaVolumeUp } from 'react-icons/fa';
+import { FaVideo, FaVideoSlash, FaRobot, FaVolumeUp, FaPhone, FaPhoneSlash } from 'react-icons/fa';
 import { SiGoogle } from 'react-icons/si';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-// ---------------------------------------------------------------------------
-// Config — replace with your n8n webhook once created
-// ---------------------------------------------------------------------------
-// Proxy through Caddy to avoid CORS — Caddy forwards to n8n internally
 const WEBHOOK_URL =
   import.meta.env.VITE_GEMINI_VOICE_WEBHOOK_URL ||
   '/proxy/n8n/webhook/gemini-voice-demo';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 interface Message {
   role: 'user' | 'gemini';
   text: string;
@@ -45,51 +38,53 @@ declare global {
   }
 }
 
-// ---------------------------------------------------------------------------
-// i18n
-// ---------------------------------------------------------------------------
 const T = {
   es: {
     title: 'Asistente de Voz IA',
-    subtitle: 'Habla y Gemini te responde. Activa la cámara para que también te vea.',
-    micStart: 'Hablar',
-    micStop: 'Escuchando...',
+    subtitle: 'Llamada en tiempo real con Gemini. Activa la cámara para que también te vea.',
+    startCall: 'Iniciar llamada',
+    endCall: 'Colgar',
     camOn: 'Cámara activa',
     camOff: 'Activar cámara',
-    thinking: 'Gemini está pensando...',
+    statusListening: 'Escuchando...',
+    statusThinking: 'Gemini está pensando...',
+    statusSpeaking: 'Gemini está hablando...',
+    statusReady: 'Listo para escuchar',
     youSaid: 'Tú:',
     geminiSaid: 'Gemini:',
     noSupport: 'Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.',
     camError: 'No se pudo acceder a la cámara.',
-    networkError: 'Error al conectar con el agente.',
-    placeholder: 'Presiona el micrófono y habla...',
+    networkError: 'Error al conectar con el agente. Reintentando...',
+    placeholder: 'Presiona "Iniciar llamada" para comenzar.',
     powered: 'Powered by Gemini + n8n',
     hint: 'Prueba: "¿Qué ves en mi cámara?" o "Explícame qué es la IA"',
     imageNote: '📷 con imagen',
+    inCall: 'En llamada',
   },
   en: {
     title: 'AI Voice Assistant',
-    subtitle: 'Speak and Gemini responds. Enable camera so it can also see you.',
-    micStart: 'Speak',
-    micStop: 'Listening...',
+    subtitle: 'Real-time call with Gemini. Enable camera so it can also see you.',
+    startCall: 'Start call',
+    endCall: 'Hang up',
     camOn: 'Camera on',
     camOff: 'Enable camera',
-    thinking: 'Gemini is thinking...',
+    statusListening: 'Listening...',
+    statusThinking: 'Gemini is thinking...',
+    statusSpeaking: 'Gemini is speaking...',
+    statusReady: 'Ready to listen',
     youSaid: 'You:',
     geminiSaid: 'Gemini:',
     noSupport: 'Your browser does not support speech recognition. Use Chrome or Edge.',
     camError: 'Could not access camera.',
-    networkError: 'Error connecting to agent.',
-    placeholder: 'Press the microphone and speak...',
+    networkError: 'Error connecting to agent. Retrying...',
+    placeholder: 'Press "Start call" to begin.',
     powered: 'Powered by Gemini + n8n',
     hint: 'Try: "What do you see in my camera?" or "Explain what AI is"',
     imageNote: '📷 with image',
+    inCall: 'In call',
   },
 } as const;
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 export function GeminiVoiceDemo() {
   const { isDarkMode } = useTheme();
   const { language: appLang } = useLanguage();
@@ -101,36 +96,48 @@ export function GeminiVoiceDemo() {
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  // Refs mirror state so async callbacks always see current values
+  const inCallRef = useRef(false);
+  const isSpeakingRef = useRef(false);
+  const isLoadingRef = useRef(false);
+  // Ref to latest startListening so speak() onend can call it without stale closure
+  const startListeningCallbackRef = useRef<() => void>(() => {});
+  const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [cameraOn, setCameraOn] = useState(false);
+  const [inCall, setInCall] = useState(false);
   const [listening, setListening] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasSpeechSupport, setHasSpeechSupport] = useState(true);
+  const [callDuration, setCallDuration] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Check speech API support
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) setHasSpeechSupport(false);
     synthRef.current = window.speechSynthesis;
   }, []);
 
-  // Auto-scroll messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopCamera();
       recognitionRef.current?.stop();
       synthRef.current?.cancel();
+      if (callTimerRef.current) clearInterval(callTimerRef.current);
     };
   }, []);
+
+  // Keep refs in sync with state
+  useEffect(() => { isLoadingRef.current = loading; }, [loading]);
+  useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
   const startCamera = async () => {
     try {
@@ -154,13 +161,9 @@ export function GeminiVoiceDemo() {
     setCameraOn(false);
   };
 
-  const toggleCamera = () => {
-    if (cameraOn) stopCamera();
-    else startCamera();
-  };
-
   const captureFrame = (): string | null => {
-    if (!cameraOn || !videoRef.current || !canvasRef.current) return null;
+    // Use streamRef (always current) not cameraOn state (stale in useCallback closures)
+    if (!streamRef.current || !videoRef.current || !canvasRef.current) return null;
     const canvas = canvasRef.current;
     const video = videoRef.current;
     canvas.width = video.videoWidth || 320;
@@ -168,7 +171,7 @@ export function GeminiVoiceDemo() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg', 0.7).split(',')[1]; // base64 only
+    return canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
   };
 
   const speak = useCallback((text: string) => {
@@ -178,11 +181,22 @@ export function GeminiVoiceDemo() {
     utt.lang = lang === 'en' ? 'en-US' : 'es-ES';
     utt.rate = 1.0;
     utt.pitch = 1.0;
+    setIsSpeaking(true);
+    isSpeakingRef.current = true;
+    utt.onend = () => {
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      // Auto-resume listening after Gemini finishes speaking
+      if (inCallRef.current && !isLoadingRef.current) {
+        setTimeout(() => startListeningCallbackRef.current(), 400);
+      }
+    };
     synthRef.current.speak(utt);
   }, [lang]);
 
   const sendToGemini = useCallback(async (text: string) => {
     setLoading(true);
+    isLoadingRef.current = true;
     const imageBase64 = captureFrame();
     const hasImage = !!imageBase64;
 
@@ -207,13 +221,21 @@ export function GeminiVoiceDemo() {
       setError(null);
     } catch {
       setError(t.networkError);
+      // Resume listening even on error
+      if (inCallRef.current) {
+        setTimeout(() => startListeningCallbackRef.current(), 1500);
+      }
     } finally {
       setLoading(false);
+      isLoadingRef.current = false;
     }
   }, [lang, speak, t.networkError]);
 
-  const startListening = () => {
-    if (!hasSpeechSupport) return;
+  const startListening = useCallback(() => {
+    if (!hasSpeechSupport || !inCallRef.current || isSpeakingRef.current || isLoadingRef.current) return;
+    // Cancel any lingering TTS to avoid 'network' errors from mic picking up audio
+    synthRef.current?.cancel();
+
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SR();
     recognitionRef.current = recognition;
@@ -226,27 +248,85 @@ export function GeminiVoiceDemo() {
       if (transcript.trim()) sendToGemini(transcript.trim());
     };
     recognition.onerror = (e: SpeechRecognitionError) => {
-      if (e.error !== 'aborted') setError(`Speech error: ${e.error}`);
+      const silent = ['aborted', 'no-speech', 'network'];
+      if (!silent.includes(e.error)) setError(`Speech error: ${e.error}`);
       setListening(false);
     };
-    recognition.onend = () => setListening(false);
+    recognition.onend = () => {
+      setListening(false);
+      // Restart if still in call and not currently processing/speaking
+      // isLoadingRef is true if sendToGemini started → speak() will handle restart via onend
+      if (inCallRef.current && !isLoadingRef.current && !isSpeakingRef.current) {
+        setTimeout(() => startListeningCallbackRef.current(), 300);
+      }
+    };
 
     recognition.start();
     setListening(true);
     setError(null);
+  }, [hasSpeechSupport, lang, sendToGemini]);
+
+  // Keep ref current so speak()/sendToGemini() callbacks always use latest version
+  startListeningCallbackRef.current = startListening;
+
+  const startCall = () => {
+    if (!hasSpeechSupport) return;
+    inCallRef.current = true;
+    setInCall(true);
+    setMessages([]);
+    setCallDuration(0);
+    callTimerRef.current = setInterval(() => setCallDuration((d) => d + 1), 1000);
+    setTimeout(() => startListening(), 150);
   };
 
-  const stopListening = () => {
+  const endCall = () => {
+    inCallRef.current = false;
+    setInCall(false);
     recognitionRef.current?.stop();
+    synthRef.current?.cancel();
     setListening(false);
+    setIsSpeaking(false);
+    setLoading(false);
+    isLoadingRef.current = false;
+    isSpeakingRef.current = false;
+    if (callTimerRef.current) {
+      clearInterval(callTimerRef.current);
+      callTimerRef.current = null;
+    }
   };
 
-  const toggleMic = () => {
-    if (listening) stopListening();
-    else startListening();
+  const formatDuration = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
   };
 
-  // ---- styles ----
+  const callStatus = loading
+    ? t.statusThinking
+    : isSpeaking
+    ? t.statusSpeaking
+    : listening
+    ? t.statusListening
+    : t.statusReady;
+
+  const statusColor = loading
+    ? 'text-yellow-400'
+    : isSpeaking
+    ? 'text-violet-400'
+    : listening
+    ? 'text-green-400'
+    : isDarkMode
+    ? 'text-gray-500'
+    : 'text-gray-400';
+
+  const barColor = loading
+    ? 'bg-yellow-400'
+    : isSpeaking
+    ? 'bg-violet-400'
+    : listening
+    ? 'bg-green-400'
+    : 'bg-gray-400';
+
   const card = isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/90 border-gray-200';
   const msgBubbleUser = isDarkMode ? 'bg-blue-600/20 border-blue-500/30 text-gray-100' : 'bg-blue-50 border-blue-200 text-gray-800';
   const msgBubbleGemini = isDarkMode ? 'bg-gray-700/60 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-200 text-gray-800';
@@ -259,14 +339,22 @@ export function GeminiVoiceDemo() {
           <div className="bg-white/20 p-2.5 rounded-xl">
             <SiGoogle className="w-6 h-6" />
           </div>
-          <div>
+          <div className="flex-1">
             <h3 className="font-bold text-lg">{t.title}</h3>
             <p className="text-xs text-blue-100">{t.subtitle}</p>
           </div>
+          {inCall && (
+            <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+              </span>
+              <span className="text-xs font-mono font-semibold">{formatDuration(callDuration)}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Camera + chat area */}
       <div className="p-4 space-y-4">
         {/* Camera preview */}
         <AnimatePresence>
@@ -286,8 +374,25 @@ export function GeminiVoiceDemo() {
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Hidden canvas for frame capture */}
         <canvas ref={canvasRef} className="hidden" />
+
+        {/* Status bar — only during call */}
+        {inCall && (
+          <div className={`flex items-center gap-3 rounded-xl px-4 py-2.5 ${isDarkMode ? 'bg-gray-900/60' : 'bg-gray-100'}`}>
+            <div className="flex items-end gap-0.5 h-5">
+              {[0, 0.12, 0.24].map((delay, i) => (
+                <motion.div
+                  key={i}
+                  className={`w-1.5 rounded-full ${barColor}`}
+                  style={{ height: listening || isSpeaking || loading ? '100%' : '40%' }}
+                  animate={listening || isSpeaking || loading ? { scaleY: [0.4, 1, 0.4] } : { scaleY: 0.4 }}
+                  transition={{ duration: 0.6, repeat: Infinity, delay, ease: 'easeInOut' }}
+                />
+              ))}
+            </div>
+            <span className={`text-sm font-medium ${statusColor}`}>{callStatus}</span>
+          </div>
+        )}
 
         {/* Chat messages */}
         <div className={`min-h-32 max-h-64 overflow-y-auto space-y-3 rounded-xl p-3 ${isDarkMode ? 'bg-gray-900/40' : 'bg-gray-50'}`}>
@@ -306,9 +411,7 @@ export function GeminiVoiceDemo() {
                   <span className="text-xs font-semibold opacity-70">
                     {msg.role === 'user' ? t.youSaid : t.geminiSaid}
                   </span>
-                  {msg.hasImage && (
-                    <span className="text-xs opacity-50">{t.imageNote}</span>
-                  )}
+                  {msg.hasImage && <span className="text-xs opacity-50">{t.imageNote}</span>}
                   {msg.role === 'gemini' && (
                     <button
                       onClick={() => speak(msg.text)}
@@ -327,22 +430,15 @@ export function GeminiVoiceDemo() {
             <div className="flex justify-start">
               <div className={`rounded-xl px-4 py-3 border ${msgBubbleGemini}`}>
                 <div className="flex items-center gap-2">
-                  <motion.div
-                    className="w-2 h-2 rounded-full bg-violet-400"
-                    animate={{ scale: [1, 1.5, 1] }}
-                    transition={{ duration: 0.8, repeat: Infinity, delay: 0 }}
-                  />
-                  <motion.div
-                    className="w-2 h-2 rounded-full bg-violet-400"
-                    animate={{ scale: [1, 1.5, 1] }}
-                    transition={{ duration: 0.8, repeat: Infinity, delay: 0.2 }}
-                  />
-                  <motion.div
-                    className="w-2 h-2 rounded-full bg-violet-400"
-                    animate={{ scale: [1, 1.5, 1] }}
-                    transition={{ duration: 0.8, repeat: Infinity, delay: 0.4 }}
-                  />
-                  <span className="text-xs ml-1 opacity-70">{t.thinking}</span>
+                  {[0, 0.2, 0.4].map((delay, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-2 h-2 rounded-full bg-violet-400"
+                      animate={{ scale: [1, 1.5, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay }}
+                    />
+                  ))}
+                  <span className="text-xs ml-1 opacity-70">{t.statusThinking}</span>
                 </div>
               </div>
             </div>
@@ -350,13 +446,11 @@ export function GeminiVoiceDemo() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Error */}
         {error && (
           <p className="text-red-400 text-xs text-center bg-red-500/10 rounded-lg py-2 px-3 border border-red-500/20">
             {error}
           </p>
         )}
-
         {!hasSpeechSupport && (
           <p className="text-yellow-400 text-xs text-center bg-yellow-500/10 rounded-lg py-2 px-3 border border-yellow-500/20">
             {t.noSupport}
@@ -365,38 +459,29 @@ export function GeminiVoiceDemo() {
 
         {/* Controls */}
         <div className="flex gap-3 justify-center">
-          {/* Mic button */}
-          <motion.button
-            onClick={toggleMic}
-            disabled={loading || !hasSpeechSupport}
-            whileTap={{ scale: 0.95 }}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-              listening
-                ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30'
-                : 'bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white'
-            }`}
-          >
-            {listening ? (
-              <>
-                <motion.div
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ duration: 0.6, repeat: Infinity }}
-                >
-                  <FaMicrophone className="w-4 h-4" />
-                </motion.div>
-                {t.micStop}
-              </>
-            ) : (
-              <>
-                <FaMicrophoneSlash className="w-4 h-4" />
-                {t.micStart}
-              </>
-            )}
-          </motion.button>
+          {!inCall ? (
+            <motion.button
+              onClick={startCall}
+              disabled={!hasSpeechSupport}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            >
+              <FaPhone className="w-4 h-4" />
+              {t.startCall}
+            </motion.button>
+          ) : (
+            <motion.button
+              onClick={endCall}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30 transition-all"
+            >
+              <FaPhoneSlash className="w-4 h-4" />
+              {t.endCall}
+            </motion.button>
+          )}
 
-          {/* Camera button */}
           <motion.button
-            onClick={toggleCamera}
+            onClick={() => { if (cameraOn) stopCamera(); else startCamera(); }}
             whileTap={{ scale: 0.95 }}
             className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all border ${
               cameraOn
@@ -413,7 +498,6 @@ export function GeminiVoiceDemo() {
           </motion.button>
         </div>
 
-        {/* Footer */}
         <p className="text-xs text-gray-400 text-center">{t.powered}</p>
       </div>
     </div>

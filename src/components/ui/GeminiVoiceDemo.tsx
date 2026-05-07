@@ -183,14 +183,37 @@ export function GeminiVoiceDemo() {
     utt.pitch = 1.0;
     setIsSpeaking(true);
     isSpeakingRef.current = true;
-    utt.onend = () => {
+
+    let pollId: ReturnType<typeof setInterval> | null = null;
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const onSpeechDone = () => {
+      if (!isSpeakingRef.current) return; // guard against double-fire
+      if (pollId) clearInterval(pollId);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
       setIsSpeaking(false);
       isSpeakingRef.current = false;
-      // Auto-resume listening after Gemini finishes speaking
       if (inCallRef.current && !isLoadingRef.current) {
         setTimeout(() => startListeningCallbackRef.current(), 400);
       }
     };
+
+    // Primary: onend event
+    utt.onend = onSpeechDone;
+
+    // Fallback 1: poll speechSynthesis.speaking every 150ms
+    // Needed because Edge/Chrome on Windows often doesn't fire onend reliably
+    pollId = setInterval(() => {
+      if (!synthRef.current?.speaking) onSpeechDone();
+    }, 150);
+
+    // Fallback 2: hard timeout based on estimated speech duration
+    const estimatedMs = Math.max(text.length * 65, 2000) + 2000;
+    fallbackTimer = setTimeout(() => {
+      synthRef.current?.cancel();
+      onSpeechDone();
+    }, estimatedMs);
+
     synthRef.current.speak(utt);
   }, [lang]);
 

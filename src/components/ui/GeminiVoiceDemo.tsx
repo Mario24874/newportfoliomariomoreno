@@ -108,13 +108,17 @@ export function GeminiVoiceDemo() {
   // Guards against double-start: set synchronously BEFORE recognition.start()
   // and cleared synchronously inside onerror + onend — never via async state
   const recActiveRef = useRef(false);
+  // Controls whether onresult events are processed.
+  // Set false during TTS/loading so the continuous session ignores echoed audio.
+  // Set true when ready to hear the user again — avoids stop/restart mid-call,
+  // which Edge rejects outside a user-gesture context.
+  const processResultsRef = useRef(false);
 
-  // Stable ref to latest startListening so speak() onend can call it
+  // Stable ref to latest startListening so onend restart can call it
   const startListeningRef = useRef<() => void>(() => {});
 
   // Timers
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const watchdogRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // UI state
   const [cameraOn, setCameraOn] = useState(false);
@@ -144,7 +148,6 @@ export function GeminiVoiceDemo() {
       recognitionRef.current?.stop();
       synthRef.current?.cancel();
       if (callTimerRef.current) clearInterval(callTimerRef.current);
-      if (watchdogRef.current) clearInterval(watchdogRef.current);
     };
   }, []);
 
@@ -222,7 +225,9 @@ export function GeminiVoiceDemo() {
       setIsSpeaking(false);
       isSpeakingRef.current = false;
       if (inCallRef.current && !isLoadingRef.current) {
-        setTimeout(() => startListeningRef.current(), 600);
+        // Re-enable processing on the still-running session — no stop/restart needed.
+        processResultsRef.current = true;
+        setListening(true);
       }
     }
 
@@ -281,46 +286,41 @@ export function GeminiVoiceDemo() {
 
   // ── startListening ───────────────────────────────────────────────────────────
   const startListening = useCallback(() => {
-    // recActiveRef is set synchronously here — prevents double-start from
-    // watchdog + onend firing in the same tick
     if (
       !hasSpeechSupport ||
       !inCallRef.current ||
-      isSpeakingRef.current ||
-      isLoadingRef.current ||
       recActiveRef.current   // already active — do not start a second instance
     ) return;
 
     recActiveRef.current = true;
-    synthRef.current?.cancel(); // kill any lingering TTS before mic opens
+    processResultsRef.current = true;
+    synthRef.current?.cancel();
 
     // Prefer webkitSpeechRecognition: Edge exposes both SpeechRecognition (Azure backend)
     // and webkitSpeechRecognition (Google backend). Azure backend fails with es-ES in Edge.
+    // Strategy: ONE session per call with continuous=true. Never call recognition.stop()
+    // mid-call — restarting outside a user-gesture context breaks Edge. Instead, flip
+    // processResultsRef to ignore onresult events during TTS/loading.
     const SR = window.webkitSpeechRecognition || window.SpeechRecognition;
     const recognition = new SR();
     recognitionRef.current = recognition;
     recognition.lang = lang === 'en' ? 'en-US' : 'es-ES';
-    // continuous=true: session stays alive until we stop it explicitly.
-    // Edge rejects SpeechRecognition.start() called outside a user-gesture context,
-    // so we never let the session expire and restart — one session per call turn.
     recognition.continuous = true;
     recognition.interimResults = false;
 
-    let captured = false;
-
     recognition.onresult = (e: SpeechRecognitionEvent) => {
+      if (!processResultsRef.current) return;  // ignore during TTS / loading
       const last = e.results[e.results.length - 1];
       const transcript = last?.[0]?.transcript ?? '';
-      if (transcript.trim() && !captured) {
-        captured = true;
-        recActiveRef.current = false;
-        recognition.stop();
+      if (transcript.trim()) {
+        processResultsRef.current = false;  // suppress further results until TTS done
         sendToGemini(transcript.trim());
       }
     };
 
     recognition.onerror = (e: SpeechRecognitionError) => {
       recActiveRef.current = false;
+      processResultsRef.current = false;
       const silent = ['aborted', 'no-speech', 'network'];
       if (!silent.includes(e.error)) setError(`Speech error: ${e.error}`);
       setListening(false);
@@ -328,10 +328,10 @@ export function GeminiVoiceDemo() {
 
     recognition.onend = () => {
       recActiveRef.current = false;
+      processResultsRef.current = false;
       setListening(false);
-      // Only restart if we didn't capture speech (silence timeout / aborted).
-      // If captured=true, sendToGemini is running and will restart via speak→onDone.
-      if (!captured && inCallRef.current && !isLoadingRef.current && !isSpeakingRef.current) {
+      // Session ended (browser timeout) — restart if still in call
+      if (inCallRef.current && !isLoadingRef.current && !isSpeakingRef.current) {
         setTimeout(() => startListeningRef.current(), 300);
       }
     };
@@ -355,19 +355,6 @@ export function GeminiVoiceDemo() {
 
     callTimerRef.current = setInterval(() => setCallDuration((d) => d + 1), 1000);
 
-    // Watchdog: every 2s, if stuck (no active recognition, not loading, not speaking), restart.
-    // Uses recActiveRef (sync) not listening state (async) to avoid false double-starts.
-    watchdogRef.current = setInterval(() => {
-      if (
-        inCallRef.current &&
-        !isLoadingRef.current &&
-        !isSpeakingRef.current &&
-        !recActiveRef.current
-      ) {
-        startListeningRef.current();
-      }
-    }, 2000);
-
     // Call directly — no setTimeout. Edge requires SpeechRecognition.start()
     // within the user-gesture context of the button click.
     startListening();
@@ -376,6 +363,7 @@ export function GeminiVoiceDemo() {
   const endCall = () => {
     inCallRef.current = false;
     recActiveRef.current = false;
+    processResultsRef.current = false;
     isSpeakingRef.current = false;
     isLoadingRef.current = false;
     setInCall(false);
@@ -385,7 +373,6 @@ export function GeminiVoiceDemo() {
     recognitionRef.current?.stop();
     synthRef.current?.cancel();
     if (callTimerRef.current) { clearInterval(callTimerRef.current); callTimerRef.current = null; }
-    if (watchdogRef.current) { clearInterval(watchdogRef.current); watchdogRef.current = null; }
   };
 
   // ── helpers ──────────────────────────────────────────────────────────────────

@@ -13,6 +13,7 @@ interface Message {
   role: 'user' | 'gemini';
   text: string;
   hasImage?: boolean;
+  imageDataUrl?: string;
 }
 
 interface SpeechRecognitionEvent extends Event {
@@ -122,6 +123,7 @@ export function GeminiVoiceDemo() {
 
   // UI state
   const [cameraOn, setCameraOn] = useState(false);
+  const [captureFlash, setCaptureFlash] = useState(false);
   const [inCall, setInCall] = useState(false);
   const [listening, setListening] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -242,7 +244,14 @@ export function GeminiVoiceDemo() {
     isLoadingRef.current = true;
 
     const imageBase64 = captureFrame();
-    setMessages((prev) => [...prev, { role: 'user', text, hasImage: !!imageBase64 }]);
+    const imageDataUrl = imageBase64 ? `data:image/jpeg;base64,${imageBase64}` : undefined;
+
+    if (imageBase64) {
+      setCaptureFlash(true);
+      setTimeout(() => setCaptureFlash(false), 400);
+    }
+
+    setMessages((prev) => [...prev, { role: 'user', text, hasImage: !!imageBase64, imageDataUrl }]);
 
     try {
       const body: Record<string, unknown> = {
@@ -434,9 +443,29 @@ export function GeminiVoiceDemo() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden rounded-xl border border-gray-600"
+              className="overflow-hidden rounded-xl border border-gray-600 relative"
             >
               <video ref={videoRef} className="w-full max-h-48 object-cover rounded-xl bg-black" muted playsInline />
+              {/* Flash overlay on capture */}
+              <AnimatePresence>
+                {captureFlash && (
+                  <motion.div
+                    initial={{ opacity: 0.7 }}
+                    animate={{ opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35 }}
+                    className="absolute inset-0 bg-white rounded-xl pointer-events-none"
+                  />
+                )}
+              </AnimatePresence>
+              {/* Live indicator */}
+              <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/60 rounded-full px-2 py-1">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+                <span className="text-white text-[10px] font-semibold tracking-wide">LIVE</span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -477,13 +506,19 @@ export function GeminiVoiceDemo() {
                   <span className="text-xs font-semibold opacity-70">
                     {msg.role === 'user' ? t.youSaid : t.geminiSaid}
                   </span>
-                  {msg.hasImage && <span className="text-xs opacity-50">{t.imageNote}</span>}
                   {msg.role === 'gemini' && (
                     <button onClick={() => speak(msg.text)} className="ml-auto text-violet-400 hover:text-violet-300 transition-colors" title="Re-read">
                       <FaVolumeUp className="w-3 h-3" />
                     </button>
                   )}
                 </div>
+                {msg.imageDataUrl && (
+                  <img
+                    src={msg.imageDataUrl}
+                    alt="captured frame"
+                    className="w-full max-h-28 object-cover rounded-lg mb-1.5 border border-blue-400/30"
+                  />
+                )}
                 <p className="leading-relaxed">{msg.text}</p>
               </div>
             </div>

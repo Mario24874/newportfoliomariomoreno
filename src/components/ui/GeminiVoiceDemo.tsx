@@ -129,10 +129,17 @@ export function GeminiVoiceDemo() {
   }
 
   // ── WebSocket message handler ─────────────────────────────────────────────
-  function handleWsMessage(event: MessageEvent) {
+  async function handleWsMessage(event: MessageEvent) {
     let data: Record<string, unknown>;
     try {
-      const raw = typeof event.data === 'string' ? event.data : new TextDecoder().decode(event.data as ArrayBuffer);
+      let raw: string;
+      if (typeof event.data === 'string') {
+        raw = event.data;
+      } else if (event.data instanceof Blob) {
+        raw = await event.data.text();
+      } else {
+        raw = new TextDecoder().decode(event.data as ArrayBuffer);
+      }
       data = JSON.parse(raw);
       console.log('[Gemini WS] message:', JSON.stringify(data).slice(0, 300));
     } catch { return; }
@@ -369,6 +376,14 @@ export function GeminiVoiceDemo() {
               },
               inputAudioTranscription: {},
               outputAudioTranscription: {},
+              realtimeInputConfig: {
+                automaticActivityDetection: {
+                  disabled: false,
+                  silenceDurationMs: 2000,
+                  prefixPaddingMs: 500,
+                },
+                turnCoverage: 'TURN_INCLUDES_ONLY_ACTIVITY',
+              },
             },
           };
           console.log('[Gemini WS] setup sent:', JSON.stringify(setupMsg).slice(0, 200));

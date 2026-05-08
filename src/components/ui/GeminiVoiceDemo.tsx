@@ -10,11 +10,13 @@ const TOKEN_URL =
   import.meta.env.VITE_GEMINI_LIVE_TOKEN_URL ||
   '/proxy/n8n/webhook/gemini-live-token';
 
-// Gemini Live API — BidiGenerateContent with ephemeral token auth
+// Gemini Live API — BidiGenerateContentConstrained is the browser-safe endpoint
+// that accepts ephemeral token auth (?access_token=auth_tokens/...)
+// BidiGenerateContent requires OAuth/API key and rejects ephemeral tokens (1008)
 const WS_BASE =
-  'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent';
+  'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
 
-const MODEL = 'gemini-3.1-flash-live-preview';
+const MODEL = 'gemini-2.5-flash-preview-native-audio-dialog';
 
 interface Message {
   role: 'user' | 'gemini';

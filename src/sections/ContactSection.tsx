@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button, IconButton, Box } from '@mui/material';
-import { FaEnvelope, FaWhatsapp, FaLinkedin, FaGithub } from 'react-icons/fa';
+import { FaEnvelope, FaWhatsapp, FaLinkedin, FaGithub, FaYoutube, FaInstagram } from 'react-icons/fa';
 import { YOUR_WHATSAPP_NUMBER, YOUR_EMAIL, YOUR_LINKEDIN_URL, YOUR_GITHUB_URL } from '@/data/portfolioData';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
@@ -113,7 +113,40 @@ const ContactSection: React.FC = () => {
               >
                 <FaGithub />
               </IconButton>
-              {/* Add more social links if needed */}
+              <IconButton
+                href="https://www.youtube.com/@MarioMoreno-lA"
+                target="_blank"
+                rel="noopener noreferrer"
+                component={motion.a}
+                whileHover={{ scale: 1.2 }}
+                sx={{
+                  color: 'text.secondary',
+                  fontSize: '1.5rem',
+                  '&:hover': {
+                    color: '#FF0000',
+                    backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                  }
+                }}
+              >
+                <FaYoutube />
+              </IconButton>
+              <IconButton
+                href="https://www.instagram.com/mario.moreno.dev/"
+                target="_blank"
+                rel="noopener noreferrer"
+                component={motion.a}
+                whileHover={{ scale: 1.2 }}
+                sx={{
+                  color: 'text.secondary',
+                  fontSize: '1.5rem',
+                  '&:hover': {
+                    color: '#E1306C',
+                    backgroundColor: 'rgba(225, 48, 108, 0.08)',
+                  }
+                }}
+              >
+                <FaInstagram />
+              </IconButton>
             </Box>
           </div>
         </motion.div>

@@ -16,7 +16,7 @@ const TOKEN_URL =
 const WS_BASE =
   'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
 
-const MODEL = 'gemini-2.5-flash-preview-native-audio-dialog';
+const MODEL = 'gemini-3.1-flash-live-preview';
 
 interface Message {
   role: 'user' | 'gemini';
@@ -352,7 +352,7 @@ export function GeminiVoiceDemo() {
           const sysEn = `You are a real-time voice assistant for Mario Moreno's portfolio demo. Be concise: max 1-2 short sentences per reply. For greetings: 5 words max. When asked to describe the camera image, give a detailed visual description. Never ask follow-up questions.`;
           const sysEs = `Eres un asistente de voz en tiempo real para el portfolio de Mario Moreno. Sé muy breve: máximo 1-2 oraciones cortas. Para saludos: máximo 5 palabras. Si te piden describir la imagen de la cámara, da una descripción visual detallada. No hagas preguntas de seguimiento.`;
 
-          // 4. Send setup message with model, voice, transcriptions
+          // 4. Send setup message — minimal valid config for BidiGenerateContentConstrained
           const setupMsg = {
             setup: {
               model: `models/${MODEL}`,
@@ -369,14 +369,6 @@ export function GeminiVoiceDemo() {
               },
               inputAudioTranscription: {},
               outputAudioTranscription: {},
-              realtimeInputConfig: {
-                automaticActivityDetection: {
-                  disabled: false,
-                  silenceDurationMs: 1500,
-                  prefixPaddingMs: 300,
-                },
-                turnCoverage: 'TURN_INCLUDES_ONLY_ACTIVITY',
-              },
             },
           };
           console.log('[Gemini WS] setup sent:', JSON.stringify(setupMsg).slice(0, 200));

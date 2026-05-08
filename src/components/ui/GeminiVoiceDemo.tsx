@@ -10,9 +10,9 @@ const TOKEN_URL =
   import.meta.env.VITE_GEMINI_LIVE_TOKEN_URL ||
   '/proxy/n8n/webhook/gemini-live-token';
 
-// Gemini Live API — BidiGenerateContentConstrained requires ephemeral tokens
+// Gemini Live API — BidiGenerateContent with ephemeral token auth
 const WS_BASE =
-  'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
+  'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent';
 
 const MODEL = 'gemini-3.1-flash-live-preview';
 
@@ -132,11 +132,20 @@ export function GeminiVoiceDemo() {
     try {
       const raw = typeof event.data === 'string' ? event.data : new TextDecoder().decode(event.data as ArrayBuffer);
       data = JSON.parse(raw);
+      console.log('[Gemini WS] message:', JSON.stringify(data).slice(0, 300));
     } catch { return; }
 
     // Setup complete — connection ready
     if (data?.setupComplete) {
       setIsConnected(true);
+      return;
+    }
+
+    // API-level error from Gemini (e.g. invalid model, bad token, quota)
+    if (data?.error) {
+      const errMsg = (data.error as Record<string, unknown>)?.message ?? 'Gemini API error';
+      setError(`Gemini: ${String(errMsg)}`);
+      doEndCall();
       return;
     }
 
@@ -197,15 +206,8 @@ export function GeminiVoiceDemo() {
   // ── Audio capture setup ───────────────────────────────────────────────────
   // Uses the AudioContext already created synchronously in startCall (gesture context)
   async function startAudioCapture() {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        sampleRate: 16000,
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      },
-    });
-    micStreamRef.current = stream;
+    // micStreamRef is populated in startCall before WebSocket opens
+    const stream = micStreamRef.current!;
 
     const ctx = captureCtxRef.current!;
     // Must await resume() — AudioContext starts suspended; AudioWorkletNode
@@ -322,62 +324,86 @@ export function GeminiVoiceDemo() {
     playbackCtxRef.current = playbackCtx;
 
     try {
-      // 1. Fetch ephemeral token from backend (n8n)
+      // 1. Get mic permission before WebSocket — any error is caught here
+      const micStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          sampleRate: 16000,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+      micStreamRef.current = micStream;
+
+      // 2. Fetch ephemeral token from backend (n8n)
       const tokenRes = await fetch(TOKEN_URL, { method: 'POST' });
       if (!tokenRes.ok) throw new Error(`Token error: ${tokenRes.status}`);
       const { token } = await tokenRes.json() as { token: string };
 
-      // 2. Open WebSocket to Gemini Live API
+      // 3. Open WebSocket to Gemini Live API
       const ws = new WebSocket(`${WS_BASE}?access_token=${token}`);
       wsRef.current = ws;
 
       ws.onopen = async () => {
-        // System instruction in the configured language
-        const sysEn = `You are a real-time voice assistant for Mario Moreno's portfolio demo. Be concise: max 1-2 short sentences per reply. For greetings: 5 words max. When asked to describe the camera image, give a detailed visual description. Never ask follow-up questions.`;
-        const sysEs = `Eres un asistente de voz en tiempo real para el portfolio de Mario Moreno. Sé muy breve: máximo 1-2 oraciones cortas. Para saludos: máximo 5 palabras. Si te piden describir la imagen de la cámara, da una descripción visual detallada. No hagas preguntas de seguimiento.`;
+        console.log('[Gemini WS] open — sending setup');
+        try {
+          const sysEn = `You are a real-time voice assistant for Mario Moreno's portfolio demo. Be concise: max 1-2 short sentences per reply. For greetings: 5 words max. When asked to describe the camera image, give a detailed visual description. Never ask follow-up questions.`;
+          const sysEs = `Eres un asistente de voz en tiempo real para el portfolio de Mario Moreno. Sé muy breve: máximo 1-2 oraciones cortas. Para saludos: máximo 5 palabras. Si te piden describir la imagen de la cámara, da una descripción visual detallada. No hagas preguntas de seguimiento.`;
 
-        // 3. Send setup message with model, voice, transcriptions
-        ws.send(JSON.stringify({
-          setup: {
-            model: `models/${MODEL}`,
-            generationConfig: {
-              responseModalities: ['AUDIO'],
-              speechConfig: {
-                voiceConfig: {
-                  prebuiltVoiceConfig: { voiceName: 'Aoede' },
+          // 4. Send setup message with model, voice, transcriptions
+          const setupMsg = {
+            setup: {
+              model: `models/${MODEL}`,
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                  voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName: 'Aoede' },
+                  },
                 },
               },
-            },
-            systemInstruction: {
-              parts: [{ text: lang === 'es' ? sysEs : sysEn }],
-            },
-            inputAudioTranscription: {},
-            outputAudioTranscription: {},
-            realtimeInputConfig: {
-              automaticActivityDetection: {
-                disabled: false,
-                silenceDurationMs: 1500,
-                prefixPaddingMs: 300,
+              systemInstruction: {
+                parts: [{ text: lang === 'es' ? sysEs : sysEn }],
               },
-              turnCoverage: 'TURN_INCLUDES_ONLY_ACTIVITY',
+              inputAudioTranscription: {},
+              outputAudioTranscription: {},
+              realtimeInputConfig: {
+                automaticActivityDetection: {
+                  disabled: false,
+                  silenceDurationMs: 1500,
+                  prefixPaddingMs: 300,
+                },
+                turnCoverage: 'TURN_INCLUDES_ONLY_ACTIVITY',
+              },
             },
-          },
-        }));
+          };
+          console.log('[Gemini WS] setup sent:', JSON.stringify(setupMsg).slice(0, 200));
+          ws.send(JSON.stringify(setupMsg));
 
-        // 4. Start audio I/O
-        await startAudioPlayback();
-        await startAudioCapture();
+          // 5. Start audio I/O
+          await startAudioPlayback();
+          await startAudioCapture();
 
-        // 5. Start video frames if camera already on
-        if (cameraOn) startVideoFrames();
+          // 6. Start video frames if camera already on
+          if (cameraOn) startVideoFrames();
+        } catch (err) {
+          setError('Setup failed: ' + (err instanceof Error ? err.message : String(err)));
+          doEndCall();
+        }
       };
 
       ws.onmessage = handleWsMessage;
-      ws.onerror = () => setError('WebSocket connection error.');
-      ws.onclose = () => {
+      ws.onerror = (e) => {
+        console.error('WebSocket error', e);
+        setError('WebSocket connection error.');
+      };
+      ws.onclose = (e) => {
         setIsConnected(false);
         setIsSpeaking(false);
-        if (inCallRef.current) setError('Connection closed by server.');
+        if (inCallRef.current) {
+          const reason = e.reason ? `: ${e.reason}` : '';
+          setError(`Connection closed (${e.code}${reason})`);
+        }
       };
     } catch (err) {
       setError(t.tokenError + ' ' + (err instanceof Error ? err.message : ''));

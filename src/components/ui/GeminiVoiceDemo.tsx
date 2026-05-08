@@ -208,6 +208,9 @@ export function GeminiVoiceDemo() {
     micStreamRef.current = stream;
 
     const ctx = captureCtxRef.current!;
+    // Must await resume() — AudioContext starts suspended; AudioWorkletNode
+    // creation throws "No execution context available" if context is not running
+    await ctx.resume();
     await ctx.audioWorklet.addModule('/audio-processors/capture.worklet.js');
     const worklet = new AudioWorkletNode(ctx, 'audio-capture-processor');
     captureWorkletRef.current = worklet;
@@ -228,6 +231,7 @@ export function GeminiVoiceDemo() {
   // Uses the AudioContext already created synchronously in startCall (gesture context)
   async function startAudioPlayback() {
     const ctx = playbackCtxRef.current!;
+    await ctx.resume();
     await ctx.audioWorklet.addModule('/audio-processors/playback.worklet.js');
     const worklet = new AudioWorkletNode(ctx, 'pcm-processor');
     playbackWorkletRef.current = worklet;
@@ -316,8 +320,6 @@ export function GeminiVoiceDemo() {
     captureCtxRef.current = captureCtx;
     const playbackCtx = new AudioContext({ sampleRate: 24000 });
     playbackCtxRef.current = playbackCtx;
-    captureCtx.resume().catch(() => {});
-    playbackCtx.resume().catch(() => {});
 
     try {
       // 1. Fetch ephemeral token from backend (n8n)

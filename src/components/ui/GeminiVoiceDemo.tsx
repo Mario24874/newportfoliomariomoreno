@@ -14,7 +14,7 @@ const TOKEN_URL =
 const WS_BASE =
   'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
 
-const MODEL = 'gemini-2.5-flash-native-audio-preview-12-2025';
+const MODEL = 'gemini-3.1-flash-live-preview';
 
 interface Message {
   role: 'user' | 'gemini';
@@ -195,6 +195,7 @@ export function GeminiVoiceDemo() {
   }
 
   // ── Audio capture setup ───────────────────────────────────────────────────
+  // Uses the AudioContext already created synchronously in startCall (gesture context)
   async function startAudioCapture() {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -206,9 +207,7 @@ export function GeminiVoiceDemo() {
     });
     micStreamRef.current = stream;
 
-    const ctx = new AudioContext({ sampleRate: 16000 });
-    captureCtxRef.current = ctx;
-
+    const ctx = captureCtxRef.current!;
     await ctx.audioWorklet.addModule('/audio-processors/capture.worklet.js');
     const worklet = new AudioWorkletNode(ctx, 'audio-capture-processor');
     captureWorkletRef.current = worklet;
@@ -226,10 +225,9 @@ export function GeminiVoiceDemo() {
   }
 
   // ── Audio playback setup ──────────────────────────────────────────────────
+  // Uses the AudioContext already created synchronously in startCall (gesture context)
   async function startAudioPlayback() {
-    const ctx = new AudioContext({ sampleRate: 24000 });
-    playbackCtxRef.current = ctx;
-
+    const ctx = playbackCtxRef.current!;
     await ctx.audioWorklet.addModule('/audio-processors/playback.worklet.js');
     const worklet = new AudioWorkletNode(ctx, 'pcm-processor');
     playbackWorkletRef.current = worklet;
@@ -248,16 +246,10 @@ export function GeminiVoiceDemo() {
         audio: false,
       });
       videoStreamRef.current = stream;
+      // videoRef is always mounted (video element outside AnimatePresence conditional)
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await new Promise<void>((resolve) => {
-          const video = videoRef.current!;
-          if (video.videoWidth > 0) { resolve(); return; }
-          const handler = () => { video.removeEventListener('loadedmetadata', handler); resolve(); };
-          video.addEventListener('loadedmetadata', handler);
-          setTimeout(resolve, 2000);
-        });
-        await videoRef.current.play();
+        videoRef.current.play().catch(() => {});
       }
       setCameraOn(true);
       setError(null);
@@ -315,6 +307,17 @@ export function GeminiVoiceDemo() {
     setCallDuration(0);
     setError(null);
     callTimerRef.current = setInterval(() => setCallDuration(d => d + 1), 1000);
+
+    // Create AudioContexts synchronously here — Chrome requires AudioContext to be
+    // created (and resumed) within the user gesture event handler. Creating them
+    // inside ws.onopen (async callback) puts them outside the gesture context and
+    // Chrome will refuse to resume them.
+    const captureCtx = new AudioContext({ sampleRate: 16000 });
+    captureCtxRef.current = captureCtx;
+    const playbackCtx = new AudioContext({ sampleRate: 24000 });
+    playbackCtxRef.current = playbackCtx;
+    captureCtx.resume().catch(() => {});
+    playbackCtx.resume().catch(() => {});
 
     try {
       // 1. Fetch ephemeral token from backend (n8n)
@@ -470,36 +473,27 @@ export function GeminiVoiceDemo() {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Camera preview */}
-        <AnimatePresence>
-          {cameraOn && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden rounded-xl border border-gray-600 relative"
-            >
-              <video ref={videoRef} className="w-full max-h-48 object-cover rounded-xl bg-black" muted playsInline />
-              <AnimatePresence>
-                {captureFlash && (
-                  <motion.div
-                    initial={{ opacity: 0.5 }}
-                    animate={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute inset-0 bg-white rounded-xl pointer-events-none"
-                  />
-                )}
-              </AnimatePresence>
-              <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/60 rounded-full px-2 py-1">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                </span>
-                <span className="text-white text-[10px] font-semibold tracking-wide">LIVE</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Camera preview — video element always in DOM so videoRef is valid before setCameraOn */}
+        <div className={`rounded-xl border border-gray-600 relative overflow-hidden transition-all duration-300 ${cameraOn ? 'block' : 'hidden'}`}>
+          <video ref={videoRef} className="w-full max-h-48 object-cover rounded-xl bg-black" muted playsInline />
+          <AnimatePresence>
+            {captureFlash && (
+              <motion.div
+                initial={{ opacity: 0.5 }}
+                animate={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 bg-white rounded-xl pointer-events-none"
+              />
+            )}
+          </AnimatePresence>
+          <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/60 rounded-full px-2 py-1">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+            </span>
+            <span className="text-white text-[10px] font-semibold tracking-wide">LIVE</span>
+          </div>
+        </div>
         <canvas ref={canvasRef} className="hidden" />
 
         {/* Status bar */}

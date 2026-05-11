@@ -2,6 +2,10 @@
     root * /srv
     encode gzip
 
+    # Redirect www → non-www (301 permanent)
+    @www host www.mariomoreno.work
+    redir @www https://mariomoreno.work{uri} 301
+
     # -------------------------------------------------------------------------
     # Reverse proxy for n8n webhooks — avoids CORS from browser
     # All /proxy/n8n/* requests are forwarded to the n8n instance

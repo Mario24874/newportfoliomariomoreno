@@ -166,7 +166,7 @@ const HeaderMUI: React.FC = () => {
           <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
             {t.header.menu || 'Menu'}
           </Typography>
-          <IconButton onClick={toggleDrawer(false)} sx={{ color: 'text.secondary' }}>
+          <IconButton onClick={toggleDrawer(false)} aria-label="Cerrar menú" sx={{ color: 'text.secondary' }}>
             <HiX />
           </IconButton>
         </Box>

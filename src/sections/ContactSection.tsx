@@ -83,6 +83,7 @@ const ContactSection: React.FC = () => {
                 href={YOUR_LINKEDIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="LinkedIn de Mario Moreno"
                 component={motion.a}
                 whileHover={{ scale: 1.2 }}
                 sx={{
@@ -100,6 +101,7 @@ const ContactSection: React.FC = () => {
                 href={YOUR_GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="GitHub de Mario Moreno"
                 component={motion.a}
                 whileHover={{ scale: 1.2 }}
                 sx={{
@@ -117,6 +119,7 @@ const ContactSection: React.FC = () => {
                 href="https://www.youtube.com/@MarioMoreno-lA"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="YouTube de Mario Moreno"
                 component={motion.a}
                 whileHover={{ scale: 1.2 }}
                 sx={{
@@ -134,6 +137,7 @@ const ContactSection: React.FC = () => {
                 href="https://www.instagram.com/mario.moreno.dev/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Instagram de Mario Moreno"
                 component={motion.a}
                 whileHover={{ scale: 1.2 }}
                 sx={{

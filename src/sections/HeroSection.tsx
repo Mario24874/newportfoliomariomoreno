@@ -103,11 +103,15 @@ const HeroSection: React.FC = () => {
         <section id="hero-section" className="min-h-screen flex items-center justify-center text-center px-4 sm:px-6 lg:px-8 -mt-16 sm:-mt-20 relative overflow-hidden">
             {/* Background Image with Fade Effect */}
             <div className="absolute inset-0 z-0">
-                {/* Main background image */}
-                <div 
-                    className="absolute inset-0 bg-cover bg-top bg-no-repeat transform"
+                {/* Main background image — real <img> for LCP detection */}
+                <img
+                    src={backgroundConfig.imageUrl}
+                    alt=""
+                    fetchPriority="high"
+                    loading="eager"
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover object-top"
                     style={{
-                        backgroundImage: `url(${backgroundConfig.imageUrl})`,
                         filter: `blur(${backgroundConfig.effects.blur}px) brightness(${backgroundConfig.effects.brightness})`,
                         transform: `scale(${backgroundConfig.effects.scale})`,
                         willChange: 'transform',
@@ -135,13 +139,16 @@ const HeroSection: React.FC = () => {
             
             <div className="container mx-auto max-w-4xl relative z-10">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 1, y: 0 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
+                    transition={{ duration: 0 }}
                     className="space-y-6 sm:space-y-8"
                 >
                     {/* Main Heading - Fully responsive */}
-                    <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-white leading-tight">
+                    <h1
+                        aria-label="Mario Moreno — Full Stack Engineer & AI Automation Specialist"
+                        className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-white leading-tight"
+                    >
                         <span className="block">
                             {renderAnimatedText()}
                             <span className={`border-r-2 border-white transition-opacity duration-200 ${isWaiting || (charIndex === heroTexts[textIndex].length && !isDeleting) ? 'animate-blink' : 'opacity-100'}`}> </span>

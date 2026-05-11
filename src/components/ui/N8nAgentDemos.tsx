@@ -267,8 +267,9 @@ export function ResearchAgentDemo() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.researchLanguageLabel}</label>
+            <label htmlFor="researchLang" className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.researchLanguageLabel}</label>
             <select
+              id="researchLang"
               value={researchLang}
               onChange={(e) => setResearchLang(e.target.value as typeof researchLang)}
               className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputBase}`}
@@ -280,8 +281,9 @@ export function ResearchAgentDemo() {
             </select>
           </div>
           <div>
-            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.researchDepthLabel}</label>
+            <label htmlFor="researchDepth" className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.researchDepthLabel}</label>
             <select
+              id="researchDepth"
               value={depth}
               onChange={(e) => setDepth(e.target.value as typeof depth)}
               className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputBase}`}
@@ -489,8 +491,9 @@ export function ContentAgentDemo() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.contentTone}</label>
+            <label htmlFor="contentTone" className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.contentTone}</label>
             <select
+              id="contentTone"
               value={tone}
               onChange={(e) => setTone(e.target.value as typeof tone)}
               className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 ${inputBase}`}
@@ -504,8 +507,9 @@ export function ContentAgentDemo() {
             </select>
           </div>
           <div>
-            <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.contentLanguage}</label>
+            <label htmlFor="contentLanguage" className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.contentLanguage}</label>
             <select
+              id="contentLanguage"
               value={contentLanguage}
               onChange={(e) => setContentLanguage(e.target.value as 'es' | 'en')}
               className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 ${inputBase}`}

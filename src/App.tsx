@@ -1,22 +1,23 @@
 // src/App.tsx
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import Lenis from 'lenis';
 import Analytics from '@/components/Analytics';
 import HeaderMUI from '@/components/layout/HeaderMUI';
-import Footer from '@/components/layout/Footer';
 import HeroSection from '@/sections/HeroSection';
-import AIScrollSection from '@/sections/AIScrollSection';
-import SkillsSection from '@/sections/SkillsSection';
-import ProjectsSection from '@/sections/ProjectsSection';
-import DemosSection from '@/sections/DemosSection';
-import MobileAppsSection from '@/sections/MobileAppsSection';
-import AboutSection from '@/sections/AboutSection';
-import ContactSection from '@/sections/ContactSection';
-import WhatsAppWidget from '@/components/ui/WhatsAppWidget';
-import PrivacyPolicy from '@/components/ui/PrivacyPolicy';
-import TermsConditions from '@/components/ui/TermsConditions';
 import { YOUR_WHATSAPP_NUMBER } from '@/data/portfolioData';
 import { useTheme } from '@/contexts/ThemeContext';
+
+const AIScrollSection = React.lazy(() => import('@/sections/AIScrollSection'));
+const AboutSection = React.lazy(() => import('@/sections/AboutSection'));
+const SkillsSection = React.lazy(() => import('@/sections/SkillsSection'));
+const ProjectsSection = React.lazy(() => import('@/sections/ProjectsSection'));
+const DemosSection = React.lazy(() => import('@/sections/DemosSection'));
+const MobileAppsSection = React.lazy(() => import('@/sections/MobileAppsSection'));
+const ContactSection = React.lazy(() => import('@/sections/ContactSection'));
+const Footer = React.lazy(() => import('@/components/layout/Footer'));
+const WhatsAppWidget = React.lazy(() => import('@/components/ui/WhatsAppWidget'));
+const PrivacyPolicy = React.lazy(() => import('@/components/ui/PrivacyPolicy'));
+const TermsConditions = React.lazy(() => import('@/components/ui/TermsConditions'));
 
 const App: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -40,21 +41,25 @@ const App: React.FC = () => {
       <HeaderMUI />
       <main>
         <HeroSection />
-        <AIScrollSection />
-        <AboutSection />
-        <SkillsSection />
-        <ProjectsSection />
-        <DemosSection />
-        <MobileAppsSection />
-        <ContactSection />
+        <Suspense fallback={null}>
+          <AIScrollSection />
+          <AboutSection />
+          <SkillsSection />
+          <ProjectsSection />
+          <DemosSection />
+          <MobileAppsSection />
+          <ContactSection />
+        </Suspense>
       </main>
-      <WhatsAppWidget phoneNumber={YOUR_WHATSAPP_NUMBER} />
-      <Footer
-        onPrivacyClick={() => setShowPrivacyPolicy(true)}
-        onTermsClick={() => setShowTerms(true)}
-      />
-      <PrivacyPolicy isOpen={showPrivacyPolicy} onClose={() => setShowPrivacyPolicy(false)} />
-      <TermsConditions isOpen={showTerms} onClose={() => setShowTerms(false)} />
+      <Suspense fallback={null}>
+        <WhatsAppWidget phoneNumber={YOUR_WHATSAPP_NUMBER} />
+        <Footer
+          onPrivacyClick={() => setShowPrivacyPolicy(true)}
+          onTermsClick={() => setShowTerms(true)}
+        />
+        <PrivacyPolicy isOpen={showPrivacyPolicy} onClose={() => setShowPrivacyPolicy(false)} />
+        <TermsConditions isOpen={showTerms} onClose={() => setShowTerms(false)} />
+      </Suspense>
     </div>
   );
 };

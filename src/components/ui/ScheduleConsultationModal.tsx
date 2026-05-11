@@ -312,11 +312,12 @@ const ScheduleConsultationModal: React.FC<ScheduleConsultationModalProps> = ({ i
 
       {/* Consultation Type */}
       <div>
-        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="consultationType" className="flex items-center text-sm font-medium text-gray-700 mb-2">
           <FaBriefcase className="mr-2 text-blue-500" />
           {language === 'es' ? 'Tipo de Consulta' : 'Consultation Type'} *
         </label>
         <select
+          id="consultationType"
           name="consultationType"
           value={formData.consultationType}
           onChange={handleChange}

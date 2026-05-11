@@ -5,6 +5,25 @@ import { SiGoogle } from 'react-icons/si';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+const TURNSTILE_SITE_KEY =
+  (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY || 'TU_SITE_KEY_AQUI';
+
+function incrementLocalCount(agentName: string) {
+  const key = 'demo_uses_' + agentName;
+  const stored = JSON.parse(localStorage.getItem(key) || '{}');
+  const now = Date.now();
+  const reset_at =
+    stored.reset_at && now < stored.reset_at
+      ? stored.reset_at
+      : now + 24 * 60 * 60 * 1000;
+  localStorage.setItem(key, JSON.stringify({ count: (stored.count || 0) + 1, reset_at }));
+}
+
+function checkLimitReached(agentName: string): boolean {
+  const stored = JSON.parse(localStorage.getItem('demo_uses_' + agentName) || '{}');
+  return stored.count >= 2 && Date.now() < stored.reset_at;
+}
+
 // Ephemeral token endpoint (n8n webhook generates it server-side)
 const TOKEN_URL =
   import.meta.env.VITE_GEMINI_LIVE_TOKEN_URL ||
@@ -44,6 +63,7 @@ const T = {
     placeholder: 'Presiona "Iniciar llamada" para comenzar.',
     powered: 'Powered by Gemini Live API',
     hint: 'Prueba: "¿Qué ves en mi cámara?" o "Explícame qué es la IA"',
+    limitReached: 'Has usado tu prueba gratuita para este agente. Contáctame en info@mariomoreno.work para una demo personalizada.',
   },
   en: {
     title: 'AI Voice Assistant',
@@ -63,6 +83,7 @@ const T = {
     placeholder: 'Press "Start call" to begin.',
     powered: 'Powered by Gemini Live API',
     hint: 'Try: "What do you see in my camera?" or "Explain what AI is"',
+    limitReached: 'You have used your free trial for this agent. Contact me at info@mariomoreno.work for a personalized demo.',
   },
 } as const;
 
@@ -96,6 +117,10 @@ export function GeminiVoiceDemo() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [callDuration, setCallDuration] = useState(0);
+  const [cfToken, setCfToken] = useState('');
+  const [limitReached, setLimitReached] = useState(false);
+  const tsRef = useRef<HTMLDivElement>(null);
+  const tsWidgetId = useRef<string | null>(null);
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -105,6 +130,38 @@ export function GeminiVoiceDemo() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (checkLimitReached('gemini-voice')) setLimitReached(true);
+  }, []);
+
+  useEffect(() => {
+    if (limitReached || !tsRef.current) return;
+    let interval: ReturnType<typeof setInterval>;
+    const tryRender = () => {
+      const w = window as any;
+      if (!w.turnstile || !tsRef.current) return;
+      tsWidgetId.current = w.turnstile.render(tsRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => setCfToken(token),
+        'refresh-expired': 'auto',
+        appearance: 'interaction-only',
+        theme: 'dark',
+      });
+    };
+    if ((window as any).turnstile) {
+      tryRender();
+    } else {
+      interval = setInterval(() => {
+        if ((window as any).turnstile) { tryRender(); clearInterval(interval); }
+      }, 500);
+    }
+    return () => {
+      clearInterval(interval);
+      (window as any).turnstile?.remove(tsWidgetId.current);
+      tsWidgetId.current = null;
+    };
+  }, [limitReached]);
 
   // ── Audio helpers ─────────────────────────────────────────────────────────
   function float32ToBase64PCM16(float32: Float32Array): string {
@@ -147,6 +204,7 @@ export function GeminiVoiceDemo() {
     // Setup complete — connection ready
     if (data?.setupComplete) {
       setIsConnected(true);
+      incrementLocalCount('gemini-voice');
       return;
     }
 
@@ -344,8 +402,12 @@ export function GeminiVoiceDemo() {
       });
       micStreamRef.current = micStream;
 
-      // 2. Fetch ephemeral token from backend (n8n)
-      const tokenRes = await fetch(TOKEN_URL, { method: 'POST' });
+      // 2. Fetch ephemeral token from backend (n8n) — pass Turnstile token for verification
+      const tokenRes = await fetch(TOKEN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cf_token: cfToken }),
+      });
       if (!tokenRes.ok) throw new Error(`Token error: ${tokenRes.status}`);
       const { token } = await tokenRes.json() as { token: string };
 
@@ -485,8 +547,30 @@ export function GeminiVoiceDemo() {
   const msgGemini = isDarkMode ? 'bg-gray-700/60 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-200 text-gray-800';
 
   // ── Render ────────────────────────────────────────────────────────────────
+  if (limitReached) {
+    return (
+      <div className={`rounded-2xl border overflow-hidden ${card}`}>
+        <div className="bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600 p-4 text-white">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 p-2.5 rounded-xl">
+              <SiGoogle className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-lg">{t.title}</h3>
+              <p className="text-xs text-blue-100">{t.subtitle}</p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6 flex flex-col items-center justify-center text-center gap-3">
+          <p className="text-gray-400 text-sm max-w-xs">{t.limitReached}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`rounded-2xl border overflow-hidden ${card}`}>
+      <div ref={tsRef} />
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600 p-4 text-white">
         <div className="flex items-center gap-3">

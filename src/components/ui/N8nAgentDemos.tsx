@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaSearch,
@@ -16,6 +16,29 @@ import {
 } from 'react-icons/fa';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+// ---------------------------------------------------------------------------
+// Turnstile helpers
+// ---------------------------------------------------------------------------
+
+const TURNSTILE_SITE_KEY =
+  (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY || 'TU_SITE_KEY_AQUI';
+
+function incrementLocalCount(agentName: string) {
+  const key = 'demo_uses_' + agentName;
+  const stored = JSON.parse(localStorage.getItem(key) || '{}');
+  const now = Date.now();
+  const reset_at =
+    stored.reset_at && now < stored.reset_at
+      ? stored.reset_at
+      : now + 24 * 60 * 60 * 1000;
+  localStorage.setItem(key, JSON.stringify({ count: (stored.count || 0) + 1, reset_at }));
+}
+
+function checkLimitReached(agentName: string): boolean {
+  const stored = JSON.parse(localStorage.getItem('demo_uses_' + agentName) || '{}');
+  return stored.count >= 2 && Date.now() < stored.reset_at;
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -103,6 +126,7 @@ const T = {
     priorityHigh: 'Alta',
     priorityMedium: 'Media',
     priorityLow: 'Baja',
+    limitReached: 'Has usado tu prueba gratuita para este agente. Contáctame en info@mariomoreno.work para una demo personalizada.',
   },
   en: {
     copied: 'Copied!',
@@ -149,6 +173,7 @@ const T = {
     priorityHigh: 'High',
     priorityMedium: 'Medium',
     priorityLow: 'Low',
+    limitReached: 'You have used your free trial for this agent. Contact me at info@mariomoreno.work for a personalized demo.',
   },
 } as const;
 
@@ -226,6 +251,42 @@ export function ResearchAgentDemo() {
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [cfToken, setCfToken] = useState('');
+  const [limitReached, setLimitReached] = useState(false);
+  const tsRef = useRef<HTMLDivElement>(null);
+  const tsWidgetId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (checkLimitReached('research-agent')) setLimitReached(true);
+  }, []);
+
+  useEffect(() => {
+    if (limitReached || !tsRef.current) return;
+    let interval: ReturnType<typeof setInterval>;
+    const tryRender = () => {
+      const w = window as any;
+      if (!w.turnstile || !tsRef.current) return;
+      tsWidgetId.current = w.turnstile.render(tsRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => setCfToken(token),
+        'refresh-expired': 'auto',
+        appearance: 'interaction-only',
+        theme: 'dark',
+      });
+    };
+    if ((window as any).turnstile) {
+      tryRender();
+    } else {
+      interval = setInterval(() => {
+        if ((window as any).turnstile) { tryRender(); clearInterval(interval); }
+      }, 500);
+    }
+    return () => {
+      clearInterval(interval);
+      (window as any).turnstile?.remove(tsWidgetId.current);
+      tsWidgetId.current = null;
+    };
+  }, [limitReached]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,12 +300,13 @@ export function ResearchAgentDemo() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic, language: researchLang, depth }),
+          body: JSON.stringify({ topic, language: researchLang, depth, cf_token: cfToken }),
         }
       );
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data: ResearchResult = await res.json();
       setResult(data);
+      incrementLocalCount('research-agent');
     } catch (err) {
       setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
@@ -252,8 +314,17 @@ export function ResearchAgentDemo() {
     }
   };
 
+  if (limitReached) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
+        <p className="text-gray-400 text-sm max-w-xs">{t.limitReached}</p>
+      </div>
+    );
+  }
+
   return (
     <div>
+      <div ref={tsRef} />
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.researchTopic}</label>
@@ -444,6 +515,42 @@ export function ContentAgentDemo() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ContentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cfToken, setCfToken] = useState('');
+  const [limitReached, setLimitReached] = useState(false);
+  const tsRef = useRef<HTMLDivElement>(null);
+  const tsWidgetId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (checkLimitReached('content-agent')) setLimitReached(true);
+  }, []);
+
+  useEffect(() => {
+    if (limitReached || !tsRef.current) return;
+    let interval: ReturnType<typeof setInterval>;
+    const tryRender = () => {
+      const w = window as any;
+      if (!w.turnstile || !tsRef.current) return;
+      tsWidgetId.current = w.turnstile.render(tsRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => setCfToken(token),
+        'refresh-expired': 'auto',
+        appearance: 'interaction-only',
+        theme: 'dark',
+      });
+    };
+    if ((window as any).turnstile) {
+      tryRender();
+    } else {
+      interval = setInterval(() => {
+        if ((window as any).turnstile) { tryRender(); clearInterval(interval); }
+      }, 500);
+    }
+    return () => {
+      clearInterval(interval);
+      (window as any).turnstile?.remove(tsWidgetId.current);
+      tsWidgetId.current = null;
+    };
+  }, [limitReached]);
 
   const togglePlatform = (key: PlatformKey) => {
     setSelectedPlatforms((prev) =>
@@ -463,12 +570,13 @@ export function ContentAgentDemo() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic, tone, language: contentLanguage, platforms: selectedPlatforms }),
+          body: JSON.stringify({ topic, tone, language: contentLanguage, platforms: selectedPlatforms, cf_token: cfToken }),
         }
       );
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data: ContentResult = await res.json();
       setResult(data);
+      incrementLocalCount('content-agent');
     } catch (err) {
       setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
@@ -476,8 +584,17 @@ export function ContentAgentDemo() {
     }
   };
 
+  if (limitReached) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
+        <p className="text-gray-400 text-sm max-w-xs">{t.limitReached}</p>
+      </div>
+    );
+  }
+
   return (
     <div>
+      <div ref={tsRef} />
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.contentTopic}</label>
@@ -615,6 +732,42 @@ export function SupportAgentDemo() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SupportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cfToken, setCfToken] = useState('');
+  const [limitReached, setLimitReached] = useState(false);
+  const tsRef = useRef<HTMLDivElement>(null);
+  const tsWidgetId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (checkLimitReached('support-agent')) setLimitReached(true);
+  }, []);
+
+  useEffect(() => {
+    if (limitReached || !tsRef.current) return;
+    let interval: ReturnType<typeof setInterval>;
+    const tryRender = () => {
+      const w = window as any;
+      if (!w.turnstile || !tsRef.current) return;
+      tsWidgetId.current = w.turnstile.render(tsRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => setCfToken(token),
+        'refresh-expired': 'auto',
+        appearance: 'interaction-only',
+        theme: 'dark',
+      });
+    };
+    if ((window as any).turnstile) {
+      tryRender();
+    } else {
+      interval = setInterval(() => {
+        if ((window as any).turnstile) { tryRender(); clearInterval(interval); }
+      }, 500);
+    }
+    return () => {
+      clearInterval(interval);
+      (window as any).turnstile?.remove(tsWidgetId.current);
+      tsWidgetId.current = null;
+    };
+  }, [limitReached]);
 
   const priorityConfig = {
     critical: { label: t.priorityCritical, classes: 'bg-red-500/20 text-red-400 border-red-500/30' },
@@ -630,7 +783,7 @@ export function SupportAgentDemo() {
     setResult(null);
     setError(null);
     try {
-      const body: Record<string, string> = { message };
+      const body: Record<string, string> = { message, cf_token: cfToken };
       if (customerName.trim()) body.customer_name = customerName;
       if (product.trim()) body.product = product;
       if (customerCompany.trim()) body.customer_company = customerCompany;
@@ -646,6 +799,7 @@ export function SupportAgentDemo() {
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data: SupportResult = await res.json();
       setResult(data);
+      incrementLocalCount('support-agent');
     } catch (err) {
       setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
@@ -655,8 +809,17 @@ export function SupportAgentDemo() {
 
   const pConfig = result ? (priorityConfig[result.ticket.priority] ?? priorityConfig.medium) : null;
 
+  if (limitReached) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
+        <p className="text-gray-400 text-sm max-w-xs">{t.limitReached}</p>
+      </div>
+    );
+  }
+
   return (
     <div>
+      <div ref={tsRef} />
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className={`block text-sm font-medium mb-1 ${labelClass}`}>{t.supportMessage}</label>

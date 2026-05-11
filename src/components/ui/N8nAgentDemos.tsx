@@ -21,8 +21,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 // Turnstile helpers
 // ---------------------------------------------------------------------------
 
-const TURNSTILE_SITE_KEY =
-  (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY || 'TU_SITE_KEY_AQUI';
+const TURNSTILE_SITE_KEY = '0x4AAAAAADNcSxlusRk9rjD0';
 
 function incrementLocalCount(agentName: string) {
   const key = 'demo_uses_' + agentName;

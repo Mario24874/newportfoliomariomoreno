@@ -168,6 +168,20 @@ export const translations = {
         messageRequired: 'Message is required'
       }
     },
+    clientSection: {
+      title: 'Work with Me',
+      subtitle: 'Join my client platform and manage your project in real time',
+      description: 'Access my SaaS platform to track progress, communicate directly, review deliverables, and manage everything from one dashboard.',
+      cta: 'Create Free Account',
+      login: 'Sign In',
+      alreadyClient: 'Already have an account?',
+      features: [
+        'Real-time project tracking',
+        'Direct communication channel',
+        'Deliverable review & approval',
+        'Invoicing and contracts'
+      ]
+    },
     footer: {
       rights: 'All rights reserved',
       builtWith: 'Built with React, TypeScript & AI',
@@ -488,6 +502,20 @@ export const translations = {
         emailInvalid: 'Se requiere un email válido',
         messageRequired: 'El mensaje es requerido'
       }
+    },
+    clientSection: {
+      title: 'Trabaja Conmigo',
+      subtitle: 'Únete a mi plataforma de clientes y gestiona tu proyecto en tiempo real',
+      description: 'Accede a mi plataforma SaaS para dar seguimiento a tu proyecto, comunicarte directamente, revisar entregables y gestionar todo desde un solo panel.',
+      cta: 'Crear Cuenta Gratis',
+      login: 'Iniciar Sesión',
+      alreadyClient: '¿Ya tienes cuenta?',
+      features: [
+        'Seguimiento de proyectos en tiempo real',
+        'Canal de comunicación directo',
+        'Revisión y aprobación de entregables',
+        'Facturación y contratos'
+      ]
     },
     footer: {
       rights: 'Todos los derechos reservados',

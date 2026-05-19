@@ -145,8 +145,7 @@ export const getProjects = (t: any) => [
     description: t.projects.list.italianto.description,
     technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
     imageUrl: '/images/logo_Italianto.png',
-    liveUrl: '#',
-    repoUrl: '#',
+    liveUrl: 'https://italianto.com',
   },
   {
     id: 'antyquim',
@@ -154,7 +153,7 @@ export const getProjects = (t: any) => [
     description: t.projects.list.antyquim.description,
     technologies: ['Vue.js', 'Symfony (PHP)', 'MySQL', 'Stripe API', 'Tailwind CSS'],
     imageUrl: '/images/LogoAntyquimRSF.png',
-    liveUrl: '#',
+    liveUrl: 'https://antyquim.netlify.app/',
   },
   {
     id: 'urbanDrive',
@@ -162,7 +161,7 @@ export const getProjects = (t: any) => [
     description: t.projects.list.urbanDrive.description,
     technologies: ['React', 'Firebase', 'TypeScript', 'Jest'],
     imageUrl: '/images/UrbanDrive.png',
-    repoUrl: '#',
+    liveUrl: 'https://urban-drive-master.netlify.app/',
   },
   {
     id: 'eduManager',
@@ -170,7 +169,6 @@ export const getProjects = (t: any) => [
     description: t.projects.list.eduManager.description,
     technologies: ['Angular', 'Spring Boot (Java)', 'AWS (S3, Redshift)', 'D3.js', 'REST APIs'],
     imageUrl: '/images/LogoEduManager.jpeg',
-    liveUrl: '#',
   },
   {
     id: 'blogIT',
@@ -178,8 +176,7 @@ export const getProjects = (t: any) => [
     description: t.projects.list.blogIT.description,
     technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
     imageUrl: '/images/BlogIT.jpeg',
-    liveUrl: '#',
-    repoUrl: '#',
+    liveUrl: 'https://blog-itech.netlify.app/',
   },
   {
     id: 'nextCodeSolutions',
@@ -187,8 +184,7 @@ export const getProjects = (t: any) => [
     description: t.projects.list.nextCodeSolutions.description,
     technologies: ['React', 'Node.js', 'TypeScript', 'Python (for AI)', 'n8n', 'PostgreSQL', 'Docker'],
     imageUrl: '/images/NextCodeSolutions.jpeg',
-    liveUrl: '#',
-    repoUrl: '#',
+    liveUrl: 'https://nextcodesolutions.netlify.app/',
   },
 ];
 

@@ -84,7 +84,7 @@ const HeaderMUI: React.FC = () => {
               }}
               sx={{
                 fontWeight: 700,
-                color: 'text.primary',
+                color: '#ffffff',
                 textDecoration: 'none',
                 fontSize: { xs: '1.125rem', sm: '1.25rem', lg: '1.5rem' },
                 transition: 'color 0.3s',
@@ -108,12 +108,12 @@ const HeaderMUI: React.FC = () => {
                   key={item.name}
                   onClick={() => handleNavClick(item.href)}
                   sx={{
-                    color: 'text.secondary',
+                    color: '#ffffff',
                     px: { lg: 1.5, xl: 2 },
                     fontSize: { lg: '0.875rem', xl: '1rem' },
                     fontWeight: 500,
                     '&:hover': {
-                      color: 'text.primary',
+                      color: 'primary.main',
                       backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     },
                   }}
@@ -134,11 +134,11 @@ const HeaderMUI: React.FC = () => {
               color="inherit"
               aria-label="menu"
               onClick={toggleDrawer(true)}
-              sx={{ 
+              sx={{
                 display: { lg: 'none' },
-                color: 'text.secondary',
+                color: '#ffffff',
                 '&:hover': {
-                  color: 'text.primary',
+                  color: 'primary.main',
                 }
               }}
             >
@@ -194,7 +194,7 @@ const HeaderMUI: React.FC = () => {
                   primaryTypographyProps={{
                     fontSize: '1rem',
                     fontWeight: 500,
-                    color: 'text.secondary',
+                    color: '#ffffff',
                   }}
                 />
               </ListItemButton>

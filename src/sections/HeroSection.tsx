@@ -5,17 +5,11 @@ import { motion } from 'framer-motion';
 import { Button, Box } from '@mui/material';
 import { YOUR_NAME } from '@/data/portfolioData';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { translations } from '@/data/translations';
-import { getHeroBackgroundConfig, generateEdgeFadeStyle, generateVignetteStyle } from '@/data/heroConfig';
 
 const HeroSection: React.FC = () => {
     const { language } = useLanguage();
-    const { isDarkMode } = useTheme();
     const t = translations[language];
-    
-    // Configuración de fondo basada en el tema
-    const backgroundConfig = getHeroBackgroundConfig(isDarkMode);
     
     const [displayedText, setDisplayedText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
@@ -101,9 +95,8 @@ const HeroSection: React.FC = () => {
 
     return (
         <section id="hero-section" className="min-h-screen flex items-center justify-center text-center px-4 sm:px-6 lg:px-8 -mt-16 sm:-mt-20 relative overflow-hidden">
-            {/* Background Video with Fade Effect */}
+            {/* Background Video */}
             <div className="absolute inset-0 z-0">
-                {/* Main background video */}
                 <video
                     src="/hero-video.mp4"
                     autoPlay
@@ -111,29 +104,6 @@ const HeroSection: React.FC = () => {
                     loop
                     playsInline
                     className="absolute inset-0 w-full h-full object-cover object-top"
-                    style={{
-                        filter: `blur(${backgroundConfig.effects.blur}px) brightness(${backgroundConfig.effects.brightness})`,
-                        transform: `scale(${backgroundConfig.effects.scale})`,
-                        willChange: 'transform',
-                    }}
-                />
-                
-                {/* Multi-layer gradient overlay for smooth blending */}
-                <div className={`absolute inset-0 bg-gradient-to-b ${backgroundConfig.overlay.primary}`} />
-                
-                {/* Radial fade effect from center */}
-                <div className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-radial' : 'bg-gradient-radial-light'}`} />
-                
-                {/* Edge fade effect for seamless blending */}
-                <div 
-                    className="absolute inset-0" 
-                    style={{ background: generateEdgeFadeStyle(isDarkMode) }}
-                />
-                
-                {/* Additional vignette effect */}
-                <div 
-                    className="absolute inset-0"
-                    style={{ background: generateVignetteStyle(isDarkMode) }}
                 />
             </div>
             

@@ -101,15 +101,15 @@ const HeroSection: React.FC = () => {
 
     return (
         <section id="hero-section" className="min-h-screen flex items-center justify-center text-center px-4 sm:px-6 lg:px-8 -mt-16 sm:-mt-20 relative overflow-hidden">
-            {/* Background Image with Fade Effect */}
+            {/* Background Video with Fade Effect */}
             <div className="absolute inset-0 z-0">
-                {/* Main background image — real <img> for LCP detection */}
-                <img
-                    src={backgroundConfig.imageUrl}
-                    alt=""
-                    fetchPriority="high"
-                    loading="eager"
-                    decoding="async"
+                {/* Main background video */}
+                <video
+                    src="/hero-video.mp4"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
                     className="absolute inset-0 w-full h-full object-cover object-top"
                     style={{
                         filter: `blur(${backgroundConfig.effects.blur}px) brightness(${backgroundConfig.effects.brightness})`,
@@ -202,9 +202,9 @@ const HeroSection: React.FC = () => {
                             >
                                 {t.hero.viewWork}
                             </Button>
-                            <Button 
+                            <Button
                                 href="#contact"
-                                variant="outlined"
+                                variant="contained"
                                 color="primary"
                                 size="large"
                                 sx={{
@@ -213,12 +213,9 @@ const HeroSection: React.FC = () => {
                                     py: { xs: 1.5, sm: 2 },
                                     fontSize: { xs: '1rem', sm: '1.125rem', lg: '1.25rem' },
                                     fontWeight: 'bold',
-                                    borderColor: 'rgba(156, 163, 175, 0.5)',
-                                    color: 'text.secondary',
+                                    boxShadow: 3,
                                     '&:hover': {
-                                        borderColor: 'primary.main',
-                                        backgroundColor: 'rgba(59, 130, 246, 0.08)',
-                                        color: 'text.primary',
+                                        boxShadow: '0 8px 24px rgba(59, 130, 246, 0.4)',
                                     }
                                 }}
                             >

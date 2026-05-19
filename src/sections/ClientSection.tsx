@@ -74,7 +74,7 @@ const ClientSection: React.FC = () => {
             {/* CTA */}
             <div className="flex flex-col items-center gap-3">
               <a
-                href={`${CRM_URL}/register`}
+                href={CRM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center"

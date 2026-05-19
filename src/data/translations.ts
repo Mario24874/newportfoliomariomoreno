@@ -172,9 +172,9 @@ export const translations = {
       title: 'Work with Me',
       subtitle: 'Join my client platform and manage your project in real time',
       description: 'Access my SaaS platform to track progress, communicate directly, review deliverables, and manage everything from one dashboard.',
-      cta: 'Create Free Account',
+      cta: 'Access the Portal',
       login: 'Sign In',
-      alreadyClient: 'Already have an account?',
+      alreadyClient: 'Already a client?',
       features: [
         'Real-time project tracking',
         'Direct communication channel',
@@ -507,9 +507,9 @@ export const translations = {
       title: 'Trabaja Conmigo',
       subtitle: 'Únete a mi plataforma de clientes y gestiona tu proyecto en tiempo real',
       description: 'Accede a mi plataforma SaaS para dar seguimiento a tu proyecto, comunicarte directamente, revisar entregables y gestionar todo desde un solo panel.',
-      cta: 'Crear Cuenta Gratis',
+      cta: 'Acceder al Portal',
       login: 'Iniciar Sesión',
-      alreadyClient: '¿Ya tienes cuenta?',
+      alreadyClient: '¿Ya eres cliente?',
       features: [
         'Seguimiento de proyectos en tiempo real',
         'Canal de comunicación directo',

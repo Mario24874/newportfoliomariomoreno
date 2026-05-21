@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { translations } from '@/data/translations';
 
 const API_URL = 'https://app.mariomoreno.work/api/analytics/review';
 
 type Step = 'idle' | 'open' | 'submitting' | 'done' | 'error';
 
 export const ReviewWidget: React.FC = () => {
+  const { language } = useLanguage();
+  const t = translations[language].reviewWidget;
   const [step, setStep] = useState<Step>('idle');
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
@@ -43,7 +47,7 @@ export const ReviewWidget: React.FC = () => {
       {step === 'idle' && (
         <button
           onClick={() => setStep('open')}
-          title="Dejar una valoración"
+          title={t.buttonTitle}
           style={{
             position: 'fixed', bottom: 24, left: 24, zIndex: 50,
             display: 'flex', alignItems: 'center', gap: 8,
@@ -57,7 +61,7 @@ export const ReviewWidget: React.FC = () => {
           onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
         >
           <span style={{ fontSize: 16 }}>⭐</span>
-          Valorar
+          {t.buttonLabel}
         </button>
       )}
 
@@ -80,39 +84,39 @@ export const ReviewWidget: React.FC = () => {
               <div style={{ textAlign: 'center', padding: '12px 0' }}>
                 <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
                 <h3 style={{ margin: '0 0 8px', color: '#f8fafc', fontSize: 18, fontWeight: 700 }}>
-                  ¡Gracias por tu valoración!
+                  {t.doneTitle}
                 </h3>
                 <p style={{ margin: '0 0 20px', color: '#64748b', fontSize: 14 }}>
-                  Tu reseña será revisada y publicada pronto.
+                  {t.doneDescription}
                 </p>
                 <button onClick={reset} style={{
                   padding: '8px 20px', borderRadius: 8, background: '#1e293b',
                   color: '#94a3b8', border: 'none', cursor: 'pointer', fontSize: 13,
                 }}>
-                  Cerrar
+                  {t.close}
                 </button>
               </div>
             ) : step === 'error' ? (
               <div style={{ textAlign: 'center', padding: '12px 0' }}>
                 <div style={{ fontSize: 40, marginBottom: 12 }}>😕</div>
                 <h3 style={{ margin: '0 0 8px', color: '#f8fafc', fontSize: 18, fontWeight: 700 }}>
-                  Algo salió mal
+                  {t.errorTitle}
                 </h3>
                 <p style={{ margin: '0 0 20px', color: '#64748b', fontSize: 14 }}>
-                  Intenta de nuevo más tarde.
+                  {t.errorDescription}
                 </p>
                 <button onClick={reset} style={{
                   padding: '8px 20px', borderRadius: 8, background: '#1e293b',
                   color: '#94a3b8', border: 'none', cursor: 'pointer', fontSize: 13,
                 }}>
-                  Cerrar
+                  {t.close}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                   <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 16, fontWeight: 700 }}>
-                    ¿Cómo valoras mi portfolio?
+                    {t.modalTitle}
                   </h3>
                   <button type="button" onClick={reset} style={{
                     background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: 18, lineHeight: 1,
@@ -142,13 +146,13 @@ export const ReviewWidget: React.FC = () => {
 
                 {rating > 0 && (
                   <div style={{ textAlign: 'center', marginBottom: 16, fontSize: 13, color: '#94a3b8' }}>
-                    {['', 'Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente'][rating]}
+                    {t.ratingLabels[rating]}
                   </div>
                 )}
 
                 <input
                   type="text"
-                  placeholder="Tu nombre (opcional)"
+                  placeholder={t.namePlaceholder}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   style={{
@@ -158,7 +162,7 @@ export const ReviewWidget: React.FC = () => {
                   }}
                 />
                 <textarea
-                  placeholder="Comentario (opcional)"
+                  placeholder={t.commentPlaceholder}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   rows={3}
@@ -181,7 +185,7 @@ export const ReviewWidget: React.FC = () => {
                     transition: 'background 0.15s',
                   }}
                 >
-                  {step === 'submitting' ? 'Enviando...' : 'Enviar valoración'}
+                  {step === 'submitting' ? t.submitting : t.submit}
                 </button>
               </form>
             )}

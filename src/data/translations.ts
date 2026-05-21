@@ -332,6 +332,21 @@ export const translations = {
         offline: 'Offline',
         connecting: 'Connecting...'
       }
+    },
+    reviewWidget: {
+      buttonTitle: 'Leave a review',
+      buttonLabel: 'Rate',
+      modalTitle: 'How do you rate my portfolio?',
+      namePlaceholder: 'Your name (optional)',
+      commentPlaceholder: 'Comment (optional)',
+      submitting: 'Sending...',
+      submit: 'Submit review',
+      doneTitle: 'Thanks for your review!',
+      doneDescription: 'Your review will be checked and published soon.',
+      errorTitle: 'Something went wrong',
+      errorDescription: 'Please try again later.',
+      close: 'Close',
+      ratingLabels: ['', 'Bad', 'Fair', 'Good', 'Very good', 'Excellent']
     }
   },
   es: {
@@ -667,6 +682,21 @@ export const translations = {
         offline: 'Desconectado',
         connecting: 'Conectando...'
       }
+    },
+    reviewWidget: {
+      buttonTitle: 'Dejar una valoración',
+      buttonLabel: 'Valorar',
+      modalTitle: '¿Cómo valoras mi portfolio?',
+      namePlaceholder: 'Tu nombre (opcional)',
+      commentPlaceholder: 'Comentario (opcional)',
+      submitting: 'Enviando...',
+      submit: 'Enviar valoración',
+      doneTitle: '¡Gracias por tu valoración!',
+      doneDescription: 'Tu reseña será revisada y publicada pronto.',
+      errorTitle: 'Algo salió mal',
+      errorDescription: 'Intenta de nuevo más tarde.',
+      close: 'Cerrar',
+      ratingLabels: ['', 'Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente']
     }
   }
 };

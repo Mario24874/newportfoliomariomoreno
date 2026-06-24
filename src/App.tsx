@@ -28,6 +28,7 @@ function trackVisit() {
 const AIScrollSection = React.lazy(() => import('@/sections/AIScrollSection'));
 const AboutSection = React.lazy(() => import('@/sections/AboutSection'));
 const SkillsSection = React.lazy(() => import('@/sections/SkillsSection'));
+const MetaProviderSection = React.lazy(() => import('@/sections/MetaProviderSection'));
 const ProjectsSection = React.lazy(() => import('@/sections/ProjectsSection'));
 const DemosSection = React.lazy(() => import('@/sections/DemosSection'));
 const MobileAppsSection = React.lazy(() => import('@/sections/MobileAppsSection'));
@@ -65,6 +66,7 @@ const App: React.FC = () => {
           <AIScrollSection />
           <AboutSection />
           <SkillsSection />
+          <MetaProviderSection />
           <ProjectsSection />
           <DemosSection />
           <MobileAppsSection />

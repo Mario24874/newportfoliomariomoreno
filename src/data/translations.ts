@@ -45,6 +45,13 @@ export const translations = {
         languages: 'Language Proficiency'
       }
     },
+    metaProvider: {
+      eyebrow: 'Officially verified by Meta as a Technology Provider',
+      title: 'Meta-Verified Tech Provider',
+      valueLine: 'I build official integrations on the Meta Graph API to automate WhatsApp, Instagram and Messenger for businesses.',
+      integrationsLabel: 'Official integrations via Meta Graph API',
+      cta: "Let's talk about your integration"
+    },
     projects: {
       title: 'Featured Projects',
       viewCode: 'View Code',
@@ -394,6 +401,13 @@ export const translations = {
         soft: 'Habilidades Blandas y Organizacionales',
         languages: 'Competencia en Idiomas'
       }
+    },
+    metaProvider: {
+      eyebrow: 'Verificación oficial de Meta como Proveedor de Tecnologías',
+      title: 'Proveedor de Tecnologías verificado por Meta',
+      valueLine: 'Construyo integraciones oficiales sobre Meta Graph API para automatizar WhatsApp, Instagram y Messenger en empresas.',
+      integrationsLabel: 'Integraciones oficiales mediante Meta Graph API',
+      cta: 'Hablemos de tu integración'
     },
     projects: {
       title: 'Proyectos Destacados',

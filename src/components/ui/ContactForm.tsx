@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { saveContactMessage } from '@/lib/analytics';
 import {
   Dialog,
   DialogTitle,
@@ -99,8 +100,11 @@ const ContactForm: React.FC<ContactFormProps> = ({ open, onClose }) => {
         templateParams, 
         EMAILJS_CONFIG.PUBLIC_KEY
       );
-      
-      setStatus({ 
+
+      // Persistir en la Supabase del portfolio para el panel /admin (fire-and-forget)
+      saveContactMessage({ name: formData.name, email: formData.email, phone: formData.phone, message: formData.message });
+
+      setStatus({
         type: 'success', 
         message: t.contact?.form?.successMessage || 'Message sent successfully! I\'ll get back to you soon.' 
       });

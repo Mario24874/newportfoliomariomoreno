@@ -7,23 +7,7 @@ import HeaderMUI from '@/components/layout/HeaderMUI';
 import HeroSection from '@/sections/HeroSection';
 import { YOUR_WHATSAPP_NUMBER } from '@/data/portfolioData';
 import { useTheme } from '@/contexts/ThemeContext';
-
-const VISIT_API = 'https://app.mariomoreno.work/api/analytics/visit';
-
-function trackVisit() {
-  if (sessionStorage.getItem('pv_sent')) return;
-  const session_id = crypto.randomUUID();
-  sessionStorage.setItem('pv_sent', '1');
-  fetch(VISIT_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      session_id,
-      page: 'home',
-      referrer: document.referrer || null,
-    }),
-  }).catch(() => {});
-}
+import { trackPageview } from '@/lib/analytics';
 
 const AIScrollSection = React.lazy(() => import('@/sections/AIScrollSection'));
 const AboutSection = React.lazy(() => import('@/sections/AboutSection'));
@@ -48,7 +32,7 @@ const App: React.FC = () => {
     const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
     const raf = (time: number) => { lenis.raf(time); requestAnimationFrame(raf); };
     requestAnimationFrame(raf);
-    trackVisit();
+    trackPageview('portfolio');
     return () => lenis.destroy();
   }, []);
 

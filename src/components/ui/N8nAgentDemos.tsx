@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackDemo } from '@/lib/analytics';
 import {
   FaSearch,
   FaPen,
@@ -291,6 +292,7 @@ export function ResearchAgentDemo() {
     e.preventDefault();
     if (!topic.trim()) return;
     setLoading(true);
+    trackDemo('research', topic);
     setResult(null);
     setError(null);
     try {
@@ -561,6 +563,7 @@ export function ContentAgentDemo() {
     e.preventDefault();
     if (!topic.trim() || selectedPlatforms.length === 0) return;
     setLoading(true);
+    trackDemo('content', topic);
     setResult(null);
     setError(null);
     try {
@@ -779,6 +782,7 @@ export function SupportAgentDemo() {
     e.preventDefault();
     if (!message.trim()) return;
     setLoading(true);
+    trackDemo('support', message);
     setResult(null);
     setError(null);
     try {

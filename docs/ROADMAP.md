@@ -24,13 +24,39 @@
 3. **SEO**: verificar/cerrar `sitemap.xml`, `robots.txt` (con `Disallow: /admin`), Open Graph y JSON-LD `Person`.
 4. **Futuras funciones del admin** (más allá de métricas): definir (ej. gestión de contenido, leads del portfolio, etc.).
 
-## 🟡 app.mariomoreno.work (gestor de clientes) — pendiente
-1. **Número de WhatsApp de producción + Meta App Review** *(quedó pendiente de la sesión anterior)*:
-   - Registrar/configurar el número de WhatsApp Business que enviará.
-   - Enviar la app a **App Review** de Meta para acceso avanzado a `whatsapp_business_messaging`.
-   - Estado de plantillas (memoria 2026-06-17): `appointment_reminder` ✅ APPROVED (id 840896338780049, UTILITY, en_US), `hello_world` ✅. **Re-verificar estado actual vía Graph API** al retomar.
-2. **Plantilla de OUTREACH aprobada**: crear/aprobar una plantilla para el primer contacto (categoría MARKETING/UTILITY según uso). ⚠️ Ver nota de política abajo.
-3. **Migrar envío de WhatsApp de YCloud → Meta Cloud API**: ya existe `lib/whatsapp.ts` + `/api/whatsapp/send` con credenciales Meta. Exponer un endpoint para que n8n dispare envíos con plantilla aprobada.
+> **YCloud queda DESCARTADO por completo** — solo se usó para pruebas. Todo el WhatsApp va por **Meta Cloud API directa** (Mario ya está verificado como Tech Provider).
+
+## 📱 PRIMER PASO — Configurar el número de WhatsApp (Meta Cloud API)
+
+### Estado verificado (2026-06-30)
+- outreach-tracker **ya tiene** la integración Meta Cloud API: `lib/whatsapp.ts`, `/api/whatsapp/send`, webhook, sync de plantillas. Env en producción: `META_WHATSAPP_TOKEN`, `META_PHONE_NUMBER_ID`, `META_WABA_ID`, `META_APP_SECRET`, `META_VERIFY_TOKEN`, `META_ES_CONFIG_ID`, `META_APP_ID` (994890322950768).
+- Existe la página `app/admin/connect-whatsapp` = **Embedded Signup v4 con Coexistencia** (`featureType: whatsapp_business_app_onboarding`). Captura `phone_number_id` + `waba_id` del evento `FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING`. **No** ejecuta el paso `register` (asume número ya registrado).
+- Plantillas (memoria 2026-06-17): `appointment_reminder` ✅ APPROVED (id 840896338780049, UTILITY, en_US), `hello_world` ✅. → **re-verificar estado actual vía Graph API**.
+
+### El problema
+- Se intentó onboardear el número **+584126504208** (el mismo que se usaba en YCloud) vía **coexistencia**, pero **no pudo verificarse**.
+- **Causa más probable:** ese número estaba registrado en **YCloud (un BSP, en WhatsApp Business *Platform*)**. La coexistencia exige que el número esté activo en la **app de WhatsApp Business** (consumidor) y **no** ya enganchado a la API/Platform vía otro BSP. Mientras siga atado a YCloud, la coexistencia no procede. (Además hay restricciones de región/elegibilidad.)
+
+### Qué hay que hacer (a definir contigo — decisiones abiertas)
+1. **Decidir el número:**
+   - **Opción A (recomendada):** liberar **+584126504208** de YCloud (borrarlo de la WABA de YCloud) y registrarlo **directo en Cloud API** (sin coexistencia, que ya no necesitamos).
+   - **Opción B:** usar un **número nuevo dedicado** al Cloud API (evita el enredo con YCloud).
+2. **Registro directo en Cloud API** (camino sin coexistencia):
+   - WhatsApp Manager → agregar el número a la WABA.
+   - Verificar propiedad por **OTP (SMS/voz)**.
+   - **Register** del número en Cloud API + fijar **PIN de verificación en dos pasos**.
+   - Obtener `phone_number_id` → actualizar `META_PHONE_NUMBER_ID` (y `META_WABA_ID` si cambia) en EasyPanel.
+   - Aprobar **display name** del número.
+3. **App Review de Meta** para acceso avanzado a `whatsapp_business_messaging` (si aún no está concedido).
+4. **Plantilla de OUTREACH aprobada** para el primer contacto (categoría según uso). ⚠️ Ver nota de política.
+
+### Preguntas a resolver antes de ejecutar
+- ¿+584126504208 estuvo alguna vez en la **app** de WhatsApp Business, o solo en YCloud (Platform)? → define si la coexistencia es siquiera posible.
+- ¿Reusamos ese número (liberándolo de YCloud) o estrenamos uno nuevo?
+- ¿El `META_PHONE_NUMBER_ID` actual es el número de **prueba** de Meta (con el que se probó `appointment_reminder`) o ya un número real?
+
+## 🟡 app.mariomoreno.work — otros pendientes
+1. **Exponer endpoint para que n8n dispare envíos** con plantilla aprobada vía Meta (reutiliza `lib/whatsapp.ts` + `/api/whatsapp/send`).
 
 ## 🟡 n8n — flujos de scraping y reenvío
 Ver evaluación detallada abajo. Acciones:

@@ -127,7 +127,11 @@ export function GeminiVoiceDemo() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Skip the initial mount: scrollIntoView on an empty chat yanks the whole
+    // page down to the demos section on load. block:'nearest' keeps later
+    // scrolls inside the messages container instead of scrolling the page.
+    if (messages.length === 0) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
 
   useEffect(() => {

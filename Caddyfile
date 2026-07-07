@@ -18,6 +18,15 @@
         }
     }
 
+    # -------------------------------------------------------------------------
+    # WhatsApp agent web demo — internal proxy to the wa-agent service
+    # (same docker network). Only /chat is exposed; /webhook stays internal.
+    # -------------------------------------------------------------------------
+    handle /api/wa-agent/chat {
+        rewrite * /chat
+        reverse_proxy wa-agent:8000
+    }
+
     # Privacy Policy lives on the app (Meta App Review requirement).
     # Redirect before the SPA catch-all so /privacy never serves the homepage.
     handle /privacy {

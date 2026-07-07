@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaMicrophone, FaRobot, FaBrain, FaCode, FaStore, FaPlay, FaWarehouse, FaSearch, FaPen, FaHeadset } from 'react-icons/fa';
+import { FaMicrophone, FaRobot, FaBrain, FaCode, FaStore, FaPlay, FaWarehouse, FaSearch, FaPen, FaHeadset, FaWhatsapp } from 'react-icons/fa';
 import { SiOpenai, SiTelegram } from 'react-icons/si';
 import { motion } from 'framer-motion';
 import EmbeddedElevenLabsWidget from '@/components/ui/EmbeddedElevenLabsWidget';
@@ -8,6 +8,7 @@ import N8nAutomationDemo from '@/components/ui/N8nAutomationDemo';
 import ScheduleConsultationModal from '@/components/ui/ScheduleConsultationModal';
 import { ResearchAgentDemo, ContentAgentDemo, SupportAgentDemo } from '@/components/ui/N8nAgentDemos';
 import GeminiVoiceDemo from '@/components/ui/GeminiVoiceDemo';
+import WhatsAppAgentDemo from '@/components/ui/WhatsAppAgentDemo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { translations } from '@/data/translations';
@@ -41,6 +42,16 @@ const DemosSection: React.FC = () => {
 
   // New live AI agent demos
   const agentDemos: AgentCardConfig[] = [
+    {
+      id: 'whatsapp-agent',
+      title: language === 'es' ? 'Agente WhatsApp (demo web)' : 'WhatsApp Agent (web demo)',
+      description: language === 'es'
+        ? 'El mismo agente LangGraph con memoria que atiende WhatsApp, conectado aquí por HTTP. Pregúntale por mis servicios y proyectos.'
+        : 'The same memory-enabled LangGraph agent that answers on WhatsApp, connected here over HTTP. Ask it about my services and projects.',
+      icon: FaWhatsapp,
+      gradient: 'from-green-500 to-emerald-600',
+      component: <WhatsAppAgentDemo />,
+    },
     {
       id: 'research-agent',
       title: language === 'es' ? 'Agente de Investigación' : 'Research Agent',

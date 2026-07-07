@@ -87,6 +87,10 @@ export const translations = {
         playest: {
           title: 'Playest',
           description: 'SaaS platform for creating and sharing YouTube playlists with ad-free playback, karaoke mode and recurring billing (Stripe subscriptions, mobile payments and gift cards).'
+        },
+        playestOdoo: {
+          title: 'Playest Connector for Odoo',
+          description: 'Odoo 18 module that brings Playest playlists into the ERP for training, tutorials and corporate ambient music, plus a Chrome extension (MV3) that sends the playlist you are watching straight to Odoo.'
         }
       }
     },
@@ -448,6 +452,10 @@ export const translations = {
         playest: {
           title: 'Playest',
           description: 'Plataforma SaaS para crear y compartir playlists de YouTube con reproducción sin anuncios, modo karaoke y facturación recurrente (suscripciones Stripe, pago móvil y gift cards).'
+        },
+        playestOdoo: {
+          title: 'Playest Connector para Odoo',
+          description: 'Módulo de Odoo 18 que integra las playlists de Playest en el ERP para adiestramiento, tutoriales y ambiente musical corporativo, más una extensión de Chrome (MV3) que envía la lista que estás viendo directo a Odoo.'
         }
       }
     },

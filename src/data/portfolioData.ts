@@ -148,6 +148,14 @@ export const getProjects = (t: any) => [
     liveUrl: 'https://playest.work',
   },
   {
+    id: 'playestOdoo',
+    title: t.projects.list.playestOdoo.title,
+    description: t.projects.list.playestOdoo.description,
+    technologies: ['Odoo 18', 'Python', 'XML', 'PostgreSQL', 'Chrome Extension (MV3)', 'Docker'],
+    imageUrl: '/images/logo-playest-odoo.png',
+    repoUrl: 'https://github.com/Mario24874/playest-odoo',
+  },
+  {
     id: 'italianto',
     title: t.projects.list.italianto.title,
     description: t.projects.list.italianto.description,

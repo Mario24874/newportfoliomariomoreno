@@ -82,6 +82,7 @@ const DemosSection: React.FC = () => {
         : 'Talk to Gemini in real time. Enable your camera and the agent can also see and describe what is in front of it.',
       icon: FaRobot,
       gradient: 'from-blue-600 to-violet-600',
+      live: true,
       component: <GeminiVoiceDemo />,
     },
     {
@@ -90,6 +91,7 @@ const DemosSection: React.FC = () => {
       description: t.demos.elevenlabs.description,
       icon: FaMicrophone,
       gradient: 'from-purple-500 to-pink-500',
+      live: true,
       component: agentId ? (
         <EmbeddedElevenLabsWidget agentId={agentId} />
       ) : (
@@ -107,6 +109,7 @@ const DemosSection: React.FC = () => {
         : 'Interactive demo of a virtual store with AI that responds to Telegram commands to automatically change prices.',
       icon: SiTelegram,
       gradient: 'from-blue-500 to-cyan-500',
+      live: false,
       component: (
         <div className="text-center p-6">
           <div className="mb-4">
@@ -136,6 +139,7 @@ const DemosSection: React.FC = () => {
         : 'Smart virtual warehouse with automatic presentation changes (Unit, 6-Pack, Box) and prices via Telegram commands.',
       icon: FaWarehouse,
       gradient: 'from-green-500 to-emerald-500',
+      live: false,
       component: (
         <div className="text-center p-6">
           <div className="mb-4">
@@ -165,6 +169,7 @@ const DemosSection: React.FC = () => {
         : 'Personal assistant with OpenAI that processes voice messages, accesses Gmail and Google Calendar.',
       icon: SiOpenai,
       gradient: 'from-green-500 to-teal-500',
+      live: false,
       component: (
         <div className="text-center p-6">
           <div className="mb-4">
@@ -194,6 +199,7 @@ const DemosSection: React.FC = () => {
         : 'Intelligent workflow automation powered by n8n and custom AI integrations.',
       icon: FaRobot,
       gradient: 'from-orange-500 to-red-500',
+      live: false,
       component: <N8nAutomationDemo />
     }
   ];
@@ -350,9 +356,15 @@ const DemosSection: React.FC = () => {
                       <FaCode className="w-4 h-4" />
                       <span>AI Powered</span>
                     </span>
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                      Live Demo
-                    </span>
+                    {demo.live ? (
+                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                        {language === 'es' ? 'Demo en Vivo' : 'Live Demo'}
+                      </span>
+                    ) : (
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                        {language === 'es' ? 'Simulación Interactiva' : 'Interactive Simulation'}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

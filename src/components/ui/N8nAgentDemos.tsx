@@ -127,6 +127,9 @@ const T = {
     priorityMedium: 'Media',
     priorityLow: 'Baja',
     limitReached: 'Has usado tu prueba gratuita para este agente. Contáctame en info@mariomoreno.work para una demo personalizada.',
+    researchStages: ['Buscando fuentes…', 'Analizando información…', 'Redactando el reporte…', 'Casi listo — dando formato…'],
+    contentStages: ['Analizando tu marca y tema…', 'Generando contenido por plataforma…', 'Optimizando hashtags y CTAs…', 'Casi listo — dando formato…'],
+    supportStages: ['Leyendo el mensaje…', 'Clasificando sentimiento y urgencia…', 'Redactando la respuesta…', 'Casi listo…'],
   },
   en: {
     copied: 'Copied!',
@@ -174,6 +177,9 @@ const T = {
     priorityMedium: 'Medium',
     priorityLow: 'Low',
     limitReached: 'You have used your free trial for this agent. Contact me at info@mariomoreno.work for a personalized demo.',
+    researchStages: ['Searching sources…', 'Analyzing information…', 'Writing the report…', 'Almost done — formatting…'],
+    contentStages: ['Analyzing your brand and topic…', 'Generating per-platform content…', 'Optimizing hashtags and CTAs…', 'Almost done — formatting…'],
+    supportStages: ['Reading the message…', 'Classifying sentiment and urgency…', 'Drafting the response…', 'Almost done…'],
   },
 } as const;
 
@@ -202,14 +208,24 @@ function CopyButton({ text, lang }: { text: string; lang: Lang }) {
   );
 }
 
-function Spinner() {
+function Spinner({ stages }: { stages?: readonly string[] }) {
+  const [stage, setStage] = useState(0);
+  useEffect(() => {
+    if (!stages) return;
+    setStage(0);
+    const id = setInterval(() => setStage((s) => Math.min(s + 1, stages.length - 1)), 5000);
+    return () => clearInterval(id);
+  }, [stages]);
   return (
-    <div className="flex justify-center py-6">
+    <div className="flex flex-col items-center gap-3 py-6">
       <motion.div
         className="w-10 h-10 rounded-full border-4 border-blue-500 border-t-transparent"
         animate={{ rotate: 360 }}
         transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
       />
+      {stages && (
+        <p className="text-sm text-gray-400 animate-pulse" aria-live="polite">{stages[stage]}</p>
+      )}
     </div>
   );
 }
@@ -378,7 +394,7 @@ export function ResearchAgentDemo() {
       <AnimatePresence>
         {loading && (
           <motion.div key="spinner" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Spinner />
+            <Spinner stages={t.researchStages} />
           </motion.div>
         )}
         {error && (
@@ -671,7 +687,7 @@ export function ContentAgentDemo() {
       <AnimatePresence>
         {loading && (
           <motion.div key="spinner" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Spinner />
+            <Spinner stages={t.contentStages} />
           </motion.div>
         )}
         {error && (
@@ -884,7 +900,7 @@ export function SupportAgentDemo() {
       <AnimatePresence>
         {loading && (
           <motion.div key="spinner" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Spinner />
+            <Spinner stages={t.supportStages} />
           </motion.div>
         )}
         {error && (

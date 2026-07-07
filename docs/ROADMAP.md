@@ -1,6 +1,12 @@
 # Roadmap — Portafolio + app.mariomoreno.work
 
-> Última actualización: 2026-06-30
+> Última actualización: 2026-07-07
+
+## ✅ Hecho (2026-07-07)
+- **YCloud eliminado de n8n**: flujo "Reenvio de Mensajes WA fallidos" desactivado y deprecado (API key hardcodeada borrada del nodo — ⚠️ falta revocarla en el panel de YCloud); en VE1 el nodo de envío WA es ahora un stub que marca los leads `pending_meta_migration` en Supabase (se reenviarán vía Meta).
+- **Agente WhatsApp LangGraph desplegado** (`wa-agent`, servicio swarm interno en red easypanel, código en `/root/wa-agent` del VPS): FastAPI + LangGraph con memoria por número (SQLite) + Gemini (Claude listo vía `AGENT_MODEL`, pendiente recargar créditos Anthropic). El webhook de outreach-tracker reenvía los mensajes del número del agente (`AGENT_PHONE_NUMBER_ID`/`AGENT_WEBHOOK_URL`/`AGENT_SHARED_SECRET`). Hoy responde con el número de prueba de Meta; al registrar el número desvinculado solo se actualizan los env.
+- **Portfolio**: Playest agregado a Proyectos; CSP endurecida; archivos Netlify legacy eliminados; `@elevenlabs/client`; badges Demo en Vivo vs Simulación; progreso por etapas en agentes n8n.
+
 > Dos proyectos **separados que se conectan pero no se mezclan**:
 > - **mariomoreno.work** (portafolio / `newportfoliomariomoreno`): puerta de entrada y presentación. Portal `/admin` = monitoreo y análisis de métricas (luego se le suman más funciones).
 > - **app.mariomoreno.work** (`outreach-tracker`): gestor de clientes registrados. Proyecto presentado a Meta (WhatsApp Business). Aquí vive el envío real de WhatsApp.

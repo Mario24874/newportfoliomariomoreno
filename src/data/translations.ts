@@ -83,6 +83,10 @@ export const translations = {
         nextCodeSolutions: {
           title: 'Next Code Solutions',
           description: 'Professional development agency website showcasing modern web technologies and client solutions.'
+        },
+        playest: {
+          title: 'Playest',
+          description: 'SaaS platform for creating and sharing YouTube playlists with ad-free playback, karaoke mode and recurring billing (Stripe subscriptions, mobile payments and gift cards).'
         }
       }
     },
@@ -440,6 +444,10 @@ export const translations = {
         nextCodeSolutions: {
           title: 'Next Code Solutions',
           description: 'Sitio web de agencia de desarrollo profesional que muestra tecnologías web modernas y soluciones para clientes.'
+        },
+        playest: {
+          title: 'Playest',
+          description: 'Plataforma SaaS para crear y compartir playlists de YouTube con reproducción sin anuncios, modo karaoke y facturación recurrente (suscripciones Stripe, pago móvil y gift cards).'
         }
       }
     },

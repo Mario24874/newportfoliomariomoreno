@@ -140,6 +140,14 @@ export const LANGUAGE_SKILLS: SkillCategory = {
 
 export const getProjects = (t: any) => [
   {
+    id: 'playest',
+    title: t.projects.list.playest.title,
+    description: t.projects.list.playest.description,
+    technologies: ['Next.js', 'TypeScript', 'Clerk', 'Supabase', 'Stripe', 'Docker'],
+    imageUrl: '/images/logo-playest.png',
+    liveUrl: 'https://playest.work',
+  },
+  {
     id: 'italianto',
     title: t.projects.list.italianto.title,
     description: t.projects.list.italianto.description,

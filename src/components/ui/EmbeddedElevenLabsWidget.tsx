@@ -21,7 +21,7 @@ const EmbeddedElevenLabsWidget: React.FC<EmbeddedElevenLabsWidgetProps> = ({ age
     setStatus('connecting');
     try {
       // Dynamic import to keep bundle clean
-      const { Conversation } = await import('@11labs/client');
+      const { Conversation } = await import('@elevenlabs/client');
       const conv = await Conversation.startSession({
         agentId,
         onConnect: () => setStatus('connected'),

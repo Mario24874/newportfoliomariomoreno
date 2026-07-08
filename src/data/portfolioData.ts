@@ -177,7 +177,7 @@ export const getProjects = (t: any) => [
     description: t.projects.list.urbanDrive.description,
     technologies: ['React', 'Firebase', 'TypeScript', 'Jest'],
     imageUrl: '/images/UrbanDrive.png',
-    liveUrl: 'https://urban-drive-master.netlify.app/',
+    liveUrl: 'https://urbandrive.cloud/',
   },
   {
     id: 'eduManager',

@@ -153,7 +153,7 @@ export const getProjects = (t: any) => [
     description: t.projects.list.playestOdoo.description,
     technologies: ['Odoo 18', 'Python', 'XML', 'PostgreSQL', 'Chrome Extension (MV3)', 'Docker'],
     imageUrl: '/images/logo-playest-odoo.png',
-    repoUrl: 'https://github.com/Mario24874/playest-odoo',
+    liveUrl: 'https://chromewebstore.google.com/detail/playest-%E2%86%92-odoo/lihekfekiongfaihpebgcdjojadiffbi',
   },
   {
     id: 'italianto',

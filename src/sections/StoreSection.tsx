@@ -132,7 +132,10 @@ const StoreSection: React.FC = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className={`text-4xl lg:text-5xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{t.title}</h2>
+          <h2 className={`flex items-center justify-center gap-3 sm:gap-4 text-4xl lg:text-5xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <img src="/images/store-logo.png" alt="" aria-hidden="true" width={64} height={64} className="h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16 rounded-full shadow-md" />
+            {t.title}
+          </h2>
           <p className={`max-w-2xl mx-auto text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t.subtitle}</p>
         </motion.div>
 

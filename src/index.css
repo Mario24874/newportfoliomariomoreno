@@ -288,3 +288,23 @@ body {
   backface-visibility: hidden;
   perspective: 1000px;
 }
+/* Carrusel de la tienda: marquee continuo por CSS (transform, sin JS por cuadro) */
+@keyframes store-marquee {
+  to { transform: translate3d(calc(var(--store-w, 0px) * -1), 0, 0); }
+}
+.store-viewport {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+}
+.store-track[data-auto='true'] {
+  animation: store-marquee var(--store-dur, 50s) linear infinite;
+  animation-delay: var(--store-delay, 0s);
+  will-change: transform;
+}
+@media (hover: hover) {
+  .store-viewport:hover .store-track[data-auto='true'] { animation-play-state: paused; }
+}
+.store-viewport:has(:focus-visible) .store-track[data-auto='true'] { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .store-track[data-auto='true'] { animation: none; }
+}

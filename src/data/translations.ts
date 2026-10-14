@@ -114,6 +114,7 @@ export const translations = {
       visit: 'Visit the store',
       soon: 'Opening soon',
       from: 'From',
+      comingSoon: 'Coming soon',
       carouselLabel: 'Store products',
       prev: 'Previous products',
       next: 'Next products'
@@ -490,6 +491,7 @@ export const translations = {
       visit: 'Visitar la tienda',
       soon: 'Abre pronto',
       from: 'Desde',
+      comingSoon: 'Próximamente',
       carouselLabel: 'Productos de la tienda',
       prev: 'Productos anteriores',
       next: 'Productos siguientes'

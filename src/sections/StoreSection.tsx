@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { HiExternalLink } from 'react-icons/hi';
+import { HiChevronLeft, HiChevronRight, HiExternalLink } from 'react-icons/hi';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { translations } from '@/data/translations';
@@ -162,6 +162,27 @@ const StoreSection: React.FC = () => {
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { freeze(); scheduleResume(); }
   };
 
+  /** Flechas: adelantan o retroceden dos tarjetas sin esperar a la animación; luego el movimiento automático se reanuda solo. */
+  const scrollByCards = (dir: 1 | -1) => {
+    const vp = viewportRef.current;
+    const card = cardRef.current;
+    if (!vp || !card) return;
+    const step = (card.offsetWidth + GAP) * 2 * dir;
+    if (animated && unit.width > 0) {
+      freeze();
+      // si el destino sale de la unidad central, se salta antes a la copia equivalente para que el desplazamiento suave no se corte
+      const target = vp.scrollLeft + step;
+      if (target < unit.width) vp.scrollLeft += unit.width;
+      else if (target >= unit.width * 2) vp.scrollLeft -= unit.width;
+      scheduleResume();
+    }
+    vp.scrollBy({ left: step, behavior: reduceMotion ? 'auto' : 'smooth' });
+  };
+
+  const arrowCls = `hidden md:flex absolute top-1/2 -translate-y-1/2 z-10 h-11 w-11 items-center justify-center rounded-full shadow-lg transition-colors ${
+    isDarkMode ? 'bg-gray-800 text-white hover:bg-gray-700 border border-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100 border border-gray-200'
+  }`;
+
   const storeUrl = feed ? (language === 'es' ? feed.url_es : feed.url) : language === 'es' ? 'https://store.mariomoreno.work/es/' : 'https://store.mariomoreno.work/';
 
   const cards = (copy: number) =>
@@ -236,6 +257,13 @@ const StoreSection: React.FC = () => {
         </motion.div>
 
         {products.length > 0 && (
+          <div className="relative">
+            <button type="button" aria-label={t.prev} onClick={() => scrollByCards(-1)} className={`${arrowCls} left-0 md:-left-5`}>
+              <HiChevronLeft className="h-6 w-6" />
+            </button>
+            <button type="button" aria-label={t.next} onClick={() => scrollByCards(1)} className={`${arrowCls} right-0 md:-right-5`}>
+              <HiChevronRight className="h-6 w-6" />
+            </button>
           <div
             ref={viewportRef}
             role="region"
@@ -254,6 +282,7 @@ const StoreSection: React.FC = () => {
             <div ref={trackRef} data-auto={animated ? 'true' : 'false'} className="store-track flex w-max" style={{ gap: GAP, paddingRight: GAP }}>
               {copies.flatMap((c) => cards(c))}
             </div>
+          </div>
           </div>
         )}
 

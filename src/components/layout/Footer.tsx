@@ -22,7 +22,15 @@ const Footer: React.FC<FooterProps> = ({ onPrivacyClick, onTermsClick }) => {
         <p className="text-sm mt-1">
           {t.footer.builtWith}.
         </p>
-        <div className="mt-3 text-sm flex items-center justify-center gap-4">
+        <div className="mt-3 text-sm flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="#store"
+            onClick={(e) => { e.preventDefault(); document.querySelector('#store')?.scrollIntoView({ behavior: 'smooth' }); }}
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 underline decoration-dotted underline-offset-4"
+          >
+            {t.nav.store}
+          </a>
+          <span className="text-gray-400 dark:text-gray-600">·</span>
           <button
             onClick={onPrivacyClick}
             className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 underline decoration-dotted underline-offset-4"

@@ -6,6 +6,7 @@ export const translations = {
       projects: 'Projects',
       demos: 'AI Demos',
       apps: 'Mobile Apps',
+      store: 'Store',
       contact: 'Contact'
     },
     header: {
@@ -106,6 +107,16 @@ export const translations = {
         title: 'WhatsApp AI Chatbot',
         description: 'Connect with my intelligent chatbot for instant responses about my services and projects.'
       }
+    },
+    store: {
+      title: 'My store',
+      subtitle: 'Apparel, accessories and digital products with original designs, made to order and shipped to the US and Europe.',
+      visit: 'Visit the store',
+      soon: 'Opening soon',
+      from: 'From',
+      carouselLabel: 'Store products',
+      prev: 'Previous products',
+      next: 'Next products'
     },
     mobileApps: {
       title: 'Mobile Applications',
@@ -371,6 +382,7 @@ export const translations = {
       projects: 'Proyectos',
       demos: 'Demos IA',
       apps: 'Apps Móviles',
+      store: 'Tienda',
       contact: 'Contacto'
     },
     header: {
@@ -471,6 +483,16 @@ export const translations = {
         title: 'Chatbot IA de WhatsApp',
         description: 'Conéctate con mi chatbot inteligente para respuestas instantáneas sobre mis servicios y proyectos.'
       }
+    },
+    store: {
+      title: 'Mi tienda',
+      subtitle: 'Ropa, accesorios y productos digitales con diseños originales, hechos a pedido y enviados a EE.UU. y Europa.',
+      visit: 'Visitar la tienda',
+      soon: 'Abre pronto',
+      from: 'Desde',
+      carouselLabel: 'Productos de la tienda',
+      prev: 'Productos anteriores',
+      next: 'Productos siguientes'
     },
     mobileApps: {
       title: 'Aplicaciones Móviles',

@@ -6,6 +6,7 @@ export const NAV_ITEMS: NavItem[] = [
   { name: 'Projects', href: '#projects', key: 'projects' },
   { name: 'AI Demos', href: '#demos', key: 'demos' },
   { name: 'Mobile Apps', href: '#mobile-apps', key: 'apps' },
+  { name: 'Store', href: '#store', key: 'store' },
   { name: 'Contact', href: '#contact', key: 'contact' },
 ];
 

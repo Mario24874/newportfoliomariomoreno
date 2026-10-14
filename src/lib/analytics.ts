@@ -106,3 +106,13 @@ export async function saveContactMessage(msg: {
   });
   return !!res && res.ok;
 }
+
+/** Evento de analítica (GA4 y Clarity). No guarda nada propio y nunca rompe el sitio. */
+export function trackEvent(name: string, params: Record<string, string> = {}): void {
+  try {
+    if (typeof window.gtag === 'function') window.gtag('event', name, params);
+    if (typeof window.clarity === 'function') window.clarity('event', name);
+  } catch {
+    /* la analítica nunca debe romper el sitio */
+  }
+}

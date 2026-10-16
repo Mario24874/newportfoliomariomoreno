@@ -127,6 +127,7 @@ const T = {
     priorityMedium: 'Media',
     priorityLow: 'Baja',
     limitReached: 'Has usado tu prueba gratuita para este agente. Contáctame en info@mariomoreno.work para una demo personalizada.',
+    dailyLimit: 'Límite alcanzado: las demos agotaron su cupo de hoy. Vuelve mañana o escríbeme a info@mariomoreno.work.',
     researchStages: ['Buscando fuentes…', 'Analizando información…', 'Redactando el reporte…', 'Casi listo — dando formato…'],
     contentStages: ['Analizando tu marca y tema…', 'Generando contenido por plataforma…', 'Optimizando hashtags y CTAs…', 'Casi listo — dando formato…'],
     supportStages: ['Leyendo el mensaje…', 'Clasificando sentimiento y urgencia…', 'Redactando la respuesta…', 'Casi listo…'],
@@ -177,6 +178,7 @@ const T = {
     priorityMedium: 'Medium',
     priorityLow: 'Low',
     limitReached: 'You have used your free trial for this agent. Contact me at info@mariomoreno.work for a personalized demo.',
+    dailyLimit: "Limit reached: today's demo quota is used up. Come back tomorrow or email info@mariomoreno.work.",
     researchStages: ['Searching sources…', 'Analyzing information…', 'Writing the report…', 'Almost done — formatting…'],
     contentStages: ['Analyzing your brand and topic…', 'Generating per-platform content…', 'Optimizing hashtags and CTAs…', 'Almost done — formatting…'],
     supportStages: ['Reading the message…', 'Classifying sentiment and urgency…', 'Drafting the response…', 'Almost done…'],
@@ -320,8 +322,13 @@ export function ResearchAgentDemo() {
           body: JSON.stringify({ topic, language: researchLang, depth, cf_token: cfToken }),
         }
       );
+      if (res.status === 429) {
+        const lim = await res.json().catch(() => ({} as { reason?: string }));
+        throw new Error(lim.reason === 'Limite diario' ? t.dailyLimit : t.limitReached);
+      }
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data: ResearchResult = await res.json();
+      if ((data as { quota?: boolean }).quota) throw new Error(t.dailyLimit);
       setResult(data);
       incrementLocalCount('research-agent');
     } catch (err) {
@@ -591,8 +598,13 @@ export function ContentAgentDemo() {
           body: JSON.stringify({ topic, tone, language: contentLanguage, platforms: selectedPlatforms, cf_token: cfToken }),
         }
       );
+      if (res.status === 429) {
+        const lim = await res.json().catch(() => ({} as { reason?: string }));
+        throw new Error(lim.reason === 'Limite diario' ? t.dailyLimit : t.limitReached);
+      }
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data: ContentResult = await res.json();
+      if ((data as { quota?: boolean }).quota) throw new Error(t.dailyLimit);
       setResult(data);
       incrementLocalCount('content-agent');
     } catch (err) {
@@ -815,8 +827,13 @@ export function SupportAgentDemo() {
           body: JSON.stringify(body),
         }
       );
+      if (res.status === 429) {
+        const lim = await res.json().catch(() => ({} as { reason?: string }));
+        throw new Error(lim.reason === 'Limite diario' ? t.dailyLimit : t.limitReached);
+      }
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data: SupportResult = await res.json();
+      if ((data as { quota?: boolean }).quota) throw new Error(t.dailyLimit);
       setResult(data);
       incrementLocalCount('support-agent');
     } catch (err) {

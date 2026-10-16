@@ -63,6 +63,7 @@ const T = {
     powered: 'Powered by Gemini Live API',
     hint: 'Prueba: "¿Qué ves en mi cámara?" o "Explícame qué es la IA"',
     limitReached: 'Has usado tu prueba gratuita para este agente. Contáctame en info@mariomoreno.work para una demo personalizada.',
+    dailyLimit: 'Límite alcanzado: las demos agotaron su cupo de hoy. Vuelve mañana o escríbeme a info@mariomoreno.work.',
   },
   en: {
     title: 'AI Voice Assistant',
@@ -83,6 +84,7 @@ const T = {
     powered: 'Powered by Gemini Live API',
     hint: 'Try: "What do you see in my camera?" or "Explain what AI is"',
     limitReached: 'You have used your free trial for this agent. Contact me at info@mariomoreno.work for a personalized demo.',
+    dailyLimit: "Limit reached: today's demo quota is used up. Come back tomorrow or email info@mariomoreno.work.",
   },
 } as const;
 
@@ -411,6 +413,10 @@ export function GeminiVoiceDemo() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cf_token: cfToken }),
       });
+      if (tokenRes.status === 429) {
+        const lim = await tokenRes.json().catch(() => ({} as { reason?: string }));
+        throw new Error(lim.reason === 'Limite diario' ? t.dailyLimit : t.limitReached);
+      }
       if (!tokenRes.ok) throw new Error(`Token error: ${tokenRes.status}`);
       const { token } = await tokenRes.json() as { token: string };
 

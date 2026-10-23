@@ -119,6 +119,14 @@ export const translations = {
       prev: 'Previous products',
       next: 'Next products'
     },
+    videoShowcase: {
+      title: 'See how I build AI assistants',
+      subtitle: 'A real n8n project in production, explained in 3 minutes: AI agent with memory, fallback model and quota protection.',
+      videoLabel: 'Video: AI assistant for my portfolio, built with n8n',
+      captions: 'English',
+      cta: 'Want to build one for your business?',
+      pack: 'n8n Business Automation Pack'
+    },
     mobileApps: {
       title: 'Mobile Applications',
       subtitle: 'Download and experience AI on your device',
@@ -495,6 +503,14 @@ export const translations = {
       carouselLabel: 'Productos de la tienda',
       prev: 'Productos anteriores',
       next: 'Productos siguientes'
+    },
+    videoShowcase: {
+      title: 'Mira cómo construyo asistentes de IA',
+      subtitle: 'Un proyecto real de n8n en producción, explicado en 3 minutos: agente de IA con memoria, modelo de respaldo y protección de cuota.',
+      videoLabel: 'Video: asistente de IA para mi portafolio, hecho con n8n',
+      captions: 'Español',
+      cta: '¿Quieres construir uno para tu negocio?',
+      pack: 'Pack de automatización con n8n'
     },
     mobileApps: {
       title: 'Aplicaciones Móviles',

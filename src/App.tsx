@@ -16,6 +16,7 @@ const MetaProviderSection = React.lazy(() => import('@/sections/MetaProviderSect
 const ProjectsSection = React.lazy(() => import('@/sections/ProjectsSection'));
 const DemosSection = React.lazy(() => import('@/sections/DemosSection'));
 const MobileAppsSection = React.lazy(() => import('@/sections/MobileAppsSection'));
+const VideoSection = React.lazy(() => import('@/sections/VideoSection'));
 const StoreSection = React.lazy(() => import('@/sections/StoreSection'));
 const ClientSection = React.lazy(() => import('@/sections/ClientSection'));
 const ContactSection = React.lazy(() => import('@/sections/ContactSection'));
@@ -55,6 +56,7 @@ const App: React.FC = () => {
           <ProjectsSection />
           <DemosSection />
           <MobileAppsSection />
+          <VideoSection />
           <StoreSection />
           <ClientSection />
           <ContactSection />

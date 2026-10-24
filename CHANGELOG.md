@@ -10,6 +10,13 @@
 
 ---
 
+## 2026-10-23 · Sección de video del asistente de IA (EN/ES)
+- Nueva sección `src/sections/VideoSection.tsx` (id `#video`), colocada antes de la tienda en `App.tsx`: reproduce el video «asistente de IA con n8n» en el idioma activo de la página (`useLanguage`), con subtítulos (`.vtt`) y portada, y dos botones a los productos de la tienda (AI Assistant Builder y n8n Business Automation Pack) con UTM `portfolio / video`.
+- Traducciones en `src/data/translations.ts` (`videoShowcase`, EN/ES). Analítica: `video_play` y `store_click`.
+- Los videos se sirven desde `https://store.mariomoreno.work/media/videos/` (la CSP del Caddyfile ya permite `media-src https:`).
+- Despliegue: push a `main` → Easypanel (servicio `n8n_mario-moreno`, ~1 min). **Easypanel restablece la política de reinicio a `on-failure` en cada despliegue: ejecutar después `docker service update --restart-condition any n8n_mario-moreno`.** Las guías de despliegue antiguas de este repositorio mencionan Netlify y están obsoletas.
+- Commit funcional: `70f46b4`. Pendiente de Mario: describir los cambios y proyectos que quiere actualizar en el portafolio (ver `store-productos/docs/PENDIENTES.md`, sección D).
+
 ## 📊 ANÁLISIS INICIAL DEL PROYECTO
 **Fecha:** 2025-08-13  
 **Analizado por:** Claude (Asistente IA)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { trackDemo } from '@/lib/analytics';
+import { trackDemo, reportDemoFailure } from '@/lib/analytics';
 import {
   FaSearch,
   FaPen,
@@ -332,6 +332,7 @@ export function ResearchAgentDemo() {
       setResult(data);
       incrementLocalCount('research-agent');
     } catch (err) {
+      if (!(err instanceof Error && (err.message === t.limitReached || err.message === t.dailyLimit))) reportDemoFailure('research', err instanceof Error ? err.message : 'unknown');
       setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
       setLoading(false);
@@ -608,6 +609,7 @@ export function ContentAgentDemo() {
       setResult(data);
       incrementLocalCount('content-agent');
     } catch (err) {
+      if (!(err instanceof Error && (err.message === t.limitReached || err.message === t.dailyLimit))) reportDemoFailure('content', err instanceof Error ? err.message : 'unknown');
       setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
       setLoading(false);
@@ -837,6 +839,7 @@ export function SupportAgentDemo() {
       setResult(data);
       incrementLocalCount('support-agent');
     } catch (err) {
+      if (!(err instanceof Error && (err.message === t.limitReached || err.message === t.dailyLimit))) reportDemoFailure('support', err instanceof Error ? err.message : 'unknown');
       setError(err instanceof Error ? err.message : t.errorUnknown);
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import { FaVideo, FaVideoSlash, FaRobot, FaPhone, FaPhoneSlash, FaMicrophone } f
 import { SiGoogle } from 'react-icons/si';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { reportDemoFailure } from '@/lib/analytics';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADNcSxlusRk9rjD0';
 
@@ -417,7 +418,7 @@ export function GeminiVoiceDemo() {
         const lim = await tokenRes.json().catch(() => ({} as { reason?: string }));
         throw new Error(lim.reason === 'Limite diario' ? t.dailyLimit : t.limitReached);
       }
-      if (!tokenRes.ok) throw new Error(`Token error: ${tokenRes.status}`);
+      if (!tokenRes.ok) { reportDemoFailure('gemini-live', `token HTTP ${tokenRes.status}`, tokenRes.status); throw new Error(`Token error: ${tokenRes.status}`); }
       const { token } = await tokenRes.json() as { token: string };
 
       // 3. Open WebSocket to Gemini Live API

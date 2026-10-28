@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaWhatsapp, FaPaperPlane, FaCheckDouble } from 'react-icons/fa';
-import { trackDemo } from '@/lib/analytics';
+import { trackDemo, reportDemoFailure } from '@/lib/analytics';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -112,12 +112,13 @@ const WhatsAppAgentDemo: React.FC = () => {
         setLimitReached(true);
         return;
       }
-      if (!res.ok) throw new Error(`Error ${res.status}`);
+      if (!res.ok) { reportDemoFailure('whatsapp-agent', `HTTP ${res.status}`, res.status); throw new Error(`Error ${res.status}`); }
       const data: { reply: string } = await res.json();
       setMessages((prev) => [...prev, { role: 'agent', text: data.reply, time: now() }]);
       incrementLocalCount();
       if (checkLimitReached()) setLimitReached(true);
-    } catch {
+    } catch (err) {
+      if (!(err instanceof Error && err.message.startsWith('Error '))) reportDemoFailure('whatsapp-agent', err instanceof Error ? err.message : 'network');
       setError(t.errorGeneric);
     } finally {
       setSending(false);

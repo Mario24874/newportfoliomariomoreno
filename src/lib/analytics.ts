@@ -89,6 +89,21 @@ export async function trackDemo(demo: string, input?: string): Promise<void> {
   });
 }
 
+/** Avisa (n8n → Telegram) de que un demo falló para un visitante. Los límites de uso (429) no cuentan como fallo. Nunca rompe el sitio. */
+export function reportDemoFailure(demo: string, detail: string, status?: number): void {
+  try {
+    if (!demo || status === 429) return;
+    fetch('/proxy/n8n/webhook/demo-fail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ demo, detail: String(detail).slice(0, 200), status: status ?? null, page: location.pathname }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    /* el reporte nunca debe romper el sitio */
+  }
+}
+
 /** Guarda un mensaje del formulario de contacto del portfolio. */
 export async function saveContactMessage(msg: {
   name?: string; email?: string; phone?: string; message?: string;

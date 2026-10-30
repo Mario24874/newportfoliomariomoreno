@@ -18,6 +18,7 @@ interface AppData {
   features: string[];
   screenshots?: string[];
   expoAndroidUrl?: string;
+  apkUrl?: string;
   isPWA?: boolean;
   pwaUrl?: string;
   status: 'available' | 'coming-soon';
@@ -53,7 +54,7 @@ const MobileAppsSection: React.FC = () => {
       category: t.mobileApps.apps.italiantoApp.category,
       technologies: [SiReact, SiTypescript],
       features: t.mobileApps.apps.italiantoApp.features,
-      expoAndroidUrl: 'https://expo.dev/accounts/mario24874/projects/italiantoapp/builds/dc46c167-24c0-48b2-a4b8-20b28d290fd0',
+      apkUrl: '/downloads/ItaliantoApp.apk',
       status: 'available'
     },
     {
@@ -243,9 +244,8 @@ const MobileAppsSection: React.FC = () => {
                         <>
                           {/* Android Button */}
                           <a
-                            href={app.expoAndroidUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href={app.apkUrl ?? app.expoAndroidUrl}
+                            {...(app.apkUrl ? { download: true } : { target: '_blank', rel: 'noopener noreferrer' })}
                             className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-4 shadow-lg hover:shadow-2xl group transform hover:scale-105"
                           >
                             <FaGooglePlay className="w-7 h-7 group-hover:scale-110 transition-transform" />
@@ -263,9 +263,9 @@ const MobileAppsSection: React.FC = () => {
                           }`}>
                             <span>📱</span>
                             <span>
-                              {language === 'es'
-                                ? 'Descarga vía Expo - Instalación directa'
-                                : 'Download via Expo - Direct install'
+                              {app.apkUrl
+                                ? (language === 'es' ? 'APK directo - Instalación directa' : 'Direct APK - Direct install')
+                                : (language === 'es' ? 'Descarga vía Expo - Instalación directa' : 'Download via Expo - Direct install')
                               }
                             </span>
                           </div>

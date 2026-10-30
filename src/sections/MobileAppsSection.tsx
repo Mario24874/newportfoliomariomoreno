@@ -54,7 +54,7 @@ const MobileAppsSection: React.FC = () => {
       category: t.mobileApps.apps.italiantoApp.category,
       technologies: [SiReact, SiTypescript],
       features: t.mobileApps.apps.italiantoApp.features,
-      apkUrl: '/downloads/ItaliantoApp.apk',
+      apkUrl: '/downloads/ItaliantoApp.apk?v=1.0.0',
       status: 'available'
     },
     {

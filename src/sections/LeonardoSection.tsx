@@ -1,53 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaCogs, FaExternalLinkAlt } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 
-// Demo interactivo: galería estática en /public/leonardo (figuras hechas con Colorfigures, licencia MIT).
-// Para activar un invento nuevo: agregar su página a public/leonardo, su imagen a public/images y moverlo de `soon` a `machines`.
-const VER = 'v=4'; // cambia al actualizar las páginas: evita que la caché de Cloudflare sirva una versión vieja
-
-interface Machine { page: string; image: string; es: { name: string; meta: string; alt: string; text: string }; en: { name: string; meta: string; alt: string; text: string } }
-
-const machines: Machine[] = [
-  {
-    page: 'carro.html',
-    image: '/images/leonardo-cart.jpg',
-    es: { name: 'Carro autopropulsado', meta: 'Códice Atlántico · h. 1478–85', alt: 'Carro autopropulsado de Leonardo da Vinci, ilustración isométrica',
-      text: 'Elige las levas que programan la dirección, da cuerda a los resortes, suelta el freno y mira el recorrido.' },
-    en: { name: 'Self-propelled cart', meta: 'Codex Atlanticus · c. 1478–85', alt: 'Leonardo da Vinci’s self-propelled cart, isometric illustration',
-      text: 'Choose the cams that program the steering, wind the springs, release the brake and watch the path.' },
-  },
-  {
-    page: 'ornitoptero.html',
-    image: '/images/leonardo-ornithopter.jpg',
-    es: { name: 'Ornitóptero', meta: 'Diseño · h. 1485–1505', alt: 'Ornitóptero de Leonardo da Vinci, ilustración isométrica',
-      text: 'Alas de membrana movidas por estribos y palancas. Aletea y prueba el despegue: es un diseño, nunca voló.' },
-    en: { name: 'Ornithopter', meta: 'Design · c. 1485–1505', alt: 'Leonardo da Vinci’s ornithopter, isometric illustration',
-      text: 'Membrane wings driven by stirrups and levers. Flap it and try to take off: a design, it never flew.' },
-  },
-  {
-    page: 'tornillo.html',
-    image: '/images/leonardo-screw.jpg',
-    es: { name: 'Tornillo aéreo', meta: 'Diseño · Manuscrito B · h. 1487–89', alt: 'Tornillo aéreo de Leonardo da Vinci, ilustración isométrica',
-      text: 'Un tornillo helicoidal de lino que giran cuatro hombres sobre una plataforma. Hazlo girar y prueba el despegue: es un diseño, nunca voló.' },
-    en: { name: 'Aerial screw', meta: 'Design · Manuscript B · c. 1487–89', alt: 'Leonardo da Vinci’s aerial screw, isometric illustration',
-      text: 'A helical linen screw turned by four men on a platform. Spin it and try to take off: a design, it never flew.' },
-  },
+// Portada única de la demo interactiva: un enlace a la galería de /public/leonardo (figuras hechas con Colorfigures, licencia MIT).
+// La lista de inventos vive en public/leonardo/manifest.json: para sumar uno basta subir su página, su imagen y una entrada ahí;
+// este componente no cambia. Si el manifiesto no carga, se muestran los inventos de esta lista inicial.
+interface Machine { image: string; es: { name: string }; en: { name: string } }
+const INITIAL: Machine[] = [
+  { image: '/images/leonardo-cart.jpg', es: { name: 'Carro autopropulsado' }, en: { name: 'Self-propelled cart' } },
+  { image: '/images/leonardo-ornithopter.jpg', es: { name: 'Ornitóptero' }, en: { name: 'Ornithopter' } },
+  { image: '/images/leonardo-screw.jpg', es: { name: 'Tornillo aéreo' }, en: { name: 'Aerial screw' } },
 ];
-
-const soon = {
-  es: ['Ballesta gigante', 'Paracaídas'],
-  en: ['Giant crossbow', 'Parachute'],
-};
 
 const LeonardoSection: React.FC = () => {
   const { language } = useLanguage();
   const { isDarkMode } = useTheme();
   const es = language === 'es';
-  const q = `?lang=${es ? 'es' : 'en'}&${VER}`;
-  const galleryHref = `/leonardo/index.html${q}`;
+  const [machines, setMachines] = useState<Machine[]>(INITIAL);
+
+  useEffect(() => {
+    // el parámetro por tramo de 10 minutos evita que la caché de Cloudflare sirva una lista vieja
+    fetch(`/leonardo/manifest.json?t=${Math.floor(Date.now() / 600000)}`, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then(m => { if (Array.isArray(m?.machines) && m.machines.length) setMachines(m.machines); })
+      .catch(() => { /* se queda con la lista inicial */ });
+  }, []);
+
+  const href = `/leonardo/index.html?lang=${es ? 'es' : 'en'}`;
+  const cols = Math.min(machines.length, 4);
 
   return (
     <section id="leonardo" className={`py-20 transition-colors duration-300 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
@@ -73,61 +55,39 @@ const LeonardoSection: React.FC = () => {
           </p>
         </motion.div>
 
-        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {machines.map((mc, i) => {
-            const t = es ? mc.es : mc.en;
-            return (
-              <motion.a
-                key={mc.page}
-                href={`/leonardo/${mc.page}${q}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 + i * 0.1 }}
-                className={`group flex flex-col overflow-hidden rounded-2xl shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
-                  isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'
-                }`}
-              >
-                <img src={mc.image} alt={t.alt} width={1200} height={899} loading="lazy" className="aspect-[4/3] w-full object-cover" />
-                <div className="flex flex-1 flex-col gap-2 p-5">
-                  <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{t.name}</h3>
-                  <p className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t.meta}</p>
-                  <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t.text}</p>
-                  <span className={`mt-auto inline-flex w-fit items-center gap-2 pt-2 text-sm font-semibold ${isDarkMode ? 'text-blue-300 group-hover:text-blue-200' : 'text-blue-600 group-hover:text-blue-700'}`}>
-                    {es ? 'Probar' : 'Try it'}
-                    <FaExternalLinkAlt className="h-3 w-3" />
-                  </span>
-                </div>
-              </motion.a>
-            );
-          })}
-        </div>
-
-        <motion.div
+        <motion.a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mx-auto mt-8 flex max-w-5xl flex-col items-center gap-5"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className={`group mx-auto block max-w-5xl overflow-hidden rounded-2xl shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+            isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'
+          }`}
         >
-          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            {es ? 'Próximamente:' : 'Coming soon:'}{' '}
-            {soon[es ? 'es' : 'en'].map((n, i, a) => (
-              <span key={n} className="font-medium">{n}{i < a.length - 1 ? ' · ' : ''}</span>
-            ))}
-          </p>
-          <a
-            href={galleryHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-700 hover:to-purple-700 hover:shadow-xl"
-          >
-            {es ? 'Abrir la galería completa' : 'Open the full gallery'}
-            <FaExternalLinkAlt className="h-3.5 w-3.5" />
-          </a>
-        </motion.div>
+          <div className="grid" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+            {machines.slice(0, cols).map(mc => {
+              const name = es ? mc.es.name : mc.en.name;
+              return (
+                <figure key={mc.image} className="m-0">
+                  <img src={mc.image} alt={name} width={1200} height={899} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                  <figcaption className={`px-2 py-2 text-center text-xs font-medium sm:text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{name}</figcaption>
+                </figure>
+              );
+            })}
+          </div>
+          <div className="flex flex-col items-center gap-3 p-6 text-center">
+            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {es ? 'Y más inventos en camino. Se abre en una pestaña nueva.' : 'More inventions on the way. Opens in a new tab.'}
+            </p>
+            <span className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all group-hover:from-blue-700 group-hover:to-purple-700">
+              {es ? 'Abrir la demo' : 'Open the demo'}
+              <FaExternalLinkAlt className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        </motion.a>
       </div>
     </section>
   );

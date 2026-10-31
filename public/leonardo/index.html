@@ -5,44 +5,43 @@
   :root{--paper:#f2efe7;--ink:#231e16;--muted:#857d6e;--rule:#ddd6c8;--accent:#ef6a4c}
   *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--paper);color:var(--ink);font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;padding:28px 16px 40px}
-  main{max-width:880px;margin:0 auto}
-  h1{font-size:20px;margin:0 0 4px;letter-spacing:.01em} p.lead{color:var(--muted);margin:0 0 22px;max-width:60ch}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
-  .card{display:flex;flex-direction:column;gap:6px;border:1.5px solid var(--ink);border-radius:14px;padding:14px 16px;background:var(--paper);text-decoration:none;color:inherit;box-shadow:3px 3px 0 var(--ink)}
+  main{max-width:960px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 4px;letter-spacing:.01em} p.lead{color:var(--muted);margin:0 0 22px;max-width:62ch}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+  .card{display:flex;flex-direction:column;border:1.5px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--paper);text-decoration:none;color:inherit;box-shadow:3px 3px 0 var(--ink)}
   a.card:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)} a.card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-  .card.soon{box-shadow:none;border-style:dashed;border-color:var(--muted);color:var(--muted)}
+  .card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-bottom:1.5px solid var(--ink)}
+  .card .body{display:flex;flex-direction:column;gap:6px;padding:12px 16px 14px}
+  .card.soon{box-shadow:none;border-style:dashed;border-color:var(--muted);color:var(--muted)} .card.soon .body{padding-top:14px}
   .tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid currentColor;border-radius:999px;padding:1px 9px}
   .card:not(.soon) .tag{background:var(--accent);color:#fff;border-color:var(--ink)}
   .card h2{font-size:15px;margin:2px 0 0} .meta{font-size:12px;color:var(--muted)} .card p{margin:0;font-size:12.5px}
   a.back{display:inline-block;margin-bottom:14px;color:var(--muted);text-decoration:none;font-size:12.5px} a.back:hover{color:var(--ink)}
+  .err{color:var(--muted)}
   footer{margin-top:26px;border-top:1px solid var(--rule);padding-top:12px;font-size:11.5px;color:var(--muted)}
   footer a{color:inherit}
 </style></head><body><main>
 <a class="back" id="b" href="/"></a>
 <h1 id="t"></h1><p class="lead" id="l"></p><div class="grid" id="g"></div><footer id="f"></footer></main>
 <script>
+// Las tarjetas salen de manifest.json: para sumar un invento basta subir su página, su imagen y una entrada ahi.
 const EN = (new URLSearchParams(location.search).get('lang') || navigator.language || 'es').toLowerCase().startsWith('en');
 const D = EN ? {
   t:'Leonardo’s machines, in motion', l:'Pick an invention, set it up and watch it work. Each one is shown as drawn in his notebooks: where the design is disputed or never worked, the page says so.',
-  av:'Available', soon:'Coming soon', f:'Interactive figures made with <a href="https://april-zhu.com/colorfigures" target="_blank" rel="noopener">Colorfigures</a> (MIT). Reconstructions follow published studies; they are interpretations, not proof of what Leonardo built.',
-  cards:[
-    { href:'carro.html', n:'Self-propelled cart', m:'Codex Atlanticus f. 812r · c. 1478–85', d:'Spring-driven cart with programmable steering. Choose the cams, wind the springs and release the brake.' },
-    { href:'ornitoptero.html', n:'Ornithopter', m:'c. 1485–1505', d:'Membrane wings driven by stirrups and levers. Flap it and try to take off: a design, with no evidence it ever flew.' },
-    { href:'tornillo.html', n:'Aerial screw', m:'Manuscript B · c. 1487–89', d:'A helical screw of starched linen turned by four men on a platform. Spin it and try to take off: a design, it never flew.' },
-    { n:'Giant crossbow', m:'Codex Atlanticus · c. 1485', d:'A huge siege crossbow wound by a screw and released by a trigger.' },
-    { n:'Parachute', m:'Codex Atlanticus · c. 1485', d:'A pyramid of cloth on a wooden frame, drawn to slow a fall.' } ] } : {
+  av:'Available', soon:'Coming soon', back:'← Back to portfolio', err:'The list of inventions could not be loaded. Try again in a moment.',
+  f:'Interactive figures made with <a href="https://april-zhu.com/colorfigures" target="_blank" rel="noopener">Colorfigures</a> (MIT). Reconstructions follow published studies; they are interpretations, not proof of what Leonardo built.' } : {
   t:'Las máquinas de Leonardo, en movimiento', l:'Elige un invento, prepáralo y míralo funcionar. Cada uno se muestra como lo dibujó en sus cuadernos: donde el diseño es discutido o nunca funcionó, la página lo dice.',
-  av:'Disponible', soon:'Próximamente', f:'Figuras interactivas hechas con <a href="https://april-zhu.com/colorfigures" target="_blank" rel="noopener">Colorfigures</a> (MIT). Las reconstrucciones siguen estudios publicados; son interpretaciones, no prueba de lo que Leonardo construyó.',
-  cards:[
-    { href:'carro.html', n:'Carro autopropulsado', m:'Códice Atlántico f. 812r · h. 1478–85', d:'Carro movido por resortes con dirección programable. Elige las levas, da cuerda a los resortes y suelta el freno.' },
-    { href:'ornitoptero.html', n:'Ornitóptero', m:'h. 1485–1505', d:'Alas de membrana movidas por estribos y palancas. Aletea y prueba el despegue: es un diseño, no hay evidencia de que volara.' },
-    { href:'tornillo.html', n:'Tornillo aéreo', m:'Manuscrito B · h. 1487–89', d:'Un tornillo helicoidal de lino almidonado que giran cuatro hombres sobre una plataforma. Hazlo girar y prueba el despegue: es un diseño, nunca voló.' },
-    { n:'Ballesta gigante', m:'Códice Atlántico · h. 1485', d:'Enorme ballesta de asedio que se tensa con un tornillo y se dispara con un gatillo.' },
-    { n:'Paracaídas', m:'Códice Atlántico · h. 1485', d:'Una pirámide de tela sobre un marco de madera, dibujada para frenar una caída.' } ] };
-document.documentElement.lang = EN ? 'en' : 'es'; document.title = D.t;
-document.getElementById('b').textContent = EN ? '\u2190 Back to portfolio' : '\u2190 Volver al portfolio'; document.getElementById('t').textContent = D.t; document.getElementById('l').textContent = D.l; document.getElementById('f').innerHTML = D.f;
-const qs = location.search;
-document.getElementById('g').innerHTML = D.cards.map(c => { const live = !!c.href, tag = `<span class="tag">${live ? D.av : D.soon}</span>`,
-  body = `${tag}<h2>${c.n}</h2><span class="meta">${c.m}</span><p>${c.d}</p>`;
-  return live ? `<a class="card" href="${c.href}${qs}">${body}</a>` : `<div class="card soon">${body}</div>`; }).join('');
+  av:'Disponible', soon:'Próximamente', back:'← Volver al portfolio', err:'No se pudo cargar la lista de inventos. Inténtalo de nuevo en un momento.',
+  f:'Figuras interactivas hechas con <a href="https://april-zhu.com/colorfigures" target="_blank" rel="noopener">Colorfigures</a> (MIT). Las reconstrucciones siguen estudios publicados; son interpretaciones, no prueba de lo que Leonardo construyó.' };
+const lang = EN ? 'en' : 'es', qs = location.search;
+document.documentElement.lang = lang; document.title = D.t;
+document.getElementById('b').textContent = D.back; document.getElementById('t').textContent = D.t;
+document.getElementById('l').textContent = D.l; document.getElementById('f').innerHTML = D.f;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const g = document.getElementById('g');
+fetch('manifest.json?t=' + Math.floor(Date.now()/600000), { cache:'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(m => {
+  const live = m.machines.map(x => { const c = x[lang]; return `<a class="card" href="${esc(x.page)}${esc(qs)}"><img src="${esc(x.image)}" alt="${esc(c.name)}" loading="lazy"><div class="body"><span class="tag">${D.av}</span><h2>${esc(c.name)}</h2><span class="meta">${esc(c.meta)}</span><p>${esc(c.text)}</p></div></a>`; });
+  const soon = (m.soon[lang] || []).map(c => `<div class="card soon"><div class="body"><span class="tag">${D.soon}</span><h2>${esc(c.name)}</h2><span class="meta">${esc(c.meta)}</span><p>${esc(c.text)}</p></div></div>`);
+  g.innerHTML = live.concat(soon).join('');
+}).catch(() => { g.innerHTML = `<p class="err">${D.err}</p>`; });
 </script></body></html>

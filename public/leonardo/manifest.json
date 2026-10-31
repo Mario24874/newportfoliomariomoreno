@@ -1,0 +1,23 @@
+{
+  "machines": [
+    { "page": "carro.html", "image": "/images/leonardo-cart.jpg",
+      "es": { "name": "Carro autopropulsado", "meta": "Códice Atlántico f. 812r · h. 1478–85", "text": "Carro movido por resortes con dirección programable. Elige las levas, da cuerda a los resortes y suelta el freno." },
+      "en": { "name": "Self-propelled cart", "meta": "Codex Atlanticus f. 812r · c. 1478–85", "text": "Spring-driven cart with programmable steering. Choose the cams, wind the springs and release the brake." } },
+    { "page": "ornitoptero.html", "image": "/images/leonardo-ornithopter.jpg",
+      "es": { "name": "Ornitóptero", "meta": "Diseño · h. 1485–1505", "text": "Alas de membrana movidas por estribos y palancas. Aletea y prueba el despegue: es un diseño, no hay evidencia de que volara." },
+      "en": { "name": "Ornithopter", "meta": "Design · c. 1485–1505", "text": "Membrane wings driven by stirrups and levers. Flap it and try to take off: a design, with no evidence it ever flew." } },
+    { "page": "tornillo.html", "image": "/images/leonardo-screw.jpg",
+      "es": { "name": "Tornillo aéreo", "meta": "Diseño · Manuscrito B · h. 1487–89", "text": "Un tornillo helicoidal de lino almidonado que giran cuatro hombres sobre una plataforma. Hazlo girar y prueba el despegue: es un diseño, nunca voló." },
+      "en": { "name": "Aerial screw", "meta": "Design · Manuscript B · c. 1487–89", "text": "A helical screw of starched linen turned by four men on a platform. Spin it and try to take off: a design, it never flew." } }
+  ],
+  "soon": {
+    "es": [
+      { "name": "Ballesta gigante", "meta": "Códice Atlántico · h. 1485", "text": "Enorme ballesta de asedio que se tensa con un tornillo y se dispara con un gatillo." },
+      { "name": "Paracaídas", "meta": "Códice Atlántico · h. 1485", "text": "Una pirámide de tela sobre un marco de madera, dibujada para frenar una caída." }
+    ],
+    "en": [
+      { "name": "Giant crossbow", "meta": "Codex Atlanticus · c. 1485", "text": "A huge siege crossbow wound by a screw and released by a trigger." },
+      { "name": "Parachute", "meta": "Codex Atlanticus · c. 1485", "text": "A pyramid of cloth on a wooden frame, drawn to slow a fall." }
+    ]
+  }
+}

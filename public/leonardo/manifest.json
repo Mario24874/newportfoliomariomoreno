@@ -41,98 +41,134 @@
         "meta": "Design · Manuscript B · c. 1487–89",
         "text": "A helical screw of starched linen turned by four men on a platform. Spin it and try to take off: a design, it never flew."
       }
+    },
+    {
+      "page": "ballesta.html",
+      "image": "/images/leonardo-crossbow.jpg",
+      "es": {
+        "name": "Ballesta gigante",
+        "meta": "Diseño · Códice Atlántico f. 149r · h. 1485–90",
+        "text": "Enorme ballesta de asedio sobre un carro con ruedas. Elige la tensión, gira la manivela, carga el dardo y suelta el pasador con el martillo. Es un diseño: no consta que se construyera a tamaño real."
+      },
+      "en": {
+        "name": "Giant crossbow",
+        "meta": "Design · Codex Atlanticus f. 149r · c. 1485–90",
+        "text": "A huge siege crossbow on a wheeled carriage. Choose the tension, turn the crank, load the bolt and knock out the pin with the hammer. A design: there is no record of a full-size one being built."
+      }
+    },
+    {
+      "page": "paracaidas.html",
+      "image": "/images/leonardo-parachute.jpg",
+      "es": {
+        "name": "Paracaídas",
+        "meta": "Códice Atlántico f. 381v · h. 1485",
+        "text": "Pirámide de lino sobre un armazón de madera. Suelta la carga con y sin paracaídas y compara la velocidad de caída. En 2000 se probó una réplica y funcionó, aunque pesaba unos 84 kg."
+      },
+      "en": {
+        "name": "Parachute",
+        "meta": "Codex Atlanticus f. 381v · c. 1485",
+        "text": "A pyramid of linen on a wooden frame. Drop the load with and without the parachute and compare the fall speed. In 2000 a replica was tested and worked, although it weighed about 84 kg."
+      }
     }
   ],
   "soon": {
-    "es": [
-      {
-        "name": "Ballesta gigante",
-        "meta": "Códice Atlántico · h. 1485",
-        "text": "Enorme ballesta de asedio que se tensa con un tornillo y se dispara con un gatillo."
-      },
-      {
-        "name": "Paracaídas",
-        "meta": "Códice Atlántico · h. 1485",
-        "text": "Una pirámide de tela sobre un marco de madera, dibujada para frenar una caída."
-      }
-    ],
-    "en": [
-      {
-        "name": "Giant crossbow",
-        "meta": "Codex Atlanticus · c. 1485",
-        "text": "A huge siege crossbow wound by a screw and released by a trigger."
-      },
-      {
-        "name": "Parachute",
-        "meta": "Codex Atlanticus · c. 1485",
-        "text": "A pyramid of cloth on a wooden frame, drawn to slow a fall."
-      }
-    ]
+    "es": [],
+    "en": []
   },
   "uses": {
     "es": {
       "title": "¿Para qué sirve esto?",
-      "intro": "Cada invento es una pieza interactiva: se puede girar, abrir por dentro y probar con botones. La misma técnica sirve para explicar cualquier producto o proceso que tenga partes que se mueven.",
-      "items": [
+      "intro": "Cada invento es una demo interactiva: se puede girar, abrir por dentro y probar con botones. La misma técnica sirve para mostrar cualquier producto, programa o servicio de forma que el cliente lo entienda probándolo, en vez de leerlo.",
+      "groups": [
         {
-          "name": "Explicar un producto antes de venderlo",
-          "text": "Que el cliente vea cómo funciona por dentro una máquina, un equipo o una herramienta, en vez de leer un manual."
+          "name": "Demos de productos físicos",
+          "text": "Que el cliente vea cómo funciona por dentro y lo pruebe antes de comprar.",
+          "examples": [
+            "Una máquina de café, un electrodoméstico o un equipo industrial.",
+            "Una herramienta o un vehículo con partes que se mueven.",
+            "Una ficha de tienda en línea que se puede girar y abrir, con las partes nombradas.",
+            "Un manual que se mueve, en lugar de dibujos fijos."
+          ]
         },
         {
-          "name": "Capacitar al personal",
-          "text": "Mostrar paso a paso cómo se opera o se repara un equipo, con botones que repiten cada paso las veces que haga falta."
+          "name": "Demos de productos digitales",
+          "text": "Mostrar cómo trabaja un programa o una app sin que el cliente tenga que instalarlo.",
+          "examples": [
+            "Cómo fluyen los datos dentro de una aplicación o de una API, representado como un mecanismo.",
+            "Una automatización paso a paso, por ejemplo de un pedido a la factura.",
+            "La arquitectura de un sistema, que el cliente puede recorrer pieza por pieza.",
+            "Un asistente de inteligencia artificial y lo que hace en cada paso."
+          ]
         },
         {
-          "name": "Tiendas en línea y catálogos",
-          "text": "Una ficha de producto que se puede girar y abrir, con las partes nombradas, para resolver dudas antes de la compra."
+          "name": "Demos de servicios y procesos",
+          "text": "Hacer visible algo que normalmente solo se explica con palabras.",
+          "examples": [
+            "Las etapas de un servicio: diagnóstico, instalación, seguimiento.",
+            "Un proceso de la empresa, como una cadena de suministro o la atención al cliente.",
+            "El recorrido de un pedido, de un trámite o de un paciente.",
+            "Una propuesta comercial que el cliente puede explorar antes de decidir."
+          ]
         },
         {
-          "name": "Museos, escuelas y divulgación",
-          "text": "Hacer comprensible una máquina histórica o un proceso científico, igual en el teléfono que en la computadora."
-        },
-        {
-          "name": "Manuales y soporte técnico",
-          "text": "Esquemas que se mueven en lugar de dibujos fijos, para que quien llama a soporte entienda a la primera."
-        },
-        {
-          "name": "Presentaciones y ferias",
-          "text": "Una pieza para mostrar en pantalla que cada visitante puede manipular por su cuenta."
+          "name": "Capacitación y divulgación",
+          "text": "Enseñar paso a paso y repetirlo las veces que haga falta.",
+          "examples": [
+            "Formar al personal para operar o reparar un equipo.",
+            "Museos, escuelas y exposiciones.",
+            "Ferias y presentaciones donde cada visitante manipula la pieza."
+          ]
         }
       ],
-      "how": "Cada pieza se construye a medida a partir de cómo funciona el objeto real. Se publica como una página web, funciona en teléfono y computadora, y se puede integrar en un sitio que ya tengas. Es más útil con productos que tienen mecanismo o partes móviles; no sustituye a una foto realista.",
-      "cta": "Hablemos de tu producto"
+      "how": "Cada pieza se construye a medida a partir de cómo funciona lo que se quiere explicar. Se publica como una página web, funciona en teléfono y computadora, y se puede integrar en un sitio que ya tengas. Es más útil cuando hay un mecanismo, un flujo o partes que se mueven; no sustituye a una foto realista.",
+      "cta": "Hablemos de tu producto o servicio"
     },
     "en": {
       "title": "What is this for?",
-      "intro": "Each invention is an interactive piece: you can turn it, open it to see inside and try it with buttons. The same technique can explain any product or process that has moving parts.",
-      "items": [
+      "intro": "Each invention is an interactive demo: you can turn it, open it to see inside and try it with buttons. The same technique can show any product, program or service in a way customers understand by trying it instead of reading about it.",
+      "groups": [
         {
-          "name": "Explain a product before selling it",
-          "text": "Let the customer see how a machine, device or tool works inside, instead of reading a manual."
+          "name": "Physical product demos",
+          "text": "Let the customer see how it works inside and try it before buying.",
+          "examples": [
+            "A coffee machine, a household appliance or industrial equipment.",
+            "A tool or a vehicle with moving parts.",
+            "An online store page you can turn and open, with named parts.",
+            "A manual that moves, instead of fixed drawings."
+          ]
         },
         {
-          "name": "Train staff",
-          "text": "Show step by step how to operate or repair equipment, with buttons that replay each step as often as needed."
+          "name": "Digital product demos",
+          "text": "Show how a program or an app works without the customer installing anything.",
+          "examples": [
+            "How data flows inside an application or an API, drawn as a mechanism.",
+            "An automation step by step, for example from an order to the invoice.",
+            "A system architecture the customer can walk through piece by piece.",
+            "An AI assistant and what it does at each step."
+          ]
         },
         {
-          "name": "Online stores and catalogues",
-          "text": "A product page you can turn and open, with named parts, to answer questions before the purchase."
+          "name": "Service and process demos",
+          "text": "Make visible something that is usually explained only with words.",
+          "examples": [
+            "The stages of a service: diagnosis, installation, follow-up.",
+            "A company process, such as a supply chain or customer support.",
+            "The path of an order, a procedure or a patient.",
+            "A commercial proposal the customer can explore before deciding."
+          ]
         },
         {
-          "name": "Museums, schools and outreach",
-          "text": "Make a historic machine or a scientific process easy to grasp, the same on a phone as on a computer."
-        },
-        {
-          "name": "Manuals and technical support",
-          "text": "Diagrams that move instead of fixed drawings, so people understand on the first try."
-        },
-        {
-          "name": "Presentations and trade fairs",
-          "text": "A piece to show on screen that every visitor can handle on their own."
+          "name": "Training and outreach",
+          "text": "Teach step by step and repeat it as often as needed.",
+          "examples": [
+            "Train staff to operate or repair equipment.",
+            "Museums, schools and exhibitions.",
+            "Trade fairs and presentations where every visitor handles the piece."
+          ]
         }
       ],
-      "how": "Each piece is built to order from how the real object works. It is published as a web page, works on phone and computer, and can be embedded in a site you already have. It is most useful for products with a mechanism or moving parts; it does not replace a realistic photo.",
-      "cta": "Let's talk about your product"
+      "how": "Each piece is built to order from how the thing being explained works. It is published as a web page, works on phone and computer, and can be embedded in a site you already have. It is most useful when there is a mechanism, a flow or moving parts; it does not replace a realistic photo.",
+      "cta": "Let's talk about your product or service"
     }
   }
 }

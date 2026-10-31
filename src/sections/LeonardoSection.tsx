@@ -12,6 +12,8 @@ const INITIAL: Machine[] = [
   { image: '/images/leonardo-cart.jpg', es: { name: 'Carro autopropulsado' }, en: { name: 'Self-propelled cart' } },
   { image: '/images/leonardo-ornithopter.jpg', es: { name: 'Ornitóptero' }, en: { name: 'Ornithopter' } },
   { image: '/images/leonardo-screw.jpg', es: { name: 'Tornillo aéreo' }, en: { name: 'Aerial screw' } },
+  { image: '/images/leonardo-crossbow.jpg', es: { name: 'Ballesta gigante' }, en: { name: 'Giant crossbow' } },
+  { image: '/images/leonardo-parachute.jpg', es: { name: 'Paracaídas' }, en: { name: 'Parachute' } },
 ];
 
 const LeonardoSection: React.FC = () => {
@@ -29,7 +31,6 @@ const LeonardoSection: React.FC = () => {
   }, []);
 
   const href = `/leonardo/index.html?lang=${es ? 'es' : 'en'}`;
-  const cols = Math.min(machines.length, 4);
 
   return (
     <section id="leonardo" className={`py-20 transition-colors duration-300 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
@@ -67,20 +68,24 @@ const LeonardoSection: React.FC = () => {
             isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'
           }`}
         >
-          <div className="grid" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-            {machines.slice(0, cols).map(mc => {
+          <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-3 sm:gap-5 sm:p-6 lg:grid-cols-5">
+            {machines.slice(0, 10).map(mc => {
               const name = es ? mc.es.name : mc.en.name;
               return (
-                <figure key={mc.image} className="m-0">
-                  <img src={mc.image} alt={name} width={1200} height={899} loading="lazy" className="aspect-[4/3] w-full object-cover" />
-                  <figcaption className={`px-2 py-2 text-center text-xs font-medium sm:text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{name}</figcaption>
+                <figure key={mc.image} className="m-0 flex flex-col gap-2">
+                  <div className={`overflow-hidden rounded-xl border-2 transition-transform duration-300 group-hover:-translate-y-0.5 ${
+                    isDarkMode ? 'border-gray-300 shadow-[3px_3px_0_#d1d5db]' : 'border-gray-900 shadow-[3px_3px_0_#111827]'
+                  }`}>
+                    <img src={mc.image} alt={name} width={1200} height={899} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                  </div>
+                  <figcaption className={`text-center text-xs font-semibold sm:text-sm ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{name}</figcaption>
                 </figure>
               );
             })}
           </div>
-          <div className="flex flex-col items-center gap-3 p-6 text-center">
+          <div className="flex flex-col items-center gap-3 px-6 pb-6 pt-2 text-center">
             <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              {es ? 'La misma técnica sirve para explicar productos y procesos: la galería muestra qué se puede hacer con ella. Más inventos en camino.' : 'The same technique can explain products and processes: the gallery shows what can be done with it. More inventions on the way.'}
+              {es ? 'La misma técnica sirve para demos de productos físicos, productos digitales y servicios: la galería muestra ejemplos de qué se puede hacer con ella.' : 'The same technique works for demos of physical products, digital products and services: the gallery shows examples of what can be done with it.'}
             </p>
             <span className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all group-hover:from-blue-700 group-hover:to-purple-700">
               {es ? 'Abrir la demo' : 'Open the demo'}

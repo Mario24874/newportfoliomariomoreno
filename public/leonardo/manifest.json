@@ -1,23 +1,138 @@
 {
   "machines": [
-    { "page": "carro.html", "image": "/images/leonardo-cart.jpg",
-      "es": { "name": "Carro autopropulsado", "meta": "Códice Atlántico f. 812r · h. 1478–85", "text": "Carro movido por resortes con dirección programable. Elige las levas, da cuerda a los resortes y suelta el freno." },
-      "en": { "name": "Self-propelled cart", "meta": "Codex Atlanticus f. 812r · c. 1478–85", "text": "Spring-driven cart with programmable steering. Choose the cams, wind the springs and release the brake." } },
-    { "page": "ornitoptero.html", "image": "/images/leonardo-ornithopter.jpg",
-      "es": { "name": "Ornitóptero", "meta": "Diseño · h. 1485–1505", "text": "Alas de membrana movidas por estribos y palancas. Aletea y prueba el despegue: es un diseño, no hay evidencia de que volara." },
-      "en": { "name": "Ornithopter", "meta": "Design · c. 1485–1505", "text": "Membrane wings driven by stirrups and levers. Flap it and try to take off: a design, with no evidence it ever flew." } },
-    { "page": "tornillo.html", "image": "/images/leonardo-screw.jpg",
-      "es": { "name": "Tornillo aéreo", "meta": "Diseño · Manuscrito B · h. 1487–89", "text": "Un tornillo helicoidal de lino almidonado que giran cuatro hombres sobre una plataforma. Hazlo girar y prueba el despegue: es un diseño, nunca voló." },
-      "en": { "name": "Aerial screw", "meta": "Design · Manuscript B · c. 1487–89", "text": "A helical screw of starched linen turned by four men on a platform. Spin it and try to take off: a design, it never flew." } }
+    {
+      "page": "carro.html",
+      "image": "/images/leonardo-cart.jpg",
+      "es": {
+        "name": "Carro autopropulsado",
+        "meta": "Códice Atlántico f. 812r · h. 1478–85",
+        "text": "Carro movido por resortes con dirección programable. Elige las levas, da cuerda a los resortes y suelta el freno."
+      },
+      "en": {
+        "name": "Self-propelled cart",
+        "meta": "Codex Atlanticus f. 812r · c. 1478–85",
+        "text": "Spring-driven cart with programmable steering. Choose the cams, wind the springs and release the brake."
+      }
+    },
+    {
+      "page": "ornitoptero.html",
+      "image": "/images/leonardo-ornithopter.jpg",
+      "es": {
+        "name": "Ornitóptero",
+        "meta": "Diseño · h. 1485–1505",
+        "text": "Alas de membrana movidas por estribos y palancas. Aletea y prueba el despegue: es un diseño, no hay evidencia de que volara."
+      },
+      "en": {
+        "name": "Ornithopter",
+        "meta": "Design · c. 1485–1505",
+        "text": "Membrane wings driven by stirrups and levers. Flap it and try to take off: a design, with no evidence it ever flew."
+      }
+    },
+    {
+      "page": "tornillo.html",
+      "image": "/images/leonardo-screw.jpg",
+      "es": {
+        "name": "Tornillo aéreo",
+        "meta": "Diseño · Manuscrito B · h. 1487–89",
+        "text": "Un tornillo helicoidal de lino almidonado que giran cuatro hombres sobre una plataforma. Hazlo girar y prueba el despegue: es un diseño, nunca voló."
+      },
+      "en": {
+        "name": "Aerial screw",
+        "meta": "Design · Manuscript B · c. 1487–89",
+        "text": "A helical screw of starched linen turned by four men on a platform. Spin it and try to take off: a design, it never flew."
+      }
+    }
   ],
   "soon": {
     "es": [
-      { "name": "Ballesta gigante", "meta": "Códice Atlántico · h. 1485", "text": "Enorme ballesta de asedio que se tensa con un tornillo y se dispara con un gatillo." },
-      { "name": "Paracaídas", "meta": "Códice Atlántico · h. 1485", "text": "Una pirámide de tela sobre un marco de madera, dibujada para frenar una caída." }
+      {
+        "name": "Ballesta gigante",
+        "meta": "Códice Atlántico · h. 1485",
+        "text": "Enorme ballesta de asedio que se tensa con un tornillo y se dispara con un gatillo."
+      },
+      {
+        "name": "Paracaídas",
+        "meta": "Códice Atlántico · h. 1485",
+        "text": "Una pirámide de tela sobre un marco de madera, dibujada para frenar una caída."
+      }
     ],
     "en": [
-      { "name": "Giant crossbow", "meta": "Codex Atlanticus · c. 1485", "text": "A huge siege crossbow wound by a screw and released by a trigger." },
-      { "name": "Parachute", "meta": "Codex Atlanticus · c. 1485", "text": "A pyramid of cloth on a wooden frame, drawn to slow a fall." }
+      {
+        "name": "Giant crossbow",
+        "meta": "Codex Atlanticus · c. 1485",
+        "text": "A huge siege crossbow wound by a screw and released by a trigger."
+      },
+      {
+        "name": "Parachute",
+        "meta": "Codex Atlanticus · c. 1485",
+        "text": "A pyramid of cloth on a wooden frame, drawn to slow a fall."
+      }
     ]
+  },
+  "uses": {
+    "es": {
+      "title": "¿Para qué sirve esto?",
+      "intro": "Cada invento es una pieza interactiva: se puede girar, abrir por dentro y probar con botones. La misma técnica sirve para explicar cualquier producto o proceso que tenga partes que se mueven.",
+      "items": [
+        {
+          "name": "Explicar un producto antes de venderlo",
+          "text": "Que el cliente vea cómo funciona por dentro una máquina, un equipo o una herramienta, en vez de leer un manual."
+        },
+        {
+          "name": "Capacitar al personal",
+          "text": "Mostrar paso a paso cómo se opera o se repara un equipo, con botones que repiten cada paso las veces que haga falta."
+        },
+        {
+          "name": "Tiendas en línea y catálogos",
+          "text": "Una ficha de producto que se puede girar y abrir, con las partes nombradas, para resolver dudas antes de la compra."
+        },
+        {
+          "name": "Museos, escuelas y divulgación",
+          "text": "Hacer comprensible una máquina histórica o un proceso científico, igual en el teléfono que en la computadora."
+        },
+        {
+          "name": "Manuales y soporte técnico",
+          "text": "Esquemas que se mueven en lugar de dibujos fijos, para que quien llama a soporte entienda a la primera."
+        },
+        {
+          "name": "Presentaciones y ferias",
+          "text": "Una pieza para mostrar en pantalla que cada visitante puede manipular por su cuenta."
+        }
+      ],
+      "how": "Cada pieza se construye a medida a partir de cómo funciona el objeto real. Se publica como una página web, funciona en teléfono y computadora, y se puede integrar en un sitio que ya tengas. Es más útil con productos que tienen mecanismo o partes móviles; no sustituye a una foto realista.",
+      "cta": "Hablemos de tu producto"
+    },
+    "en": {
+      "title": "What is this for?",
+      "intro": "Each invention is an interactive piece: you can turn it, open it to see inside and try it with buttons. The same technique can explain any product or process that has moving parts.",
+      "items": [
+        {
+          "name": "Explain a product before selling it",
+          "text": "Let the customer see how a machine, device or tool works inside, instead of reading a manual."
+        },
+        {
+          "name": "Train staff",
+          "text": "Show step by step how to operate or repair equipment, with buttons that replay each step as often as needed."
+        },
+        {
+          "name": "Online stores and catalogues",
+          "text": "A product page you can turn and open, with named parts, to answer questions before the purchase."
+        },
+        {
+          "name": "Museums, schools and outreach",
+          "text": "Make a historic machine or a scientific process easy to grasp, the same on a phone as on a computer."
+        },
+        {
+          "name": "Manuals and technical support",
+          "text": "Diagrams that move instead of fixed drawings, so people understand on the first try."
+        },
+        {
+          "name": "Presentations and trade fairs",
+          "text": "A piece to show on screen that every visitor can handle on their own."
+        }
+      ],
+      "how": "Each piece is built to order from how the real object works. It is published as a web page, works on phone and computer, and can be embedded in a site you already have. It is most useful for products with a mechanism or moving parts; it does not replace a realistic photo.",
+      "cta": "Let's talk about your product"
+    }
   }
 }

@@ -80,7 +80,7 @@ const LeonardoSection: React.FC = () => {
           </div>
           <div className="flex flex-col items-center gap-3 p-6 text-center">
             <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              {es ? 'Y más inventos en camino. Se abre en una pestaña nueva.' : 'More inventions on the way. Opens in a new tab.'}
+              {es ? 'La misma técnica sirve para explicar productos y procesos: la galería muestra qué se puede hacer con ella. Más inventos en camino.' : 'The same technique can explain products and processes: the gallery shows what can be done with it. More inventions on the way.'}
             </p>
             <span className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all group-hover:from-blue-700 group-hover:to-purple-700">
               {es ? 'Abrir la demo' : 'Open the demo'}

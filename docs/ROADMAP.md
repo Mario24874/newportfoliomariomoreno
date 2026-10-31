@@ -1,6 +1,10 @@
 # Roadmap — Portafolio + app.mariomoreno.work
 
-> Última actualización: 2026-07-07
+> Última actualización: 2026-10-31
+
+## ✅ Hecho (2026-10-31)
+- **Demo interactiva «Las máquinas de Leonardo»** (5 figuras Colorfigures + galería + aplicaciones por tipo de demo) en producción; portada con una tarjeta que enlaza a la galería y lista de inventos en `public/leonardo/manifest.json`. Documentación: `docs/LEONARDO-DEMO.md`.
+- **APK de ItaliantoApp** reemplazada por la 1.1.0 (TWA sin claves, apunta a italianto.com): `public/downloads/ItaliantoApp.apk`, enlace `?v=1.1.0` en la sección de apps móviles (el APK viejo con claves ya no está en el árbol; sigue en el historial de git: **rotar esas claves**).
 
 ## ✅ Hecho (2026-07-07)
 - **YCloud eliminado de n8n**: flujo "Reenvio de Mensajes WA fallidos" desactivado y deprecado (API key hardcodeada borrada del nodo — ⚠️ falta revocarla en el panel de YCloud); en VE1 el nodo de envío WA es ahora un stub que marca los leads `pending_meta_migration` en Supabase (se reenviarán vía Meta).

@@ -6,7 +6,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 // Demo interactivo: galería estática en /public/leonardo (figuras hechas con Colorfigures, licencia MIT).
 // Para activar un invento nuevo: agregar su página a public/leonardo, su imagen a public/images y moverlo de `soon` a `machines`.
-const VER = 'v=3'; // cambia al actualizar las páginas: evita que la caché de Cloudflare sirva una versión vieja
+const VER = 'v=4'; // cambia al actualizar las páginas: evita que la caché de Cloudflare sirva una versión vieja
 
 interface Machine { page: string; image: string; es: { name: string; meta: string; alt: string; text: string }; en: { name: string; meta: string; alt: string; text: string } }
 
@@ -27,11 +27,19 @@ const machines: Machine[] = [
     en: { name: 'Ornithopter', meta: 'Design · c. 1485–1505', alt: 'Leonardo da Vinci’s ornithopter, isometric illustration',
       text: 'Membrane wings driven by stirrups and levers. Flap it and try to take off: a design, it never flew.' },
   },
+  {
+    page: 'tornillo.html',
+    image: '/images/leonardo-screw.jpg',
+    es: { name: 'Tornillo aéreo', meta: 'Diseño · Manuscrito B · h. 1487–89', alt: 'Tornillo aéreo de Leonardo da Vinci, ilustración isométrica',
+      text: 'Un tornillo helicoidal de lino que giran cuatro hombres sobre una plataforma. Hazlo girar y prueba el despegue: es un diseño, nunca voló.' },
+    en: { name: 'Aerial screw', meta: 'Design · Manuscript B · c. 1487–89', alt: 'Leonardo da Vinci’s aerial screw, isometric illustration',
+      text: 'A helical linen screw turned by four men on a platform. Spin it and try to take off: a design, it never flew.' },
+  },
 ];
 
 const soon = {
-  es: ['Tornillo aéreo', 'Ballesta gigante', 'Paracaídas'],
-  en: ['Aerial screw', 'Giant crossbow', 'Parachute'],
+  es: ['Ballesta gigante', 'Paracaídas'],
+  en: ['Giant crossbow', 'Parachute'],
 };
 
 const LeonardoSection: React.FC = () => {
@@ -65,7 +73,7 @@ const LeonardoSection: React.FC = () => {
           </p>
         </motion.div>
 
-        <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
           {machines.map((mc, i) => {
             const t = es ? mc.es : mc.en;
             return (

@@ -19,6 +19,7 @@ const LeonardoSection = React.lazy(() => import('@/sections/LeonardoSection'));
 const MobileAppsSection = React.lazy(() => import('@/sections/MobileAppsSection'));
 const VideoSection = React.lazy(() => import('@/sections/VideoSection'));
 const StoreSection = React.lazy(() => import('@/sections/StoreSection'));
+const StoreDemoSection = React.lazy(() => import('@/sections/StoreDemoSection'));
 const ClientSection = React.lazy(() => import('@/sections/ClientSection'));
 const ContactSection = React.lazy(() => import('@/sections/ContactSection'));
 const Footer = React.lazy(() => import('@/components/layout/Footer'));
@@ -60,6 +61,7 @@ const App: React.FC = () => {
           <MobileAppsSection />
           <VideoSection />
           <StoreSection />
+          <StoreDemoSection />
           <ClientSection />
           <ContactSection />
         </Suspense>

@@ -1,0 +1,13 @@
+[Unit]
+Description=Portfolio: resumen diario de KPIs a Telegram (vía avisador), sin IA
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /opt/portfolio-collector/resumen.py
+TimeoutStartSec=2min
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/avisador

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
-
-const API_URL = 'https://app.mariomoreno.work/api/analytics/review';
+import { submitReview } from '@/lib/analytics';
 
 type Step = 'idle' | 'open' | 'submitting' | 'done' | 'error';
 
@@ -20,12 +19,7 @@ export const ReviewWidget: React.FC = () => {
     if (rating === 0) return;
     setStep('submitting');
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating, comment: comment || undefined, reviewer_name: name || undefined }),
-      });
-      setStep(res.ok ? 'done' : 'error');
+      setStep((await submitReview(rating, comment, name)) ? 'done' : 'error');
     } catch {
       setStep('error');
     }

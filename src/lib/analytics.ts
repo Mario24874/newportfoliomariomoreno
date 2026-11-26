@@ -104,6 +104,17 @@ export async function saveContactMessage(msg: {
   return !!res && res.ok;
 }
 
+/** Registra un clic en un enlace de contacto (hoy solo «whatsapp»). keepalive: el clic abre otra pestaña/app. */
+export function trackClick(target: 'whatsapp'): void {
+  try { void send('/t/click', { anon_id: anonId(), target }, true); } catch { /* nunca rompe el sitio */ }
+}
+
+/** Envía una reseña del widget (el endpoint antiguo app.mariomoreno.work/api/analytics/review devolvía 404). */
+export async function submitReview(rating: number, comment?: string, reviewerName?: string): Promise<boolean> {
+  const res = await send('/t/review', { anon_id: anonId(), rating, comment: comment || undefined, reviewer_name: reviewerName || undefined });
+  return !!res && res.ok;
+}
+
 /** Evento de analítica (GA4 y Clarity). No guarda nada propio y nunca rompe el sitio. */
 export function trackEvent(name: string, params: Record<string, string> = {}): void {
   try {

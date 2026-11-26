@@ -6,6 +6,7 @@ import { YOUR_WHATSAPP_NUMBER, YOUR_EMAIL, YOUR_LINKEDIN_URL, YOUR_GITHUB_URL } 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
 import ContactForm from '@/components/ui/ContactForm';
+import { trackClick } from '@/lib/analytics';
 
 const ContactSection: React.FC = () => {
   const { language } = useLanguage();
@@ -54,6 +55,7 @@ const ContactSection: React.FC = () => {
             
             <Button
               href={whatsappLink}
+              onClick={() => trackClick('whatsapp')}
               target="_blank"
               rel="noopener noreferrer"
               variant="contained"

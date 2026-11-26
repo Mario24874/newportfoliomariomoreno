@@ -192,6 +192,34 @@ def captacion_report(rows, now=None):
             "replies": [{"company": r.get("company"), "at": r.get("replied_at"), "subject": (r.get("subject") or "")[:80]} for r in sorted(replied, key=lambda x: x.get("replied_at") or "", reverse=True)[:10]]}
 
 
+def campana_report(envios, prospectos, supresion, eventos, config, lotes, now=None):
+    """Campaña V2 (tablas c2_*): lo que se envía HOY. Los envíos de ensayo (ensayo=true) se cuentan aparte y no entran en las métricas."""
+    now = now or now_utc(); c14 = now - timedelta(days=14)
+    reales = [e for e in envios if not e.get("ensayo")]
+    ensayos = [e for e in envios if e.get("ensayo")]
+    por_dia = Counter((parse_ts(e["enviado_at"]) + TZ).date().isoformat() for e in reales if e.get("enviado_at") and parse_ts(e["enviado_at"]) >= c14)
+    dias = [((now + TZ).date() - timedelta(days=i)).isoformat() for i in range(13, -1, -1)]
+    tipos = Counter(e.get("tipo") for e in eventos)
+    cfg = {c["clave"]: c["valor"] for c in config}
+    ult = max((e["enviado_at"] for e in reales if e.get("enviado_at")), default=None)
+    return {"sent": len(reales), "trial_sent": len(ensayos), "last_sent": ult,
+            "delivered": sum(1 for e in reales if e.get("estado_entrega") == "entregado"),
+            "bounced": sum(1 for e in reales if e.get("rebote_tipo")),
+            "by_touch": sorted(Counter(f"Toque {e.get('toque')}" for e in reales).items()),
+            "by_delivery": Counter(e.get("estado_entrega") or "?" for e in reales).most_common(),
+            "by_day": [{"day": d, "sent": por_dia.get(d, 0)} for d in dias],
+            "prospects": {"total": len(prospectos), "by_state": Counter(p.get("estado") for p in prospectos).most_common(),
+                          "by_cell": Counter(p.get("celda") for p in prospectos).most_common(),
+                          "by_channel": Counter(p.get("canal") or "sin canal" for p in prospectos).most_common()},
+            "suppressed": {"total": len(supresion), "by_reason": Counter(x.get("motivo") for x in supresion).most_common()},
+            "batches": Counter(l.get("estado") for l in lotes).most_common(),
+            "paused": str(cfg.get("pausa", "")).lower() in ("true", "1", "si", "sí"), "start_date": cfg.get("fecha_inicio"),
+            "unmatched_resend_events": tipos.get("resend_sin_envio", 0),
+            "recent_events": [{"at": e["creado"], "type": e["tipo"], "detail": json.dumps(e.get("detalle"), ensure_ascii=False)[:120] if e.get("detalle") else ""}
+                              for e in eventos if e.get("tipo") != "resend_sin_envio"][:12],
+            "replies_tracked": False}
+
+
 def probe(name, url, ok):
     t0 = time.time()
     try:
@@ -231,7 +259,7 @@ def avisos_report(events=None):
 
 # ---------- enrutado (puro: recibe la BD; la autenticación la hace collector.py) ----------
 _cache = {}
-TTL = {"/admin/summary": 10, "/admin/demos": 10, "/admin/captacion": 60, "/admin/salud": 30, "/admin/avisos": 10, "/admin/live": 4}
+TTL = {"/admin/summary": 10, "/admin/demos": 10, "/admin/captacion": 60, "/admin/campana": 60, "/admin/salud": 30, "/admin/avisos": 10, "/admin/live": 4}
 
 
 def since(col, dt):
@@ -279,6 +307,11 @@ def _route(db, method, path, params, body, now):
             return (200, messages_csv(items), "csv") if path.endswith(".csv") else (200, {"items": items, "total": len(items)}, "json")
         if path == "/admin/captacion":
             return 200, captacion_report(db.select_all("outreach_log", "select=sent_at,status,has_reply,replied_at,company,country,subject&order=sent_at.desc"), now), "json"
+        if path == "/admin/campana":
+            return 200, campana_report(db.select_all("c2_envios", "select=toque,enviado_at,estado_entrega,rebote_tipo,ensayo&order=enviado_at.desc"),
+                                       db.select_all("c2_prospectos", "select=estado,celda,canal"), db.select_all("c2_supresion", "select=motivo"),
+                                       db.select_all("c2_eventos", "select=creado,tipo,detalle&order=creado.desc&limit=1000"), db.select_all("c2_config", "select=clave,valor"),
+                                       db.select_all("c2_lotes", "select=estado"), now), "json"
         if path == "/admin/salud":
             return 200, salud_report(), "json"
         if path == "/admin/avisos":

@@ -78,6 +78,18 @@ class T(unittest.TestCase):
         r = a.captacion_report(rows, NOW)
         self.assertEqual((r["sent"], r["replied"], r["reply_rate"], len(r["by_day"])), (2, 1, 50.0, 14))
 
+    def test_campana_v2_excluye_ensayos_y_cuenta_estados_sin_inventar_respuestas(self):
+        env = [{"toque": 1, "enviado_at": ts(days=1), "estado_entrega": "entregado", "rebote_tipo": None, "ensayo": False},
+               {"toque": 2, "enviado_at": ts(days=2), "estado_entrega": "enviado", "rebote_tipo": "duro", "ensayo": False},
+               {"toque": 1, "enviado_at": ts(days=2), "estado_entrega": "entregado", "rebote_tipo": None, "ensayo": True}]
+        pro = [{"estado": "aprobado", "celda": "A", "canal": "correo"}, {"estado": "descartado", "celda": "A", "canal": None}]
+        evs = [{"creado": ts(hours=1), "tipo": "resend_sin_envio", "detalle": {"x": 1}}, {"creado": ts(hours=2), "tipo": "baja", "detalle": {"valor": "a@b"}}]
+        r = a.campana_report(env, pro, [{"motivo": "baja"}], evs, [{"clave": "pausa", "valor": "False"}, {"clave": "fecha_inicio", "valor": "2026-11-05"}], [{"estado": "aprobado"}], NOW)
+        self.assertEqual((r["sent"], r["trial_sent"], r["delivered"], r["bounced"]), (2, 1, 1, 1))
+        self.assertEqual(r["prospects"]["total"], 2); self.assertEqual(r["unmatched_resend_events"], 1)
+        self.assertEqual([e["type"] for e in r["recent_events"]], ["baja"])      # el ruido de Resend sin envío no se lista
+        self.assertFalse(r["paused"]); self.assertFalse(r["replies_tracked"]); self.assertEqual(len(r["by_day"]), 14)
+
     def test_avisos_solo_del_portfolio(self):
         r = a.avisos_report([{"t": 1.0, "proyecto": "Tienda", "tipo": "info", "titulo": "x", "estado": "enviado"}, {"t": 2.0, "proyecto": "Portfolio", "tipo": "info", "titulo": "y", "estado": "enviado"}])
         self.assertEqual([e["title"] for e in r["recent"]], ["y"]); self.assertGreater(len(r["rules"]), 5)

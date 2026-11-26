@@ -92,7 +92,7 @@ function Dashboard({ email, onOut }: { email: string; onOut: () => void }) {
   const ranged = tab === 'Resumen' || tab === 'Tráfico' || tab === 'Demos IA';
   return (
     <div style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily: T.font, overflowX: 'hidden' }}>
-      <style>{`.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media(max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+      <style>{`.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.tiles.t3{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:900px){.tiles,.tiles.t3{grid-template-columns:repeat(2,minmax(0,1fr))}}
         button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid ${T.accent};outline-offset:2px}`}</style>
       <header style={{ position: 'sticky', top: 0, zIndex: 10, background: '#161615', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px', height: 54, flexWrap: 'wrap' }}>

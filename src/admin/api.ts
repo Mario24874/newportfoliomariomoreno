@@ -21,6 +21,13 @@ export interface Demos {
 export interface Msg { id: string; kind: 'contacto' | 'resena'; name: string | null; email: string | null; phone: string | null; message: string | null; rating: number | null; status: 'new' | 'read' | 'archived'; at: string }
 export interface Messages { items: Msg[]; total: number }
 export interface Captacion { sent: number; replied: number; reply_rate: number; by_status: [string, number][]; by_country: [string, number][]; by_day: { day: string; sent: number }[]; replies: { company: string; at: string | null; subject: string }[] }
+export interface Campana {
+  sent: number; trial_sent: number; last_sent: string | null; delivered: number; bounced: number; by_touch: [string, number][]; by_delivery: [string, number][];
+  by_day: { day: string; sent: number }[];
+  prospects: { total: number; by_state: [string, number][]; by_cell: [string, number][]; by_channel: [string, number][] };
+  suppressed: { total: number; by_reason: [string, number][] }; batches: [string, number][]; paused: boolean; start_date: string | null;
+  unmatched_resend_events: number; recent_events: { at: string; type: string; detail: string }[]; replies_tracked: boolean;
+}
 export interface Salud { generated_at: string; sites: { name: string; ok: boolean; code: number; ms: number }[]; demos: { name: string; ok: boolean; status: string; at: string }[]; alerts: { at: string; source: string; severity: string; what: string; message: string }[] }
 export interface Avisos { rules: { name: string; when: string }[]; recent: { at: string; type: string; title: string; state: string }[] }
 

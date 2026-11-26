@@ -1,6 +1,6 @@
 // Vistas del panel: Resumen, Tráfico, Demos IA, Mensajes, Captación, Salud y Avisos. Cada una consulta su ruta /admin/* y conserva los datos previos al recargar.
 import React, { useState } from 'react';
-import { ApiError, call, useApi, type Avisos, type Captacion, type Demos, type Live, type Messages, type Msg, type Range, type Salud, type Summary } from './api';
+import { ApiError, call, useApi, type Avisos, type Campana, type Captacion, type Demos, type Live, type Messages, type Msg, type Range, type Salud, type Summary } from './api';
 import { BarList, Card, Columns, DataTable, Empty, Funnel, SegBar, Status, Tile, TimeChart } from './charts';
 import { T, ago, countryName, fmtDate, fmtDur, fmtPct } from './theme';
 
@@ -146,22 +146,46 @@ export function Mensajes() {
 }
 
 /* ================= Captación ================= */
+const STATE_ES: Record<string, string> = { descartado: 'Descartado', aprobado: 'Aprobado, en espera', t1: 'Toque 1 enviado', t2: 'Toque 2 enviado', t3: 'Toque 3 enviado', baja: 'Se dio de baja', entregado: 'Entregado', enviado: 'Enviado, sin confirmar' };
 export function CaptacionView() {
-  const { data: c, error, loading, reload } = useApi<Captacion>('/admin/captacion', {}, 60000);
-  if (!c) return <><Banner error={error} onRetry={reload} /><Loading /></>;
+  const v2 = useApi<Campana>('/admin/campana', {}, 60000);
+  const { data: c, error, loading, reload } = useApi<Captacion>('/admin/captacion', {}, 120000);
+  const k = v2.data;
   const nk = (v: number) => ({ v, p: null, d: null });
+  if (!k) return <><Banner error={v2.error ?? error} onRetry={() => { v2.reload(); reload(); }} /><Loading /></>;
+  const days = k.last_sent ? Math.floor((Date.now() - new Date(k.last_sent).getTime()) / 86400000) : null;
   return (
-    <div style={{ display: 'grid', gap: 14, ...dim(loading) }}>
-      <Banner error={error} onRetry={reload} />
-      <div className="tiles">
-        <Tile label="Correos enviados (campaña)" kpi={nk(c.sent)} /><Tile label="Respuestas" kpi={nk(c.replied)} /><Tile label="Tasa de respuesta" kpi={nk(c.reply_rate)} fmt={fmtPct} />
+    <div style={{ display: 'grid', gap: 14, ...dim(v2.loading || loading) }}>
+      <Banner error={v2.error ?? error} onRetry={() => { v2.reload(); reload(); }} />
+      <Card title="Campaña V2 · correo en frío" right={<Status ok={!k.paused} okText="Activa" badText="En pausa" />}>
+        <p style={{ margin: 0, color: T.sub, fontSize: 13, lineHeight: 1.55, ...font }}>
+          Empezó el {k.start_date ?? '—'} · último envío real: <b style={{ color: T.text }}>{k.last_sent ? `${fmtDate(k.last_sent)} (hace ${days} d)` : 'ninguno'}</b>
+          {days !== null && days >= 7 && !k.paused && <span style={{ color: T.warning }}> · ⚠ lleva {days} días sin enviar: revisar topes, ventana horaria y toques pendientes.</span>}
+        </p>
+      </Card>
+      <div className="tiles t3">
+        <Tile label="Prospectos en base" kpi={nk(k.prospects.total)} /><Tile label="Correos enviados (reales)" kpi={nk(k.sent)} hint={`Sin contar ${k.trial_sent} de ensayo`} />
+        <Tile label="Entregados confirmados" kpi={nk(k.delivered)} /><Tile label="Rebotes" kpi={nk(k.bounced)} upIsGood={false} />
+        <Tile label="Bajas y supresiones" kpi={nk(k.suppressed.total)} hint="Direcciones que no se vuelven a contactar: plataformas, bajas voluntarias, rebotes duros y quejas (tabla c2_supresion)" /><Tile label="Envíos de ensayo (aparte)" kpi={nk(k.trial_sent)} />
       </div>
-      <Card title="Envíos de los últimos 14 días (hora de Caracas)"><Columns values={c.by_day.map((d) => d.sent)} labels={c.by_day.map((d) => `${d.day.slice(8, 10)}/${d.day.slice(5, 7)}`)} unit="enviados" color={T.series[1]} /></Card>
-      <div style={grid(320)}>
-        <Card title="Por estado"><BarList rows={c.by_status} color={T.series[3]} /></Card>
-        <Card title="Por país de destino"><BarList rows={c.by_country} fmtName={countryName} color={T.series[0]} /></Card>
+      <Card title="Envíos reales de los últimos 14 días (hora de Caracas)"><Columns values={k.by_day.map((d) => d.sent)} labels={k.by_day.map((d) => `${d.day.slice(8, 10)}/${d.day.slice(5, 7)}`)} unit="enviados" color={T.series[1]} /></Card>
+      <div style={grid(340)}>
+        <Card title="Prospectos por estado"><BarList rows={k.prospects.by_state} fmtName={(n) => STATE_ES[n] ?? n} color={T.series[0]} /></Card>
+        <Card title="Correos por toque"><BarList rows={k.by_touch} color={T.series[1]} empty="Aún no se ha enviado ningún correo." /></Card>
+        <Card title="Estado de entrega"><BarList rows={k.by_delivery} fmtName={(n) => STATE_ES[n] ?? n} color={T.series[2]} empty="Sin envíos." /></Card>
+        <Card title="Canal de contacto de los prospectos"><BarList rows={k.prospects.by_channel} fmtName={(n) => (n === 'correo' ? 'Correo' : n === 'formulario_manual' ? 'Formulario manual' : n === 'whatsapp_manual' ? 'WhatsApp manual' : n === 'revisar_buzon_gratuito' ? 'Revisar buzón gratuito' : n)} color={T.series[3]} /></Card>
       </div>
-      <Card title="Últimas respuestas"><DataTable head={['Cuándo', 'Empresa', 'Asunto']} empty="Todavía no hay respuestas a la campaña." rows={c.replies.map((r) => [fmtDate(r.at), r.company, r.subject])} /></Card>
+      <Card title="Respuestas a la campaña"><Empty>Las respuestas todavía <b>no se registran en la base de datos</b> (no hay tabla de respuestas en la V2): te llegan por Telegram (tema 📣 Campaña) y quedan en el buzón. Esta sección no muestra «0 respuestas» porque sería falso: se mostrará en cuanto se registren.</Empty></Card>
+      <Card title="Últimos eventos de la campaña"><DataTable head={['Cuándo', 'Evento', 'Detalle']} empty="Sin eventos." rows={k.recent_events.map((e) => [fmtDate(e.at), e.type, e.detail])} />
+        {k.unmatched_resend_events > 0 && <p style={{ margin: '10px 0 0', color: T.muted, fontSize: 12.5, ...font }}>Además hay {k.unmatched_resend_events} avisos de Resend (rebotes/entregas) que no corresponden a ningún envío de la V2: vienen de otros correos de la misma cuenta.</p>}
+      </Card>
+      {c && (
+        <Card title="Campaña anterior (V1, histórica — apagada)" right={<span style={{ color: T.muted, fontSize: 12 }}>tabla outreach_log</span>}>
+          <p style={{ margin: '0 0 12px', color: T.muted, fontSize: 12.5, lineHeight: 1.5, ...font }}>Datos reales de la primera campaña (mayo–octubre). No incluye la V2.</p>
+          <div className="tiles t3"><Tile label="Correos enviados" kpi={nk(c.sent)} /><Tile label="Con respuesta" kpi={nk(c.replied)} /><Tile label="Tasa de respuesta" kpi={nk(c.reply_rate)} fmt={fmtPct} /></div>
+          <div style={{ marginTop: 14 }}><BarList rows={c.by_country} color={T.series[0]} empty="" /><p style={{ margin: '8px 0 0', color: T.muted, fontSize: 12, ...font }}>Ciudades/regiones de destino (el campo se llamaba «país» pero guarda la ciudad).</p></div>
+        </Card>
+      )}
     </div>
   );
 }

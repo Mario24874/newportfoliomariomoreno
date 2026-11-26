@@ -92,7 +92,7 @@ export function Legend({ items }: { items: { name: string; color: string; kind?:
 
 /* ---------- serie temporal: visitas (área+línea) y únicos (línea) ---------- */
 export interface Pt { t: string; visits: number; uniques: number }
-export function TimeChart({ data, hourly }: { data: Pt[]; hourly: boolean }) {
+export function TimeChart({ data, hourly, names = ['Visitas', 'Visitantes únicos'] }: { data: Pt[]; hourly: boolean; names?: [string, string] }) {
   const [tip, setTip] = useState<number | null>(null);
   const [table, setTable] = useState(false);
   const [box, W] = useWidth();
@@ -112,17 +112,17 @@ export function TimeChart({ data, hourly }: { data: Pt[]; hourly: boolean }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
-        <Legend items={[{ name: 'Visitas', color: T.series[0] }, { name: 'Visitantes únicos', color: T.series[1] }]} />
+        <Legend items={[{ name: names[0], color: T.series[0] }, { name: names[1], color: T.series[1] }]} />
         <button onClick={() => setTable((v) => !v)} style={{ background: 'none', border: `1px solid ${T.border}`, color: T.sub, fontSize: 12, borderRadius: 8, padding: '4px 10px', cursor: 'pointer', ...font }}>{table ? 'Ver gráfico' : 'Ver como tabla'}</button>
       </div>
       {table ? (
-        <div style={{ maxHeight: 260, overflow: 'auto' }}><DataTable head={[hourly ? 'Hora (Caracas)' : 'Día (Caracas)', 'Visitas', 'Únicos']} rows={data.map((d) => [lab(d.t), String(d.visits), String(d.uniques)])} empty="Sin datos" /></div>
+        <div style={{ maxHeight: 260, overflow: 'auto' }}><DataTable head={[hourly ? 'Hora (Caracas)' : 'Día', names[0], names[1]]} rows={data.map((d) => [lab(d.t), String(d.visits), String(d.uniques)])} empty="Sin datos" /></div>
       ) : (
         <div ref={box} style={{ position: 'relative' }}>
-          <svg width={W} height={H} role="img" aria-label={`Visitas y visitantes únicos por ${hourly ? 'hora' : 'día'}; total ${data.reduce((a, d) => a + d.visits, 0)} visitas`}
+          <svg width={W} height={H} role="img" aria-label={`${names[0]} y ${names[1]} por ${hourly ? 'hora' : 'día'}; total ${data.reduce((a, d) => a + d.visits, 0)}`}
             onPointerMove={onMove} onPointerLeave={() => setTip(null)} style={{ display: 'block', touchAction: 'pan-y' }}>
             {ticks.map((v) => (<g key={v}><line x1={L} x2={W - R} y1={Y(v)} y2={Y(v)} stroke={T.grid} strokeWidth={1} /><text x={L - 8} y={Y(v) + 4} textAnchor="end" fontSize={11} fill={T.muted} style={font}>{fmtNum(Math.round(v))}</text></g>))}
-            {data.map((d, i) => (i % step === 0 || i === last) && <text key={i} x={X(i)} y={H - 6} textAnchor={i === 0 ? 'start' : i === last ? 'end' : 'middle'} fontSize={11} fill={T.muted} style={font}>{lab(d.t)}</text>)}
+            {data.map((d, i) => (i % step === 0 || (i === last && last % step >= Math.ceil(step / 2))) && <text key={i} x={X(i)} y={H - 6} textAnchor={i === 0 ? 'start' : i === last ? 'end' : 'middle'} fontSize={11} fill={T.muted} style={font}>{lab(d.t)}</text>)}
             {data.length > 0 && <path d={`${line('visits')}L${X(last)},${Y(0)}L${X(0)},${Y(0)}Z`} fill={T.series[0]} opacity={0.1} />}
             <path d={line('uniques')} fill="none" stroke={T.series[1]} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
             <path d={line('visits')} fill="none" stroke={T.series[0]} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
@@ -131,7 +131,7 @@ export function TimeChart({ data, hourly }: { data: Pt[]; hourly: boolean }) {
               <circle cx={X(tip)} cy={Y(data[tip].visits)} r={4} fill={T.series[0]} stroke={T.card} strokeWidth={2} />
               <circle cx={X(tip)} cy={Y(data[tip].uniques)} r={4} fill={T.series[1]} stroke={T.card} strokeWidth={2} /></g>}
           </svg>
-          <TipBox tip={tip !== null ? { x: Math.min(Math.max(X(tip), 70), W - 70), y: Y(data[tip].visits), title: lab(data[tip].t) + (hourly ? ' h' : ''), rows: [{ color: T.series[0], label: 'visitas', value: String(data[tip].visits) }, { color: T.series[1], label: 'únicos', value: String(data[tip].uniques) }] } : null} />
+          <TipBox tip={tip !== null ? { x: Math.min(Math.max(X(tip), 70), W - 70), y: Y(data[tip].visits), title: lab(data[tip].t) + (hourly ? ' h' : ''), rows: [{ color: T.series[0], label: names[0].toLowerCase(), value: String(data[tip].visits) }, { color: T.series[1], label: names[1].toLowerCase(), value: String(data[tip].uniques) }] } : null} />
         </div>
       )}
     </div>

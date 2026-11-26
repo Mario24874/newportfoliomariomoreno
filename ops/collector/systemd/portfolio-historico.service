@@ -1,0 +1,13 @@
+[Unit]
+Description=Portfolio: historial de tráfico desde Cloudflare (acumula día a día), sin IA
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /opt/portfolio-collector/cf_historico.py --dias 3
+TimeoutStartSec=5min
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/portfolio-collector

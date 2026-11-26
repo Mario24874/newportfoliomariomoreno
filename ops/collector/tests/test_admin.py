@@ -92,6 +92,18 @@ class T(unittest.TestCase):
         # respuestas: salen de los prospectos en estado «respondio»; los envíos de ensayo no cuentan como contactados
         self.assertEqual((r["contacted"], r["replied"], r["reply_rate"], r["replies_tracked"]), (2, 1, 50.0, True))
 
+    def test_historico_filtra_por_dias_suma_totales_y_tolera_vacio(self):
+        from datetime import date
+        data = {"generated_at": "x", "notas": {"portfolio": "n"},
+                "zona": {"2026-10-20": {"peticiones": 5, "paginas": 2, "unicos": 3}, "2026-11-25": {"peticiones": 9, "paginas": 4, "unicos": 6}},
+                "portfolio": {"2026-11-24": {"cargas": 10, "ips_unicas": 4, "cargas_bruto": 50, "descartadas_vps": 20, "descartadas_bots": 10, "descartadas_rafaga": 10, "paises": [["US", 7], ["VE", 3]]},
+                              "2026-11-25": {"cargas": 20, "ips_unicas": 6, "cargas_bruto": 60, "descartadas_vps": 20, "descartadas_bots": 10, "descartadas_rafaga": 10, "paises": [["US", 15], ["DE", 5]]}}}
+        r = a.historico_report(data, 7, date(2026, 11, 26))
+        self.assertEqual([z["date"] for z in r["zona"]], ["2026-11-25"])                      # 20-oct queda fuera de 7 días
+        self.assertEqual((r["totales"]["cargas"], r["totales"]["cargas_bruto"], r["totales"]["ips_por_dia"], r["totales"]["dias"]), (30, 110, 5, 2))
+        self.assertEqual(r["paises"][0], ("US", 22)); self.assertFalse(r["empty"])
+        self.assertTrue(a.historico_report({}, 30, date(2026, 11, 26))["empty"])
+
     def test_avisos_solo_del_portfolio(self):
         r = a.avisos_report([{"t": 1.0, "proyecto": "Tienda", "tipo": "info", "titulo": "x", "estado": "enviado"}, {"t": 2.0, "proyecto": "Portfolio", "tipo": "info", "titulo": "y", "estado": "enviado"}])
         self.assertEqual([e["title"] for e in r["recent"]], ["y"]); self.assertGreater(len(r["rules"]), 5)

@@ -1,6 +1,6 @@
 // Vistas del panel: Resumen, Tráfico, Demos IA, Mensajes, Captación, Salud y Avisos. Cada una consulta su ruta /admin/* y conserva los datos previos al recargar.
 import React, { useState } from 'react';
-import { ApiError, call, useApi, type Avisos, type Campana, type Captacion, type Demos, type Live, type Messages, type Msg, type Range, type Salud, type Summary } from './api';
+import { ApiError, call, useApi, type Avisos, type Campana, type Captacion, type Demos, type Historico, type Live, type Messages, type Msg, type Range, type Salud, type Summary } from './api';
 import { BarList, Card, Columns, DataTable, Empty, Funnel, SegBar, Status, Tile, TimeChart } from './charts';
 import { T, ago, countryName, fmtDate, fmtDur, fmtPct } from './theme';
 
@@ -72,6 +72,43 @@ export function Trafico({ range }: { range: Range }) {
         <Card title="Dispositivos"><SegBar parts={Object.entries(s.devices).sort((a, b) => b[1] - a[1])} /></Card>
         <Card title="Navegadores"><SegBar parts={Object.entries(s.browsers).sort((a, b) => b[1] - a[1])} /></Card>
       </div>
+    </div>
+  );
+}
+
+/* ================= Histórico (Cloudflare) ================= */
+export function HistoricoView() {
+  const [dias, setDias] = useState(30);
+  const { data: h, error, loading, reload } = useApi<Historico>('/admin/historico', { days: String(dias) }, 300000);
+  if (!h) return <><Banner error={error} onRetry={reload} /><Loading /></>;
+  const t = h.totales, nk = (v: number) => ({ v, p: null, d: null });
+  const noHumano = t.cargas_bruto ? Math.round(((t.cargas_bruto - t.cargas) * 100) / t.cargas_bruto) : 0;
+  return (
+    <div style={{ display: 'grid', gap: 14, ...dim(loading) }}>
+      <Banner error={error} onRetry={reload} />
+      <Card title="De dónde salen estos datos">
+        <p style={{ margin: 0, color: T.sub, fontSize: 13, lineHeight: 1.6, ...font }}>
+          El sitio no guardaba visitas antes del 26-nov; <b style={{ color: T.text }}>Cloudflare</b>, que está delante, sí vio el tráfico. Aquí se recupera ese historial (la zona desde el 20-oct y el portfolio desde el 27-oct) y se acumula cada día, aunque Cloudflare lo borre.
+          {' '}<b style={{ color: T.text }}>Son estimaciones:</b> se descartan los monitores y pruebas del propio servidor, los agentes de robots conocidos y las IP con ráfagas, pero aún pueden quedar robots de centros de datos. Las visitas reales y sin robots que registra el sitio (Resumen y Tráfico) empiezan el 26-nov.
+        </p>
+        <div role="group" aria-label="Días" style={{ display: 'flex', gap: 6, marginTop: 12 }}>
+          {[7, 30, 90].map((n) => <button key={n} onClick={() => setDias(n)} aria-pressed={dias === n} style={{ background: dias === n ? T.raised : 'transparent', color: dias === n ? T.text : T.sub, border: `1px solid ${dias === n ? T.accent : T.border}`, borderRadius: 8, padding: '4px 12px', fontSize: 12.5, cursor: 'pointer', ...font }}>{n} días</button>)}
+        </div>
+      </Card>
+      {h.empty ? <Card><Empty>Todavía no hay historial importado. El importador corre cada día a las 03:10 UTC.</Empty></Card> : (<>
+        <div className="tiles">
+          <Tile label="Cargas de página sin filtrar" kpi={nk(t.cargas_bruto)} hint="HTML con respuesta 200 del host mariomoreno.work según Cloudflare, incluyendo robots y el propio servidor" />
+          <Tile label="Visitas humanas estimadas (máx.)" kpi={nk(t.cargas)} hint="Cota superior: sin el servidor propio, robots conocidos ni IP con más de 10 cargas al día" />
+          <Tile label="IP distintas por día (media)" kpi={nk(t.ips_por_dia)} />
+          <Tile label="Tráfico descartado como no humano" kpi={nk(noHumano)} fmt={fmtPct} upIsGood={false} />
+        </div>
+        <Card title="Portfolio por día (estimación, fechas UTC)"><TimeChart data={h.portfolio.map((p) => ({ t: p.date, visits: p.cargas, uniques: p.ips_unicas }))} hourly={false} names={['Cargas humanas estimadas', 'IP distintas']} /></Card>
+        <div style={grid(400)}>
+          <Card title="Qué se descartó (suma del periodo)"><BarList rows={[['Servidor propio (monitores y pruebas)', t.descartadas_vps], ['Robots por agente de usuario', t.descartadas_bots], ['IP con ráfagas (más de 10 cargas/día)', t.descartadas_rafaga], ['Estimación humana (máx.)', t.cargas]]} color={T.series[3]} /></Card>
+          <Card title="Países de la estimación"><BarList rows={h.paises} fmtName={countryName} color={T.series[0]} empty="Sin datos" /></Card>
+        </div>
+        <Card title="Toda la zona mariomoreno.work por día (incluye tienda, menú y demás subdominios; con robots)"><TimeChart data={h.zona.map((z) => ({ t: z.date, visits: z.paginas, uniques: z.unicos }))} hourly={false} names={['Páginas vistas', 'Únicos (IP)']} /></Card>
+      </>)}
     </div>
   );
 }

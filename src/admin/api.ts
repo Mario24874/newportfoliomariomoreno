@@ -28,6 +28,13 @@ export interface Campana {
   suppressed: { total: number; by_reason: [string, number][] }; batches: [string, number][]; paused: boolean; start_date: string | null;
   unmatched_resend_events: number; recent_events: { at: string; type: string; detail: string }[]; replies_tracked: boolean; contacted: number; replied: number; reply_rate: number;
 }
+export interface Historico {
+  generated_at: string | null; days: number; empty: boolean; notas: { zona?: string; portfolio?: string };
+  zona: { date: string; peticiones: number; paginas: number; unicos: number }[];
+  portfolio: { date: string; cargas: number; ips_unicas: number; cargas_bruto: number; descartadas_vps: number; descartadas_bots: number; descartadas_rafaga: number }[];
+  totales: { cargas_bruto: number; cargas: number; descartadas_vps: number; descartadas_bots: number; descartadas_rafaga: number; ips_por_dia: number; dias: number };
+  paises: [string, number][];
+}
 export interface Salud { generated_at: string; sites: { name: string; ok: boolean; code: number; ms: number }[]; demos: { name: string; ok: boolean; status: string; at: string }[]; alerts: { at: string; source: string; severity: string; what: string; message: string }[] }
 export interface Avisos { rules: { name: string; when: string }[]; recent: { at: string; type: string; title: string; state: string }[] }
 

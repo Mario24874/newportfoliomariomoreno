@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase, isAdminEmail } from '@/lib/supabase';
 import { setTokenGetter, useApi, type Live, type Range, type Summary } from './api';
-import { AvisosView, CaptacionView, DemosView, Mensajes, Resumen, SaludView, Trafico } from './views';
+import { AvisosView, CaptacionView, DemosView, HistoricoView, Mensajes, Resumen, SaludView, Trafico } from './views';
 import { T } from './theme';
 
 const C = {
@@ -79,7 +79,7 @@ function Denied({ email, onOut }: { email?: string; onOut: () => void }) {
   );
 }
 
-const TABS = ['Resumen', 'Tráfico', 'Demos IA', 'Mensajes', 'Captación', 'Salud', 'Avisos'] as const;
+const TABS = ['Resumen', 'Tráfico', 'Histórico', 'Demos IA', 'Mensajes', 'Captación', 'Salud', 'Avisos'] as const;
 type Tab = (typeof TABS)[number];
 const RANGES: [Range, string][] = [['24h', 'Últimas 24 h'], ['7d', '7 días'], ['30d', '30 días'], ['90d', '90 días']];
 
@@ -122,6 +122,7 @@ function Dashboard({ email, onOut }: { email: string; onOut: () => void }) {
         )}
         {tab === 'Resumen' && <Resumen range={range} />}
         {tab === 'Tráfico' && <Trafico range={range} />}
+        {tab === 'Histórico' && <HistoricoView />}
         {tab === 'Demos IA' && <DemosView range={range} />}
         {tab === 'Mensajes' && <Mensajes />}
         {tab === 'Captación' && <CaptacionView />}

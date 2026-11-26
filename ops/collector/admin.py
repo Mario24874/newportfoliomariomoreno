@@ -10,6 +10,7 @@ TZ = timedelta(hours=-4)
 RANGES = {"24h": 24, "7d": 168, "30d": 720, "90d": 2160}
 ALERTS = os.environ.get("N8N_ALERTS", "/etc/easypanel/projects/n8n/n8n/volumes/data/alerts/alerts.jsonl")
 EVENTOS = os.environ.get("AVISADOR_EVENTOS", "/var/lib/avisador/eventos.jsonl")
+HISTORICO = os.environ.get("CF_HISTORICO", "/var/lib/portfolio-collector/cf-historico.json")
 SITES = [("Sitio", "https://mariomoreno.work/", 200), ("Colector", "https://t.mariomoreno.work/salud", 200),
          ("Avisador", "https://avisos.mariomoreno.work/salud", 200), ("n8n", "https://n8n-n8n.qr7yo1.easypanel.host/healthz", 200)]
 RULES = [("✉️ Mensaje de contacto", "inmediato (nombre + mensaje; sin correo ni teléfono)"), ("✉️ Reseña n/5", "inmediato"),
@@ -224,6 +225,25 @@ def campana_report(envios, prospectos, supresion, eventos, config, lotes, now=No
             "replies_tracked": True}
 
 
+def historico_report(data, dias=30, hoy=None):
+    """Historial de Cloudflare (cf_historico.py): serie de la zona (exacta) y del portfolio (ESTIMACIÓN sin VPS, robots ni ráfagas). `data` es el JSON del archivo."""
+    hoy = hoy or now_utc().date()
+    desde = (hoy - timedelta(days=dias)).isoformat()
+    zona = [{"date": d, **v} for d, v in sorted((data.get("zona") or {}).items()) if d >= desde]
+    port = [{"date": d, **v} for d, v in sorted((data.get("portfolio") or {}).items()) if d >= desde]
+    paises = Counter()
+    for p in port:
+        for pais, n in p.get("paises", []):
+            paises[pais] += n
+    suma = lambda k: sum(p.get(k, 0) for p in port)  # noqa: E731
+    return {"generated_at": data.get("generated_at"), "days": dias, "empty": not zona and not port, "notas": data.get("notas", {}),
+            "zona": zona, "portfolio": port,
+            "totales": {"cargas_bruto": suma("cargas_bruto"), "cargas": suma("cargas"), "descartadas_vps": suma("descartadas_vps"),
+                        "descartadas_bots": suma("descartadas_bots"), "descartadas_rafaga": suma("descartadas_rafaga"),
+                        "ips_por_dia": round(suma("ips_unicas") / len(port)) if port else 0, "dias": len(port)},
+            "paises": paises.most_common(8)}
+
+
 def probe(name, url, ok):
     t0 = time.time()
     try:
@@ -263,7 +283,7 @@ def avisos_report(events=None):
 
 # ---------- enrutado (puro: recibe la BD; la autenticación la hace collector.py) ----------
 _cache = {}
-TTL = {"/admin/summary": 10, "/admin/demos": 10, "/admin/captacion": 60, "/admin/campana": 60, "/admin/salud": 30, "/admin/avisos": 10, "/admin/live": 4}
+TTL = {"/admin/summary": 10, "/admin/demos": 10, "/admin/captacion": 60, "/admin/campana": 60, "/admin/historico": 60, "/admin/salud": 30, "/admin/avisos": 10, "/admin/live": 4}
 
 
 def since(col, dt):
@@ -316,6 +336,16 @@ def _route(db, method, path, params, body, now):
                                        db.select_all("c2_prospectos", "select=estado,celda,canal"), db.select_all("c2_supresion", "select=motivo"),
                                        db.select_all("c2_eventos", "select=creado,tipo,detalle&order=creado.desc&limit=1000"), db.select_all("c2_config", "select=clave,valor"),
                                        db.select_all("c2_lotes", "select=estado"), now), "json"
+        if path == "/admin/historico":
+            try:
+                dias = max(1, min(int(params.get("days", "30")), 400))
+            except ValueError:
+                dias = 30
+            try:
+                data = json.load(open(HISTORICO, encoding="utf-8"))
+            except (OSError, ValueError):
+                data = {}
+            return 200, historico_report(data, dias), "json"
         if path == "/admin/salud":
             return 200, salud_report(), "json"
         if path == "/admin/avisos":

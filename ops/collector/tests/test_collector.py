@@ -152,4 +152,73 @@ class Http(unittest.TestCase):
         self.assertEqual(self.avisos[0][:2], ("error", "El colector no puede guardar en Supabase"))
 
 
+class AdminHttp(unittest.TestCase):
+    """/admin/* por HTTP real: Supabase Auth simulado (token «dueno» = owner, «otro» = otra persona, cualquier otro = inválido)."""
+    def setUp(self):
+        import json, threading, http.server, urllib.request
+        self.json, self.urlreq = json, urllib.request
+        c.admin._cache.clear()
+
+        class AuthStub(http.server.BaseHTTPRequestHandler):
+            def do_GET(h):
+                tok = (h.headers.get("Authorization") or "")[7:]
+                email = {"dueno": "Dueno@Ejemplo.com", "otro": "intruso@ejemplo.com"}.get(tok)
+                h.send_response(200 if email else 401); h.send_header("Content-Type", "application/json"); h.end_headers()
+                h.wfile.write(json.dumps({"email": email} if email else {"msg": "invalid"}).encode())
+            def log_message(h, *a): pass
+        self.auth_srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), AuthStub)
+        threading.Thread(target=self.auth_srv.serve_forever, daemon=True).start()
+
+        class AdminDb(FakeDb):
+            def select_all(s, table, query): return {"pf_page_views": [], "pf_demo_runs": [], "pf_contact_messages": [{"id": "1", "name": "Ana", "message": "hola", "source": "portfolio", "status": "new",
+                                                    "created_at": "2026-11-26T10:00:00+00:00", "anon_id": ANON}]}.get(table, [])
+        self.db = AdminDb()
+        auth = c.Auth(f"http://127.0.0.1:{self.auth_srv.server_address[1]}", "k", ["dueno@ejemplo.com"])
+        self.srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), c.make_handler(self.db, None, auth))
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+        self.port = self.srv.server_address[1]
+
+    def tearDown(self):
+        self.srv.shutdown(); self.srv.server_close(); self.auth_srv.shutdown(); self.auth_srv.server_close()
+
+    def call(self, method, path, token=None, origin="https://mariomoreno.work", body=None):
+        import urllib.error
+        h = {"Origin": origin}
+        if token: h["Authorization"] = "Bearer " + token
+        r = self.urlreq.Request(f"http://127.0.0.1:{self.port}{path}", data=self.json.dumps(body).encode() if body is not None else None, method=method, headers=h)
+        try:
+            with self.urlreq.urlopen(r, timeout=5) as x: return x.status, x.read().decode(), dict(x.headers)
+        except urllib.error.HTTPError as e: return e.code, e.read().decode(), dict(e.headers)
+
+    def test_sin_token_401_otra_persona_403_owner_200(self):
+        self.assertEqual(self.call("GET", "/admin/live")[0], 401)
+        self.assertEqual(self.call("GET", "/admin/live", "falso")[0], 401)
+        self.assertEqual(self.call("GET", "/admin/live", "otro")[0], 403)
+        code, body, _ = self.call("GET", "/admin/live", "dueno")
+        self.assertEqual(code, 200); self.assertEqual(self.json.loads(body)["active_5min"], 0)
+
+    def test_origen_ajeno_se_rechaza_aun_con_token_valido(self):
+        self.assertEqual(self.call("GET", "/admin/live", "dueno", origin="https://evil.example")[0], 403)
+
+    def test_resumen_y_rango_invalido(self):
+        code, body, _ = self.call("GET", "/admin/summary?range=7d", "dueno")
+        self.assertEqual(code, 200); self.assertTrue(self.json.loads(body)["empty"])
+        self.assertEqual(self.call("GET", "/admin/summary?range=1y", "dueno")[0], 400)
+
+    def test_bandeja_csv_y_cambio_de_estado(self):
+        code, body, hdr = self.call("GET", "/admin/messages.csv", "dueno")
+        self.assertEqual(code, 200); self.assertIn("text/csv", hdr.get("Content-Type", "")); self.assertIn("hola", body)
+        mid = "11111111-2222-3333-4444-555555555555"
+        self.assertEqual(self.call("PATCH", f"/admin/messages/{mid}", "dueno", body={"status": "read"})[0], 200)
+        self.assertEqual(self.db.upd[-1], ("pf_contact_messages", {"id": f"eq.{mid}"}, {"status": "read"}))
+        self.assertEqual(self.call("PATCH", f"/admin/messages/{mid}", "dueno", body={"status": "borrado"})[0], 400)
+        self.assertEqual(self.call("PATCH", f"/admin/messages/{mid}", "otro", body={"status": "read"})[0], 403)
+
+    def test_preflight_permite_authorization_solo_desde_el_sitio(self):
+        import urllib.error
+        r = self.urlreq.Request(f"http://127.0.0.1:{self.port}/admin/summary", method="OPTIONS", headers={"Origin": "https://mariomoreno.work"})
+        with self.urlreq.urlopen(r, timeout=5) as x:
+            self.assertIn("Authorization", x.headers["Access-Control-Allow-Headers"]); self.assertIn("PATCH", x.headers["Access-Control-Allow-Methods"])
+
+
 if __name__ == "__main__": unittest.main()

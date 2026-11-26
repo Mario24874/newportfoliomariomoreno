@@ -2,9 +2,10 @@
 # Instala/actualiza el colector y el resumen diario en el VPS: copia el código a /opt (no depende de la rama de /root/portfolio) y reinicia.
 set -euo pipefail
 cd "$(dirname "$0")"
-python3 -m unittest tests.test_collector tests.test_resumen
+python3 -m unittest tests.test_collector tests.test_resumen tests.test_admin
 install -D -m 0644 collector.py /opt/portfolio-collector/collector.py
 install -D -m 0644 resumen.py /opt/portfolio-collector/resumen.py
+install -D -m 0644 admin.py /opt/portfolio-collector/admin.py
 install -m 0644 systemd/portfolio-collector.service systemd/portfolio-resumen.service systemd/portfolio-resumen.timer /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now portfolio-collector.service portfolio-resumen.timer

@@ -12,7 +12,11 @@ Secretos: /root/.secrets/supabase-tracker.env (SUPABASE_URL, SUPABASE_SERVICE_RO
 import hashlib, json, os, re, sys, threading, time, urllib.error, urllib.parse, urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # python -I no añade el directorio del script
+import admin  # noqa: E402
+
 ENV_FILE = os.environ.get("COLLECTOR_ENV", "/root/.secrets/supabase-tracker.env")
+ADMIN_ENV = os.environ.get("COLLECTOR_ADMIN_ENV", "/root/.secrets/portfolio-admin.env")  # ADMIN_EMAILS=correo1,correo2
 AVISADOR_DIR = os.environ.get("AVISADOR_DIR", "/root/avisador")
 ORIGINS = {"https://mariomoreno.work", "https://www.mariomoreno.work", "https://app.mariomoreno.work"}
 BOT_RE = re.compile(r"bot|crawl|spider|slurp|headless|lighthouse|pingdom|uptime|monitor|curl|wget|python-|httpclient|go-http|java/|axios|node-fetch|preview|facebookexternalhit|whatsapp", re.I)
@@ -71,8 +75,50 @@ class Db:
     def insert(self, table, row, returning=False):
         return self._req("POST", table, row, "return=representation" if returning else "return=minimal")
 
+    def select_all(self, table, query, page=1000, cap=200000):
+        """PostgREST devuelve como mucho ~1000 filas por petición: se pagina con Range."""
+        out = []
+        while len(out) < cap:
+            h = {"apikey": self.key, "Authorization": f"Bearer {self.key}", "Range-Unit": "items", "Range": f"{len(out)}-{len(out) + page - 1}"}
+            r = urllib.request.Request(f"{self.url}/rest/v1/{table}?{query}", headers=h)
+            with urllib.request.urlopen(r, timeout=30) as x:
+                rows = json.loads(x.read() or b"[]")
+            out += rows
+            if len(rows) < page:
+                break
+        return out
+
     def update(self, table, filters, row):
         return self._req("PATCH", f"{table}?{urllib.parse.urlencode(filters)}", row, "return=minimal")
+
+
+class Auth:
+    """Verifica el JWT de Supabase del owner preguntando a Supabase Auth (sin librerías ni secretos JWT) y cruza el correo con la lista permitida."""
+    def __init__(self, url, key, emails, ttl=60):
+        self.url, self.key, self.emails, self.ttl, self._c = url.rstrip("/"), key, {e.strip().lower() for e in emails if e.strip()}, ttl, {}
+
+    def check(self, token, now=None):
+        """Devuelve 'ok' | 'denied' (sesión válida de otra persona) | 'invalid' (sin sesión válida)."""
+        now = time.time() if now is None else now
+        if not token or len(token) > 4096:
+            return "invalid"
+        k = hashlib.sha256(token.encode()).hexdigest()
+        hit = self._c.get(k)
+        if hit and now - hit[0] < self.ttl:
+            return hit[1]
+        try:
+            r = urllib.request.Request(f"{self.url}/auth/v1/user", headers={"apikey": self.key, "Authorization": f"Bearer {token}"})
+            with urllib.request.urlopen(r, timeout=8) as x:
+                email = (json.loads(x.read()).get("email") or "").lower()
+            res = "ok" if email in self.emails else "denied"
+        except urllib.error.HTTPError as e:
+            if e.code not in (400, 401, 403):
+                raise
+            res = "invalid"
+        self._c[k] = (now, res)
+        if len(self._c) > 500:
+            self._c.clear()
+        return res
 
 
 def rate_ok(kind, ip_hash, now):
@@ -170,10 +216,11 @@ def handle(kind, data, ua, country, db, emit=None, now=None):
     return 404, {"error": "no"}
 
 
-def make_handler(db, notify):
+def make_handler(db, notify, auth=None):
     class H(BaseHandler):
         pass
     H.db = db
+    H.auth = staticmethod(auth.check) if auth else None
     H.notify = staticmethod(notify) if notify else None  # staticmethod: si no, Python lo enlaza como método y le pasa `self` de más
     return H
 
@@ -181,6 +228,7 @@ def make_handler(db, notify):
 class BaseHandler(BaseHTTPRequestHandler):
     db = None
     notify = None
+    auth = None
     server_version = "pf-collector"
 
     def _cors(self):
@@ -188,16 +236,16 @@ class BaseHandler(BaseHTTPRequestHandler):
         if o in ORIGINS:
             self.send_header("Access-Control-Allow-Origin", o)
             self.send_header("Vary", "Origin")
-            self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
             self.send_header("Access-Control-Max-Age", "86400")
 
-    def _send(self, code, obj=None):
-        body = json.dumps(obj).encode() if obj else b""
+    def _send(self, code, obj=None, ctype="application/json"):
+        body = (obj.encode() if isinstance(obj, str) else json.dumps(obj).encode()) if obj not in (None, {}) else b""
         self.send_response(code)
         self._cors()
         if body:
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", ctype + ("; charset=utf-8" if ctype != "application/json" else ""))
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         if body and self.command != "HEAD":
@@ -206,8 +254,42 @@ class BaseHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self._send(204)
 
+    def _admin(self, method):
+        if self.headers.get("Origin", "") not in ORIGINS:
+            return self._send(403, {"error": "origen"})
+        if not self.auth:
+            return self._send(503, {"error": "admin deshabilitado"})
+        u = urllib.parse.urlsplit(self.path)
+        tok = (self.headers.get("Authorization") or "")[7:] if (self.headers.get("Authorization") or "").startswith("Bearer ") else ""
+        try:
+            who = self.auth(tok)
+        except Exception as e:  # noqa: BLE001 - Supabase Auth caído: no es culpa del cliente
+            print(f"[collector] auth ERROR: {type(e).__name__}: {str(e)[:150]}", file=sys.stderr, flush=True)
+            return self._send(503, {"error": "auth"})
+        if who != "ok":
+            return self._send(401 if who == "invalid" else 403, {"error": "no autorizado"})
+        body = None
+        if method == "PATCH":
+            try:
+                n = int(self.headers.get("Content-Length", "0"))
+                body = json.loads(self.rfile.read(n)) if 0 < n <= 2048 else None
+            except (ValueError, json.JSONDecodeError):
+                return self._send(400, {"error": "json"})
+        params = dict(urllib.parse.parse_qsl(u.query))
+        try:
+            code, payload, ctype = admin.route(self.db, method, u.path, params, body)
+        except Exception as e:  # noqa: BLE001
+            print(f"[collector] admin ERROR {u.path}: {type(e).__name__}: {str(e)[:200]}", file=sys.stderr, flush=True)
+            return self._send(502, {"error": "almacenamiento"})
+        self._send(code, payload, "text/csv" if ctype == "csv" else "application/json")
+
     def do_GET(self):
+        if self.path.startswith("/admin/"):
+            return self._admin("GET")
         self._send(200, {"ok": True}) if self.path == "/salud" else self._send(404, {"error": "no"})
+
+    def do_PATCH(self):
+        self._admin("PATCH") if self.path.startswith("/admin/") else self._send(404, {"error": "no"})
 
     def do_POST(self):
         m = re.fullmatch(r"/t/(pv|dur|demo|contact|review|click)", self.path)
@@ -250,6 +332,13 @@ def main():
     env = read_env(ENV_FILE)
     db = Db(env["SUPABASE_URL"], env["SUPABASE_SERVICE_ROLE_KEY"])
     notify = None
+    auth = None
+    try:
+        emails = read_env(ADMIN_ENV).get("ADMIN_EMAILS", "").split(",")
+        if any(e.strip() for e in emails):
+            auth = Auth(env["SUPABASE_URL"], env["SUPABASE_SERVICE_ROLE_KEY"], emails)
+    except OSError as e:
+        print(f"[collector] sin {ADMIN_ENV}: el panel admin queda deshabilitado ({e})", file=sys.stderr)
     try:
         sys.path.insert(0, AVISADOR_DIR)
         import avisador
@@ -258,7 +347,7 @@ def main():
         print(f"[collector] avisador no disponible: {e}", file=sys.stderr)
     host, port = os.environ.get("COLLECTOR_HOST", "127.0.0.1"), int(os.environ.get("COLLECTOR_PORT", "8788"))
     print(f"[collector] escuchando en {host}:{port}", flush=True)
-    ThreadingHTTPServer((host, port), make_handler(db, notify)).serve_forever()
+    ThreadingHTTPServer((host, port), make_handler(db, notify, auth)).serve_forever()
 
 
 if __name__ == "__main__":

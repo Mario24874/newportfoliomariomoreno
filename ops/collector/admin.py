@@ -202,6 +202,9 @@ def campana_report(envios, prospectos, supresion, eventos, config, lotes, now=No
     tipos = Counter(e.get("tipo") for e in eventos)
     cfg = {c["clave"]: c["valor"] for c in config}
     ult = max((e["enviado_at"] for e in reales if e.get("enviado_at")), default=None)
+    # Las respuestas SÍ se guardan: vigilar_respuestas.py pasa al prospecto a «respondio» y registra el evento «respuesta» en c2_eventos.
+    contactados = {e["prospecto_id"] for e in reales if e.get("prospecto_id")}
+    respondieron = sum(1 for p in prospectos if p.get("estado") == "respondio")
     return {"sent": len(reales), "trial_sent": len(ensayos), "last_sent": ult,
             "delivered": sum(1 for e in reales if e.get("estado_entrega") == "entregado"),
             "bounced": sum(1 for e in reales if e.get("rebote_tipo")),
@@ -217,7 +220,8 @@ def campana_report(envios, prospectos, supresion, eventos, config, lotes, now=No
             "unmatched_resend_events": tipos.get("resend_sin_envio", 0),
             "recent_events": [{"at": e["creado"], "type": e["tipo"], "detail": json.dumps(e.get("detalle"), ensure_ascii=False)[:120] if e.get("detalle") else ""}
                               for e in eventos if e.get("tipo") != "resend_sin_envio"][:12],
-            "replies_tracked": False}
+            "contacted": len(contactados), "replied": respondieron, "reply_rate": round(respondieron * 100 / len(contactados), 1) if contactados else 0.0,
+            "replies_tracked": True}
 
 
 def probe(name, url, ok):
@@ -308,7 +312,7 @@ def _route(db, method, path, params, body, now):
         if path == "/admin/captacion":
             return 200, captacion_report(db.select_all("outreach_log", "select=sent_at,status,has_reply,replied_at,company,country,subject&order=sent_at.desc"), now), "json"
         if path == "/admin/campana":
-            return 200, campana_report(db.select_all("c2_envios", "select=toque,enviado_at,estado_entrega,rebote_tipo,ensayo&order=enviado_at.desc"),
+            return 200, campana_report(db.select_all("c2_envios", "select=prospecto_id,toque,enviado_at,estado_entrega,rebote_tipo,ensayo&order=enviado_at.desc"),
                                        db.select_all("c2_prospectos", "select=estado,celda,canal"), db.select_all("c2_supresion", "select=motivo"),
                                        db.select_all("c2_eventos", "select=creado,tipo,detalle&order=creado.desc&limit=1000"), db.select_all("c2_config", "select=clave,valor"),
                                        db.select_all("c2_lotes", "select=estado"), now), "json"

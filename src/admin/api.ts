@@ -26,7 +26,7 @@ export interface Campana {
   by_day: { day: string; sent: number }[];
   prospects: { total: number; by_state: [string, number][]; by_cell: [string, number][]; by_channel: [string, number][] };
   suppressed: { total: number; by_reason: [string, number][] }; batches: [string, number][]; paused: boolean; start_date: string | null;
-  unmatched_resend_events: number; recent_events: { at: string; type: string; detail: string }[]; replies_tracked: boolean;
+  unmatched_resend_events: number; recent_events: { at: string; type: string; detail: string }[]; replies_tracked: boolean; contacted: number; replied: number; reply_rate: number;
 }
 export interface Salud { generated_at: string; sites: { name: string; ok: boolean; code: number; ms: number }[]; demos: { name: string; ok: boolean; status: string; at: string }[]; alerts: { at: string; source: string; severity: string; what: string; message: string }[] }
 export interface Avisos { rules: { name: string; when: string }[]; recent: { at: string; type: string; title: string; state: string }[] }

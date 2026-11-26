@@ -175,7 +175,10 @@ export function CaptacionView() {
         <Card title="Estado de entrega"><BarList rows={k.by_delivery} fmtName={(n) => STATE_ES[n] ?? n} color={T.series[2]} empty="Sin envíos." /></Card>
         <Card title="Canal de contacto de los prospectos"><BarList rows={k.prospects.by_channel} fmtName={(n) => (n === 'correo' ? 'Correo' : n === 'formulario_manual' ? 'Formulario manual' : n === 'whatsapp_manual' ? 'WhatsApp manual' : n === 'revisar_buzon_gratuito' ? 'Revisar buzón gratuito' : n)} color={T.series[3]} /></Card>
       </div>
-      <Card title="Respuestas a la campaña"><Empty>Las respuestas todavía <b>no se registran en la base de datos</b> (no hay tabla de respuestas en la V2): te llegan por Telegram (tema 📣 Campaña) y quedan en el buzón. Esta sección no muestra «0 respuestas» porque sería falso: se mostrará en cuanto se registren.</Empty></Card>
+      <Card title="Respuestas a la campaña">
+        <div className="tiles t3"><Tile label="Prospectos contactados por correo" kpi={nk(k.contacted)} hint="Prospectos con al menos un envío real (sin ensayos)" /><Tile label="Respondieron" kpi={nk(k.replied)} /><Tile label="Tasa de respuesta" kpi={nk(k.reply_rate)} fmt={fmtPct} /></div>
+        {k.replied === 0 && <p style={{ margin: '12px 0 0', color: T.muted, fontSize: 12.5, lineHeight: 1.5, ...font }}>Ninguna respuesta registrada todavía. El vigilante revisa la bandeja cada 10 min, marca al prospecto como «respondió» y te avisa por Telegram; en cuanto ocurra aparece aquí.</p>}
+      </Card>
       <Card title="Últimos eventos de la campaña"><DataTable head={['Cuándo', 'Evento', 'Detalle']} empty="Sin eventos." rows={k.recent_events.map((e) => [fmtDate(e.at), e.type, e.detail])} />
         {k.unmatched_resend_events > 0 && <p style={{ margin: '10px 0 0', color: T.muted, fontSize: 12.5, ...font }}>Además hay {k.unmatched_resend_events} avisos de Resend (rebotes/entregas) que no corresponden a ningún envío de la V2: vienen de otros correos de la misma cuenta.</p>}
       </Card>

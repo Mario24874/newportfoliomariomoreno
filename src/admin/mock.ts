@@ -32,7 +32,7 @@ export function mock(path: string, params: Record<string, string>): unknown {
     by_day: Array.from({ length: 14 }, (_, i) => ({ day: new Date(Date.now() - (13 - i) * 86400000).toISOString().slice(0, 10), sent: i < 6 ? ri(0, 4) : 0 })),
     prospects: { total: 60, by_state: [['descartado', 46], ['aprobado', 8], ['t3', 5], ['baja', 1]], by_cell: [['A', 60]], by_channel: [['sin canal', 44], ['correo', 6], ['formulario_manual', 5], ['whatsapp_manual', 4]] },
     suppressed: { total: 9, by_reason: [['plataforma', 8], ['baja', 1]] }, batches: [['aprobado', 1]], paused: false, start_date: '2026-11-05', unmatched_resend_events: 87,
-    recent_events: [{ at: iso(60 * 24 * 9), type: 'baja', detail: '{"valor":"x@y.z"}' }], replies_tracked: false };
+    recent_events: [{ at: iso(60 * 24 * 9), type: 'baja', detail: '{"valor":"x@y.z"}' }], replies_tracked: true, contacted: 6, replied: 1, reply_rate: 16.7 };
   if (path === '/admin/salud') return { generated_at: iso(0), sites: [{ name: 'Sitio', ok: true, code: 200, ms: 92 }, { name: 'Colector', ok: true, code: 200, ms: 80 }, { name: 'Avisador', ok: true, code: 200, ms: 86 }, { name: 'n8n', ok: false, code: 502, ms: 3000 }], demos: [{ name: 'Contenido', ok: true, status: 'recovered', at: iso(900) }, { name: 'Investigación', ok: false, status: 'error', at: iso(60) }], alerts: [{ at: iso(60), source: 'monitor', severity: 'error', what: 'demo Investigación', message: '503 de Gemini' }] };
   if (path === '/admin/avisos') return { rules: [{ name: '✉️ Mensaje de contacto', when: 'inmediato' }, { name: 'ℹ️ Resumen diario', when: '12:05 UTC' }], recent: [{ at: iso(5), type: 'mensaje', title: 'Mensaje de contacto', state: 'enviado' }] };
   return {};

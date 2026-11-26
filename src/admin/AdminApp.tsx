@@ -3,12 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase, isAdminEmail } from '@/lib/supabase';
-import { useMetrics } from './useMetrics';
+import { setTokenGetter, useApi, type Live, type Range, type Summary } from './api';
+import { AvisosView, CaptacionView, DemosView, Mensajes, Resumen, SaludView, Trafico } from './views';
+import { T } from './theme';
 
 const C = {
-  bg: '#020617', card: '#0f172a', border: '#1e293b', line: '#131c31',
-  text: '#f8fafc', sub: '#94a3b8', dim: '#64748b', accent: '#6366f1',
+  bg: T.page, card: T.card, border: T.border, line: T.grid,
+  text: T.text, sub: T.sub, dim: T.muted, accent: T.accent,
 };
+// Vista previa SOLO en desarrollo (npm run dev + ?mock): datos simulados y sin login. En producción esta rama no existe (se elimina al compilar).
+const MOCK = import.meta.env.DEV && location.search.includes('mock');
 
 export default function AdminApp() {
   const sb = getSupabase();
@@ -16,17 +20,20 @@ export default function AdminApp() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    document.title = 'Admin · Métricas';
+    document.title = 'Admin · Portfolio';
     const meta = document.createElement('meta');
     meta.name = 'robots';
     meta.content = 'noindex, nofollow';
     document.head.appendChild(meta);
+    if (MOCK) { setReady(true); return; }
     if (!sb) { setReady(true); return; }
+    setTokenGetter(async () => (await sb.auth.getSession()).data.session?.access_token ?? null);
     sb.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true); });
     const { data: sub } = sb.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => sub.subscription.unsubscribe();
   }, [sb]);
 
+  if (MOCK) return <Dashboard email="vista-previa@local" onOut={() => undefined} />;
   if (!sb) return <Shell><Note>Supabase no está configurado (faltan VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY).</Note></Shell>;
   if (!ready) return <Shell><Note>Cargando…</Note></Shell>;
 
@@ -72,67 +79,55 @@ function Denied({ email, onOut }: { email?: string; onOut: () => void }) {
   );
 }
 
+const TABS = ['Resumen', 'Tráfico', 'Demos IA', 'Mensajes', 'Captación', 'Salud', 'Avisos'] as const;
+type Tab = (typeof TABS)[number];
+const RANGES: [Range, string][] = [['24h', 'Últimas 24 h'], ['7d', '7 días'], ['30d', '30 días'], ['90d', '90 días']];
+
 function Dashboard({ email, onOut }: { email: string; onOut: () => void }) {
-  const m = useMetrics();
-  const fmtDur = (s: number) => (!s ? '0s' : s < 60 ? `${s}s` : `${Math.floor(s / 60)}m`);
-  const maxDay = Math.max(1, ...m.visitsByDay.map((d) => d.visits));
-
-  const kpis = [
-    { label: 'Visitas (30d)', value: m.visitsTotal, color: '#60a5fa' },
-    { label: 'Visitantes únicos', value: m.uniqueVisitors, color: '#34d399' },
-    { label: 'Demos probados', value: m.demosTotal, color: '#a78bfa' },
-    { label: 'Tiempo medio', value: fmtDur(m.avgSeconds), color: '#fbbf24' },
-    { label: 'Leads scrapeados', value: m.leadsTotal, color: '#22d3ee' },
-    { label: 'Respuestas', value: m.replies, color: '#4ade80' },
-    { label: 'Contactos', value: m.contactsTotal, color: '#fb923c' },
-  ];
-
+  const [tab, setTab] = useState<Tab>('Resumen');
+  const [range, setRange] = useState<Range>('7d');
+  const live = useApi<Live>('/admin/live', {}, 10000);
+  const sum = useApi<Summary>('/admin/summary', { range: '7d' }, 60000);
+  const unread = sum.data?.kpis.unread.v ?? 0;
+  const ranged = tab === 'Resumen' || tab === 'Tráfico' || tab === 'Demos IA';
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px', height: 54, borderBottom: `1px solid ${C.border}`, position: 'sticky', top: 0, background: '#0a0f1f', zIndex: 10 }}>
-        <strong style={{ fontSize: 15 }}><span style={{ color: C.accent }}>●</span> Admin · Métricas</strong>
-        <a href="/" style={{ color: C.dim, fontSize: 13, marginLeft: 8 }}>← Sitio</a>
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: C.dim }}>{email}</span>
-        <button onClick={onOut} style={{ fontSize: 12, color: C.sub, background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>Salir</button>
-      </header>
-
-      <div style={{ padding: 20, maxWidth: 1200, margin: '0 auto' }}>
-        {m.loading && <Note>Cargando métricas…</Note>}
-        {m.error && <Note>⚠️ {m.error}</Note>}
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px,1fr))', gap: 12, marginBottom: 16 }}>
-          {kpis.map((k) => (
-            <div key={k.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
-              <div style={{ fontSize: 26, fontWeight: 700, color: k.color }}>{k.value}</div>
-              <div style={{ fontSize: 11.5, color: C.dim, marginTop: 2 }}>{k.label}</div>
-            </div>
-          ))}
+    <div style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily: T.font, overflowX: 'hidden' }}>
+      <style>{`.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media(max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid ${T.accent};outline-offset:2px}`}</style>
+      <header style={{ position: 'sticky', top: 0, zIndex: 10, background: '#161615', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px', height: 54, flexWrap: 'wrap' }}>
+          <strong style={{ fontSize: 15 }}><span style={{ color: C.accent }}>●</span> Admin · Portfolio</strong>
+          <a href="/" style={{ color: C.dim, fontSize: 13 }}>← Sitio</a>
+          <span title="Visitantes distintos en los últimos 5 minutos" style={{ marginLeft: 'auto', fontSize: 12.5, color: T.sub, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span aria-hidden style={{ width: 8, height: 8, borderRadius: 4, background: (live.data?.active_5min ?? 0) > 0 ? T.good : T.muted }} />
+            {live.data ? `${live.data.active_5min} en vivo` : '…'}
+          </span>
+          <span style={{ fontSize: 12, color: C.dim }}>{email}</span>
+          <button onClick={onOut} style={{ fontSize: 12, color: C.sub, background: 'transparent', border: `1px solid ${C.border}`, borderRadius: 8, padding: '5px 10px', cursor: 'pointer' }}>Salir</button>
         </div>
-
-        <Card title="Visitas por día (14d)">
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 90, padding: '4px 0' }}>
-            {m.visitsByDay.map((d) => (
-              <div key={d.day} style={{ flex: 1, textAlign: 'center' }}>
-                <div title={`${d.day}: ${d.visits}`} style={{ height: `${(d.visits / maxDay) * 72}px`, minHeight: 2, background: C.accent, borderRadius: 3 }} />
-                <span style={{ fontSize: 8, color: C.dim }}>{d.day.slice(5)}</span>
-              </div>
-            ))}
+        <nav aria-label="Secciones" style={{ display: 'flex', gap: 2, padding: '0 14px', overflowX: 'auto' }}>
+          {TABS.map((t) => (
+            <button key={t} onClick={() => setTab(t)} aria-current={tab === t ? 'page' : undefined}
+              style={{ background: 'none', border: 'none', borderBottom: `2px solid ${tab === t ? C.accent : 'transparent'}`, color: tab === t ? C.text : C.dim, padding: '10px 12px', fontSize: 13.5, fontWeight: tab === t ? 650 : 500, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: T.font }}>
+              {t}{t === 'Mensajes' && unread > 0 && <span style={{ marginLeft: 6, background: C.accent, color: '#fff', borderRadius: 9, fontSize: 11, padding: '1px 6px' }}>{unread}</span>}
+            </button>
+          ))}
+        </nav>
+      </header>
+      <main style={{ padding: 20, maxWidth: 1200, margin: '0 auto' }}>
+        {ranged && (
+          <div role="group" aria-label="Rango de fechas" style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+            {RANGES.map(([v, l]) => <button key={v} onClick={() => setRange(v)} aria-pressed={range === v} style={{ background: range === v ? T.raised : 'transparent', color: range === v ? C.text : C.sub, border: `1px solid ${range === v ? C.accent : C.border}`, borderRadius: 8, padding: '5px 12px', fontSize: 13, cursor: 'pointer', fontFamily: T.font }}>{l}</button>)}
           </div>
-        </Card>
-
-        <Card title="Correos recibidos (respuestas)">
-          <Table head={['De', 'Asunto', 'Mensaje', 'Fecha']} rows={m.replyRows} empty="Sin respuestas aún (las alimenta n8n → pf_email_replies)." />
-        </Card>
-        <Card title="Solicitudes del formulario de contacto">
-          <Table head={['Nombre', 'Email/Tel', 'Mensaje', 'Fecha']} rows={m.contactRows} empty="Sin solicitudes todavía." />
-        </Card>
-        <Card title="Leads scrapeados (n8n · outreach_log)">
-          <Table head={['Empresa', 'Email', 'Estado', 'Respondió', 'Fecha']} rows={m.leadRows} empty="Sin acceso a outreach_log (activa la policy opcional) o sin leads." />
-        </Card>
-        <Card title="Visitas anónimas recientes">
-          <Table head={['Anon', 'Área', 'Ruta', 'Tiempo', 'Fecha']} rows={m.visitRows} empty="Aún no hay visitas registradas." />
-        </Card>
-      </div>
+        )}
+        {tab === 'Resumen' && <Resumen range={range} />}
+        {tab === 'Tráfico' && <Trafico range={range} />}
+        {tab === 'Demos IA' && <DemosView range={range} />}
+        {tab === 'Mensajes' && <Mensajes />}
+        {tab === 'Captación' && <CaptacionView />}
+        {tab === 'Salud' && <SaludView />}
+        {tab === 'Avisos' && <AvisosView />}
+      </main>
     </div>
   );
 }
@@ -143,23 +138,4 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 function Note({ children }: { children: React.ReactNode }) {
   return <p style={{ color: C.dim, fontSize: 13, padding: 16 }}>{children}</p>;
-}
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 14, overflow: 'hidden' }}>
-      <h3 style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', margin: 0, padding: '12px 14px', borderBottom: `1px solid ${C.border}` }}>{title}</h3>
-      <div style={{ padding: title ? 14 : 0 }}>{children}</div>
-    </div>
-  );
-}
-function Table({ head, rows, empty }: { head: string[]; rows: string[][]; empty: string }) {
-  if (!rows.length) return <p style={{ color: C.dim, fontSize: 12.5 }}>{empty}</p>;
-  return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
-        <thead><tr>{head.map((h) => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', color: C.dim, fontSize: 11, textTransform: 'uppercase', borderBottom: `1px solid ${C.border}` }}>{h}</th>)}</tr></thead>
-        <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} style={{ padding: '6px 8px', color: '#cbd5e1', borderBottom: `1px solid ${C.line}`, verticalAlign: 'top' }}>{c}</td>)}</tr>)}</tbody>
-      </table>
-    </div>
-  );
 }

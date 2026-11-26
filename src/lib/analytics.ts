@@ -1,23 +1,18 @@
-// Analítica del portafolio → Supabase propia (tablas pf_*), vía REST + anon key.
-// Usa fetch plano (NO el SDK supabase-js) para no inflar el bundle público:
-// el SDK pesado solo se carga en el chunk de /admin. La seguridad la da el RLS
-// (anon solo puede INSERT en pf_*; nadie lee desde el navegador).
-// Reemplaza el viejo trackVisit() que enviaba a app.mariomoreno.work (outreach-tracker).
+// Analítica del portafolio → colector propio en el VPS (t.mariomoreno.work, código en ops/collector) → tablas pf_* de Supabase.
+// Antes escribía a Supabase con la anon key por REST; el INSERT con `return=representation` y el PATCH de duración chocaban con RLS (0 visitas
+// guardadas, ver docs/ADMIN-V2-AUDITORIA-Y-DISENO.md H1/H2). El colector guarda con service_role, añade el país (Cloudflare), filtra bots y no guarda IP.
+// fetch/sendBeacon planos (sin SDK) para no inflar el bundle público; la analítica nunca debe romper el sitio.
 
-const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const COLLECTOR = ((import.meta.env.VITE_COLLECTOR_URL as string | undefined) || 'https://t.mariomoreno.work').replace(/\/$/, '');
 const COOKIE = 'mm_visitor';
 
-function rest(path: string, init: RequestInit & { headers?: Record<string, string> } = {}) {
-  if (!URL || !ANON) return Promise.resolve(null);
-  return fetch(`${URL}/rest/v1/${path}`, {
-    ...init,
-    headers: {
-      apikey: ANON,
-      Authorization: `Bearer ${ANON}`,
-      'Content-Type': 'application/json',
-      ...(init.headers || {}),
-    },
+// Content-Type text/plain: "petición simple" de CORS (sin preflight); el colector parsea el JSON igualmente.
+function send(path: string, payload: unknown, keepalive = false): Promise<Response | null> {
+  return fetch(`${COLLECTOR}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload),
+    keepalive,
   }).catch(() => null);
 }
 
@@ -31,7 +26,7 @@ export function anonId(): string {
     document.cookie = `${COOKIE}=${id};domain=.mariomoreno.work;path=/;expires=${exp};SameSite=Lax;Secure`;
     return id;
   } catch {
-    return 'anon';
+    return `anon-${Math.random().toString(36).slice(2, 10)}`;
   }
 }
 
@@ -40,37 +35,31 @@ let t0 = 0;
 
 /** Registra una visita y arranca el cronómetro de permanencia. */
 export async function trackPageview(area: 'portfolio' | 'app' = 'portfolio'): Promise<void> {
-  if (!URL || !ANON) return;
   if (sessionStorage.getItem('pv_sent')) return;
   sessionStorage.setItem('pv_sent', '1');
   t0 = Date.now();
   try {
-    const res = await rest('pf_page_views', {
-      method: 'POST',
-      headers: { Prefer: 'return=representation' },
-      body: JSON.stringify({
-        anon_id: anonId(),
-        area,
-        path: location.pathname || '/',
-        section: document.title ? document.title.slice(0, 120) : null,
-        referrer: document.referrer || null,
-        user_agent: navigator.userAgent.slice(0, 512),
-      }),
+    const res = await send('/t/pv', {
+      anon_id: anonId(),
+      area,
+      path: `${location.pathname || '/'}${location.search || ''}`.slice(0, 200), // incluye ?utm_… para saber la fuente
+      section: document.title ? document.title.slice(0, 120) : null,
+      referrer: document.referrer || null,
     });
-    const rows = res && res.ok ? await res.json().catch(() => null) : null;
-    viewId = Array.isArray(rows) && rows[0]?.id ? rows[0].id : null;
+    const body = res && res.ok && res.status === 200 ? await res.json().catch(() => null) : null;
+    viewId = body && typeof body.id === 'string' ? body.id : null;
     if (viewId) {
       const flush = () => {
-        if (!viewId) return;
+        const id = viewId;
+        if (!id) return;
         const dur = Math.round((Date.now() - t0) / 1000);
         viewId = null;
         if (dur < 1) return;
-        // keepalive para que el PATCH sobreviva al cierre de la pestaña
-        rest(`pf_page_views?id=eq.${viewId}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ duration_seconds: dur }),
-          keepalive: true,
-        } as RequestInit);
+        const data = JSON.stringify({ id, anon_id: anonId(), seconds: dur });
+        // sendBeacon sobrevive al cierre de la pestaña; keepalive como respaldo
+        if (!(navigator.sendBeacon && navigator.sendBeacon(`${COLLECTOR}/t/dur`, new Blob([data], { type: 'text/plain' })))) {
+          fetch(`${COLLECTOR}/t/dur`, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: data, keepalive: true }).catch(() => {});
+        }
       };
       addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
       addEventListener('pagehide', flush);
@@ -83,10 +72,7 @@ export async function trackPageview(area: 'portfolio' | 'app' = 'portfolio'): Pr
 /** Registra que un visitante probó un demo/agente de IA. */
 export async function trackDemo(demo: string, input?: string): Promise<void> {
   if (!demo) return;
-  await rest('pf_demo_runs', {
-    method: 'POST',
-    body: JSON.stringify({ anon_id: anonId(), demo, input_preview: input ? input.slice(0, 280) : null }),
-  });
+  await send('/t/demo', { anon_id: anonId(), demo, input_preview: input ? input.slice(0, 280) : null });
 }
 
 /** Avisa (n8n → Telegram) de que un demo falló para un visitante. Los límites de uso (429) no cuentan como fallo. Nunca rompe el sitio. */
@@ -108,16 +94,12 @@ export function reportDemoFailure(demo: string, detail: string, status?: number)
 export async function saveContactMessage(msg: {
   name?: string; email?: string; phone?: string; message?: string;
 }): Promise<boolean> {
-  const res = await rest('pf_contact_messages', {
-    method: 'POST',
-    body: JSON.stringify({
-      name: msg.name ?? null,
-      email: msg.email ?? null,
-      phone: msg.phone ?? null,
-      message: msg.message ?? null,
-      source: 'portfolio',
-      anon_id: anonId(),
-    }),
+  const res = await send('/t/contact', {
+    name: msg.name ?? null,
+    email: msg.email ?? null,
+    phone: msg.phone ?? null,
+    message: msg.message ?? '',
+    anon_id: anonId(),
   });
   return !!res && res.ok;
 }

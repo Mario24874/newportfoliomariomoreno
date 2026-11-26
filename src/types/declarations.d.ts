@@ -47,6 +47,7 @@ interface ImportMetaEnv {
   readonly VITE_GA4_ID: string;
   readonly VITE_CLARITY_ID: string;
   readonly VITE_GEMINI_VOICE_WEBHOOK_URL: string;
+  readonly VITE_COLLECTOR_URL?: string;
 }
 
 interface ImportMeta {

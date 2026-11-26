@@ -50,6 +50,15 @@ Sin IA, sin gasto, mínimo de piezas nuevas; datos en el Supabase actual; el avi
 2. **API admin + dashboard v2** (secciones 1–4 primero; 5–7 después). Pruebas: unitarias del API y de agregados; verificación visual con navegador; datos reales.
 3. **Despliegue** (necesita el «sí» de Mario: push a `main` = deploy del portfolio y alta del subdominio) + verificación de extremo a extremo + doc de traspaso.
 
+## 4b. Estado de la fase 0 (26-nov, tarde)
+**Decisiones de Mario (26-nov):** colector en el VPS (no SQL manual), subdominio `t.mariomoreno.work`, sin guardar IP.
+- ✅ **Colector** `ops/collector/collector.py` (stdlib, 8 pruebas unitarias OK) instalado como `portfolio-collector.service` desde `/opt/portfolio-collector/` (`ops/collector/install.sh` copia y reinicia; no depende de la rama de `/root/portfolio`). Escucha en `172.18.0.1:8788` (regla ufw acotada a `172.18.0.0/16`).
+- ✅ **Exposición**: DNS `t` (Cloudflare, proxied) + `/etc/easypanel/traefik/config/t.yaml` (solo `/t/*` y `/salud`; certificado Let's Encrypt emitido; ojo: si se crea el DNS DESPUÉS del yaml, Traefik falla con NXDOMAIN y hay que reemplazar el archivo con `mv` para que reintente). Monitor: `monitor-store.sh` vigila `https://t.mariomoreno.work/salud` (tema Portfolio).
+- ✅ **Verificado**: (a) curl al colector por HTTPS: visita, duración, demo, contacto → filas en `pf_*` (país `DE` vía Cloudflare), bot → 204 sin guardar, sin Origin/Origin ajeno → 403, preflight CORS OK; (b) el módulo REAL `src/lib/analytics.ts` compilado y ejecutado con stubs de navegador → visita con `?utm_source`, referrer y duración (sendBeacon), demo y contacto guardados. Todas las filas de prueba se borraron (`pf_page_views`=0, `pf_contact_messages`=0, `pf_demo_runs`=16 como antes).
+- ✅ **Cliente** (rama `admin-v2`, commit `ee6c8ae`): `analytics.ts` envía al colector (también corrige el bug previo de `flush`, que dejaba `viewId=null` antes de usarlo, y el `anon_id` de respaldo, que era demasiado corto), `Caddyfile` permite `t.mariomoreno.work` en `connect-src`, `VITE_COLLECTOR_URL` declarada. `npm run build` OK.
+- ⏳ **Falta para cerrar la fase 0**: DESPLEGAR el cliente (push a `main` = deploy del portfolio; necesita el «sí» de Mario) y comprobar una visita real en `pf_page_views` con su duración. Recomendación: desplegar cuanto antes; cada día sin captura son datos perdidos.
+- Nota H4: el espejo de contacto antiguo SÍ habría funcionado (INSERT sin `return`), así que `pf_contact_messages=0` significa que nadie había escrito por el formulario desde que existe el espejo.
+
 ## 5. Decisiones que necesito de Mario
 1. **Arquitectura**: ¿colector + API en el VPS (recomendado, sin acción tuya) o la alternativa B con un SQL que pegarías tú en Supabase?
 2. **Subdominio** para el colector/API (propongo `t.mariomoreno.work`; lo creo yo con el token de Cloudflare).
